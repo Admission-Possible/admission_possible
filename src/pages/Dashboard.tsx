@@ -5,10 +5,15 @@ import { Icon } from '../components/Icon';
 import { loadIntake } from '../data/storage';
 import type { Intake } from '../types';
 
-const DEADLINES: { sys: string; date: string }[] = [
-  { sys: 'QuestBridge', date: 'Sep 26' },
-  { sys: 'Common App (EA)', date: 'Nov 1' },
-  { sys: 'UC Application', date: 'Nov 30' },
+// Typical fall-cycle dates; `match` keys a row to the recommended pathway
+// (empty = always shown). Exact dates shift every year — the sample-data
+// note tells students to confirm on each system's official site.
+const DEADLINES: { sys: string; date: string; match: string }[] = [
+  { sys: 'QuestBridge', date: 'Sep 26', match: 'QuestBridge' },
+  { sys: 'Common App (EA)', date: 'Nov 1', match: '' },
+  { sys: 'UC Application', date: 'Nov 30', match: 'UC Application' },
+  { sys: 'ApplyTexas (priority)', date: 'Dec 1', match: 'ApplyTexas' },
+  { sys: 'CBCA', date: 'Rolling', match: 'CBCA' },
 ];
 
 export default function Dashboard() {
@@ -21,13 +26,20 @@ export default function Dashboard() {
 
   if (!intake || !intake.plan) return null;
 
-  const track = intake.trackOverride ?? intake.plan.trackName ?? 'Self-paced course';
-  const coaching = track === '1:1 Coaching' ? 'Next session: Thu 4:00pm' : 'Get matched with a coach';
+  const plan = intake.plan;
+  const track = intake.trackOverride ?? plan.trackName ?? 'Self-paced course';
+  const coaching =
+    track === '1:1 Coaching' ? "We'll reach out to schedule your first session" : 'Get matched with a coach';
+  const deadlines = DEADLINES.filter((d) => !d.match || plan.pathway.indexOf(d.match) >= 0);
 
   return (
     <main className="ov-dash">
       <div className="label">Your dashboard</div>
       <h1 className="ov-dash__title">Buenos días. Let's keep moving.</h1>
+      <p className="ov-dash__sample" role="note">
+        This is a preview with sample progress data. Deadlines are typical fall dates — confirm each on the official
+        site.
+      </p>
 
       <div className="ov-dash__next">
         <div>
@@ -57,7 +69,9 @@ export default function Dashboard() {
             <Icon name="bookmark" className="row-icon" />
             Your list
           </div>
-          <div className="ov-dash__v">3 reach · 3 target · 3 likely</div>
+          <div className="ov-dash__v">
+            {plan.reach.length} reach · {plan.target.length} target · {plan.likely.length} likely
+          </div>
         </div>
         <div className="ov-dash__row">
           <div className="ov-dash__k">
@@ -65,7 +79,7 @@ export default function Dashboard() {
             Deadlines
           </div>
           <div className="ov-dash__deadlines">
-            {DEADLINES.map((d) => (
+            {deadlines.map((d) => (
               <div className="ov-dl" key={d.sys}>
                 <span>{d.sys}</span>
                 <span className="ov-dl__date">{d.date}</span>

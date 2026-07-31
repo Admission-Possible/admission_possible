@@ -41,10 +41,42 @@ describe('computePlan', () => {
 
   it('gives a stronger reach list when GPA is top-band', () => {
     const top = computePlan({ firstgen: 'Yes', pell: 'Yes', gpa: '3.8–4.0, lots of rigor' });
-    expect(top.reach.map((s) => s.name)).toContain('Pomona College');
+    expect(top.reach.map((s) => s.name)).toContain('Amherst College');
 
     const lower = computePlan({ gpa: '3.0–3.5' });
     expect(lower.reach.map((s) => s.name)).toContain('Boston University');
+  });
+
+  it('keeps California and Texas system schools out of a Northeast-only list', () => {
+    const plan = computePlan({ regions: ['Northeast'] });
+    const schools = [...plan.reach, ...plan.target, ...plan.likely];
+    expect(schools.map((s) => s.name)).not.toContain('UC Davis');
+    expect(schools.map((s) => s.name)).not.toContain('Cal State Fullerton');
+    expect(schools.map((s) => s.name)).not.toContain('UT Arlington');
+    expect(schools.map((s) => s.tag).join(' ')).not.toMatch(/UC App|ApplyTexas|Cal State/);
+  });
+
+  it('offers UC-system schools only when West is explicitly picked', () => {
+    const west = computePlan({ regions: ['West'] });
+    expect(west.target.map((s) => s.name)).toContain('UC Davis');
+
+    const anywhere = computePlan({ regions: ['Anywhere'] });
+    const tags = [...anywhere.reach, ...anywhere.target, ...anywhere.likely].map((s) => s.tag).join(' ');
+    expect(tags).not.toMatch(/UC App|ApplyTexas|Cal State/);
+  });
+
+  it('regionalizes each bucket for a picked region', () => {
+    const mw = computePlan({ regions: ['Midwest'] });
+    const names = [...mw.reach, ...mw.target, ...mw.likely].map((s) => s.name);
+    expect(mw.target.map((s) => s.name)).toContain('Ohio State University');
+    expect(names).not.toContain('Boston University');
+  });
+
+  it('floats HBCU options for an HBCU/HSI-drawn student', () => {
+    const plan = computePlan({ colleges: ['HBCU / HSI'] });
+    expect(plan.reach.map((s) => s.name)).toContain('Spelman College');
+    expect(plan.target.map((s) => s.name)).toContain('Howard University');
+    expect(plan.likely.map((s) => s.name)).toContain('Xavier University of Louisiana');
   });
 
   it('always returns three schools in each bucket', () => {
