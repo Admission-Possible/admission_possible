@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { Circle } from '../components/Circle';
 import { Slash } from '../components/Slash';
 import { QUESTIONS } from '../data/questions';

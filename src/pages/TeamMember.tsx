@@ -1,4 +1,4 @@
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router';
 import { getMember } from '../data/team';
 
 // Pastel palette cycled across the skill pills (mirrors the reference layout).

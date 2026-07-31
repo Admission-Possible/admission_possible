@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef } from 'react';
 import type { KeyboardEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { NAV } from '../data/nav';
 import { Wordmark } from './Wordmark';
 

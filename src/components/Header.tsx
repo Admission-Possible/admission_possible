@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { useScrollHideHeader } from '../hooks/useScrollHideHeader';
 import { Wordmark } from './Wordmark';
 

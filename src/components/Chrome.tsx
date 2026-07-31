@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router';
 import { NAV } from '../data/nav';
 import { useReveal } from '../hooks/useReveal';
 import { Header } from './Header';

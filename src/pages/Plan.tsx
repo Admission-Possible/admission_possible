@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { Circle } from '../components/Circle';
 import { loadIntake, saveIntake } from '../data/storage';
 import type { Intake, School, TrackName } from '../types';
