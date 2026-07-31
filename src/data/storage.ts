@@ -4,11 +4,15 @@ import type { Intake } from '../types';
 // router -> plan -> dashboard flow (replaces the legacy ap.intake helpers).
 const STORE = 'ap.intake';
 
-export function saveIntake(data: Intake): void {
+// Returns false when storage is unavailable (e.g. blocked in private
+// browsing) so callers can surface the failure instead of navigating
+// into a plan page that will find nothing.
+export function saveIntake(data: Intake): boolean {
   try {
     sessionStorage.setItem(STORE, JSON.stringify(data));
+    return true;
   } catch {
-    /* storage unavailable — ignore */
+    return false;
   }
 }
 

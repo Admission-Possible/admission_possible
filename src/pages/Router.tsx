@@ -12,6 +12,7 @@ export default function Router() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
+  const [saveError, setSaveError] = useState(false);
 
   const total = QUESTIONS.length;
   const q = QUESTIONS[step];
@@ -44,7 +45,10 @@ export default function Router() {
       window.scrollTo({ top: 0 });
     } else {
       const plan = computePlan(answers);
-      saveIntake({ answers, plan });
+      if (!saveIntake({ answers, plan })) {
+        setSaveError(true);
+        return;
+      }
       navigate('/plan');
     }
   };
@@ -91,6 +95,12 @@ export default function Router() {
             );
           })}
         </div>
+        {saveError && (
+          <p className="ov-router__error" role="alert">
+            We couldn't save your plan — your browser is blocking site storage (this can happen in private browsing).
+            Allow storage for this site, or leave private mode, and press the button again.
+          </p>
+        )}
         <div className="ov-router__foot">
           <button className="ov-back" onClick={back}>
             {step === 0 ? 'Cancel' : 'Back'}

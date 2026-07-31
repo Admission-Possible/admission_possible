@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Join from './Join';
 import { renderWithRouter } from '../test/utils';
@@ -100,7 +100,7 @@ describe('Join form', () => {
     expect(screen.getByRole('alert')).toBeInTheDocument();
   });
 
-  it('falls back to mailto (no fetch) when no endpoint is configured', async () => {
+  it('opens a mail draft without wiping the form or claiming success when no endpoint is configured', async () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
@@ -110,9 +110,21 @@ describe('Join form', () => {
     await fillValid(user);
     await submit(user);
 
-    // No backend call was made, yet the visitor still gets a success handoff.
+    // No backend call, and no false "Thanks": the draft isn't sent until the
+    // visitor hits Send in their mail app (which may not even exist).
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(await screen.findByRole('button', { name: 'Thanks' })).toBeInTheDocument();
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Thanks' })).not.toBeInTheDocument();
+
+    // The typed answers survive so nothing is lost if no mail app opens.
+    expect(screen.getByLabelText('First name')).toHaveValue('Ada');
+    expect(screen.getByLabelText('Email')).toHaveValue('ada@example.com');
+
+    // An honest status explains the handoff and offers the address as a fallback.
+    const status = await screen.findByRole('status');
+    expect(status).toHaveTextContent(/email app/i);
+    expect(within(status).getByRole('link', { name: /hello@admissionpossible\.org/i })).toHaveAttribute(
+      'href',
+      expect.stringContaining('mailto:hello@admissionpossible.org'),
+    );
   });
 });

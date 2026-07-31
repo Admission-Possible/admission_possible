@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Circle } from '../components/Circle';
 import { Crumbs } from '../components/Crumbs';
 import { navCrumbs } from '../data/nav';
@@ -18,7 +18,11 @@ const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 export default function Join() {
   const [label, setLabel] = useState('Join');
   const [error, setError] = useState<string | null>(null);
+  const [mailtoOpened, setMailtoOpened] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const labelTimer = useRef<number | undefined>(undefined);
+
+  useEffect(() => () => window.clearTimeout(labelTimer.current), []);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,13 +45,15 @@ export default function Join() {
       return;
     }
     setError(null);
+    setMailtoOpened(false);
 
-    // Actually deliver the payload, then celebrate.
+    // Celebrate only once the payload has actually been delivered.
     const succeed = () => {
       formRef.current?.reset();
       setError(null);
       setLabel('Thanks');
-      window.setTimeout(() => setLabel('Join'), 1800);
+      window.clearTimeout(labelTimer.current);
+      labelTimer.current = window.setTimeout(() => setLabel('Join'), 1800);
     };
 
     // Set VITE_JOIN_ENDPOINT to POST submissions to a backend; unset uses the mailto fallback below.
@@ -56,8 +62,9 @@ export default function Join() {
     // A same-origin endpoint (e.g. /api/join) works as-is. See README → Deployment → Security headers.
     const endpoint = import.meta.env.VITE_JOIN_ENDPOINT as string | undefined;
 
-    // No backend configured? Hand the payload to the visitor's mail client so nothing is
-    // silently lost — it still lands in the hello@ inbox, no third-party account required.
+    // No backend configured? Hand the payload to the visitor's mail client.
+    // We can't confirm delivery (or that a mail app even exists), so keep the
+    // form intact and explain the handoff instead of claiming success.
     if (!endpoint) {
       const subject = `Join request — ${payload.first} ${payload.last}`.trim();
       const body = [
@@ -68,7 +75,7 @@ export default function Join() {
         `What they need help with: ${payload.needs}`,
       ].join('\n');
       window.location.href = `mailto:hello@admissionpossible.org?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      succeed();
+      setMailtoOpened(true);
       return;
     }
 
@@ -124,12 +131,20 @@ export default function Join() {
               {error}
             </p>
           )}
+          {mailtoOpened && (
+            <p className="join__note" role="status">
+              We started a draft in your email app — your message isn't sent until you hit Send there. Nothing opened?
+              Email us directly at <a href="mailto:hello@admissionpossible.org">hello@admissionpossible.org</a>.
+            </p>
+          )}
           <Circle size="join" type="submit">
             {label}
           </Circle>
         </form>
       </div>
-      <div className="join__email">hello@admissionpossible.org</div>
+      <div className="join__email">
+        <a href="mailto:hello@admissionpossible.org">hello@admissionpossible.org</a>
+      </div>
     </main>
   );
 }
