@@ -13,6 +13,13 @@ export function Chrome() {
   const { pathname } = useLocation();
   const current = NAV.find((n) => n.path === pathname)?.id ?? '';
 
+  // On navigation: close the menu (state adjusted during render, per React docs).
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    setMenuOpen(false);
+  }
+
   useReveal();
 
   // Lock body scroll while the full-screen menu is open.
@@ -29,9 +36,8 @@ export function Chrome() {
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
-  // On navigation: close the menu and jump to the top (legacy did full page loads).
+  // On navigation: jump to the top (legacy did full page loads).
   useEffect(() => {
-    setMenuOpen(false);
     window.scrollTo({ top: 0 });
   }, [pathname]);
 
