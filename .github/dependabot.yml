@@ -4,3 +4,22 @@ updates:
     directory: '/'
     schedule:
       interval: weekly
+    groups:
+      # vite majors, @vitejs/* plugins, and vitest pin each other's ranges;
+      # separate PRs for them can never pass CI individually.
+      vite-toolchain:
+        patterns:
+          - vite
+          - '@vitejs/*'
+          - vitest
+          - '@vitest/*'
+      eslint-toolchain:
+        patterns:
+          - eslint
+          - '@eslint/*'
+          - typescript-eslint
+          - eslint-plugin-*
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: weekly
