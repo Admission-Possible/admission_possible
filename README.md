@@ -17,7 +17,7 @@ college list, and a study track — followed by a student dashboard.
 - [Project structure](#project-structure)
 - [Routes](#routes)
 - [Home intro animation](#home-intro-animation)
-- [Founding team](#founding-team)
+- [About & the founding team](#about--the-founding-team)
 - [The intake flow](#the-intake-flow)
 - [Design system](#design-system)
 - [Accessibility](#accessibility)
@@ -43,11 +43,11 @@ The original vanilla implementation is preserved in git history (see the
 
 | Concern     | Choice                                     |
 | ----------- | ------------------------------------------ |
-| UI          | **React 18** + **TypeScript** (strict)     |
-| Build / dev | **Vite**                                   |
-| Routing     | **React Router** (client-side)             |
+| UI          | **React 19** + **TypeScript** (strict)     |
+| Build / dev | **Vite 8**                                 |
+| Routing     | **React Router 8** (client-side)           |
 | Styling     | A single hand-authored `global.css`        |
-| Tests       | **Vitest** + **Testing Library** (jsdom)   |
+| Tests       | **Vitest 4** + **Testing Library** (jsdom) |
 | Hosting     | Static SPA (Vercel rewrite / SPA fallback) |
 
 ---
@@ -83,24 +83,26 @@ npm run preview    # serve the production build
 public/
   icons/                # PNG icons (menu, route, course, coaching, people,
                         # list, submit, apply, learn-write)
-  intro/                # thumbnail art for the Home intro animation (t1–t8.svg)
+  intro/                # campus photos for the Home intro animation
+                        # (harvard, mit, princeton, yale)
   team/                 # founding-team photos + placeholder portraits
 src/
-  main.tsx              # entry; mounts <App/> in <BrowserRouter>
+  main.tsx              # entry; mounts <App/> in <BrowserRouter> + ErrorBoundary
   App.tsx               # routes, all nested under the Chrome layout
   types.ts              # shared domain types
-  data/                 # nav, questions, pathways, computePlan, sessionStorage,
-                        # team (founding-team content)
+  data/                 # nav, questions, pathways, plan (computePlan),
+                        # storage (sessionStorage), team (founding-team content)
   hooks/
-    useReveal.ts        # scroll reveal/slash + hero scramble (per route)
+    useReveal.ts        # scroll reveal/slash (re-scanned per route)
     useScrollHideHeader.ts
   components/
-    Chrome, Header, Menu, Footer, Crumbs, Icon, Circle, Slash, Wordmark
+    Chrome, Header, Menu, Footer, Crumbs, Icon, Circle, Slash, Wordmark,
+    ErrorBoundary
     IntroFloat.tsx      # the Home floating-image hero (see below)
-    TeamCard.tsx        # tilted founding-team card on the Home page
-  pages/                # Home, How, Offer, Pathways, Coaching, Join,
+    TeamCard.tsx        # expandable founding-team card on the About page
+  pages/                # Home, About, How, Offer, Pathways, Coaching, Join,
                         # WritingCourse, ListBuilder, Router, Plan, Dashboard,
-                        # TeamMember (the "My story" profile page)
+                        # TeamMember (the "My story" profile page), NotFound
   styles/global.css     # the full design system
 ```
 
@@ -112,18 +114,20 @@ src/
 
 ## Routes
 
-| Path                               | Page                  |
-| ---------------------------------- | --------------------- |
-| `/`                                | Home                  |
-| `/how`                             | How it works          |
-| `/offer`                           | What we offer         |
-| `/writing-course`                  | The writing course    |
-| `/list-builder`                    | College list builder  |
-| `/pathways`                        | Application pathways  |
-| `/coaching`                        | Coaching              |
-| `/join`                            | Join                  |
-| `/team/:slug`                      | Founding-team profile |
-| `/router` → `/plan` → `/dashboard` | The intake flow       |
+| Path                               | Page                               |
+| ---------------------------------- | ---------------------------------- |
+| `/`                                | Home                               |
+| `/about`                           | About us (founding-team directory) |
+| `/how`                             | How admissions works               |
+| `/offer`                           | What we offer                      |
+| `/writing-course`                  | The writing course                 |
+| `/list-builder`                    | College list builder               |
+| `/pathways`                        | Application pathways               |
+| `/coaching`                        | Coaching                           |
+| `/join`                            | Join                               |
+| `/team/:slug`                      | Founding-team profile              |
+| `/router` → `/plan` → `/dashboard` | The intake flow                    |
+| `*`                                | Not found                          |
 
 ---
 
@@ -167,17 +171,22 @@ positions and motion keep working unchanged.
 
 ---
 
-## Founding team
+## About & the founding team
 
-The Home page has a **Founding team** section: three tilted orange cards
-(`TeamCard.tsx`), each straightening and lifting on hover. Content lives in
-`src/data/team.ts` (a single source of truth shared by the cards and the
+The About page (`/about`) opens with a "Who we are" statement, then a
+**Founding team** directory: four tilted cards (`TeamCard.tsx`) — Jose,
+Haolin, Angeline, and Rehan — each straightening and lifting on hover. Each
+card is an expand **button** (an `aria-expanded` disclosure): clicking it
+toggles a shared inline intro panel below the grid with the member's full
+name, journey line, bio, a bold belief statement, and colored role chips,
+plus a "Read my full story →" link to `/team/:slug`. Content lives in
+`src/data/team.ts` (a single source of truth shared by the directory and the
 profile pages), so a card and its page never drift apart.
 
-Each card links to `/team/:slug`, rendering `TeamMember.tsx` — a "My story"
-profile in Geist: a light heading, a three-column row (journey path /
-narrative / a bold belief statement with a muted sub-paragraph), a wide hero
-image, a row of pastel skill pills, and a "Back to Home" pill in the top-left.
+`/team/:slug` renders `TeamMember.tsx` — a "My story" profile in Geist: a
+light heading, a three-column row (journey path / narrative / a bold belief
+statement with a muted sub-paragraph), a wide hero image, a row of pastel
+skill pills, and a "Back to About us" pill in the top-left.
 
 **Swapping in real photos** — drop files into `public/team/` and update the
 `photo` (card, 15:11) and `storyPhoto` (wide hero) paths in `team.ts`. The
@@ -192,14 +201,16 @@ answers and the computed plan are saved to `sessionStorage` and the user is
 sent to `/plan`; the plan's track toggle persists and is reflected on
 `/dashboard`. Visiting `/plan` or `/dashboard` without intake redirects back
 to the router. `computePlan()` maps answers to a pathway, a balanced
-reach/target/likely list, and a track.
+reach/target/likely list, and a track. The plan links to `/list-builder` for
+refining the starter list, and the dashboard's coaching row routes to
+`/join`.
 
 ---
 
 ## Design system
 
-- **Type** — Geist Mono (display) + Geist (`--display`, used on the team cards
-  and profile pages) + Inter (body).
+- **Type** — Geist Mono (display) + Geist (`--display`, used on the About
+  page, team cards, and profile pages) + Inter (body).
 - **Palette**
   | Token           | Value     | Use                         |
   | --------------- | --------- | --------------------------- |
@@ -208,16 +219,17 @@ reach/target/likely list, and a track.
   | `--muted`       | `#6F6E68` | secondary text              |
   | `--accent`      | `#E8491D` | orange accent               |
   | `--accent-soft` | `#F26B43` | lighter orange (team cards) |
-  | `--mint`        | `#9CE6A8` | mint accent                 |
   | `--card`        | `#FBFAF1` | surfaces                    |
   | `--hairline`    | `#C9C6BE` | rules / borders             |
+  | `--menu-bg`     | `#4C4B46` | full-screen menu overlay    |
 - **Motion** — scroll-triggered reveals and rotating hairline "slashes",
-  re-scanned on each route change (`IntersectionObserver` + visibility/timeout
+  re-scanned on each route change (`IntersectionObserver` + scroll/timeout
   fallback), plus the Home intro animation above. All respect
   `prefers-reduced-motion`.
 - **Icons** — `Icon.tsx` renders a name to either an inline freehand SVG or a
-  supplied PNG via the `PNG_ICONS` map (menu, route, course, coaching, people,
-  list, submit, apply, learn-write); the rest stay vector.
+  supplied PNG via the `PNG_ICONS` map (route, course, coaching, people, list,
+  submit, apply, write); `bookmark` and `calendar` stay vector. The header's
+  menu button uses `menu.png` directly.
 
 ---
 
