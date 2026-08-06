@@ -52,15 +52,4 @@ export interface Crumb {
 }
 
 export type IconName =
-  | 'route'
-  | 'write'
-  | 'list'
-  | 'apply'
-  | 'submit'
-  | 'course'
-  | 'bookmark'
-  | 'calendar'
-  | 'coaching'
-  | 'next'
-  | 'people'
-  | 'money';
+  'route' | 'write' | 'list' | 'apply' | 'submit' | 'course' | 'bookmark' | 'calendar' | 'coaching' | 'people';

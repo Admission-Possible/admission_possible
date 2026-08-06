@@ -27,20 +27,6 @@ const PATHS: Partial<Record<IconName, ReactNode>> = {
       <path d="M16 34h5" />
     </>
   ),
-  next: (
-    <>
-      <path d="M24 6C14 6 6 14 6 24s8 18 18 18 18-8 18-18S34 6 24 6z" />
-      <path d="M18 24h13" />
-      <path d="M25 18l7 6-7 6" />
-    </>
-  ),
-  money: (
-    <>
-      <path d="M24 7C15 7 8 14 8 24s7 17 16 17 16-7 16-17S33 7 24 7z" />
-      <path d="M24 14v20" />
-      <path d="M29 19c-1-2-3-3-5-3-3 0-5 2-5 4s2 3 5 4 5 2 5 4-2 4-5 4c-2 0-4-1-5-3" />
-    </>
-  ),
 };
 
 // Icons supplied as PNGs instead of inline SVG paths (take precedence).

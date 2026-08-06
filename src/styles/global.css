@@ -12,7 +12,6 @@
   --accent: #E8491D;
   --accent-soft: #F26B43;
   --card: #FBFAF1;
-  --mint: #9CE6A8;
   --hairline: #C9C6BE;
   --menu-bg: #4C4B46;
   --mono: 'Geist Mono', ui-monospace, monospace;
@@ -45,8 +44,6 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 }
 .skip-link:focus { left: 8px; top: 8px; }
 
-.root { position: relative; width: 100%; min-height: 100vh; background: var(--bg); overflow-x: hidden; }
-
 /* ---- shared atoms ---- */
 .rule { height: 1px; background: var(--ink); }
 .rule--mt { margin: 52px 0 0; }
@@ -61,7 +58,6 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 
 .wordmark { display: inline-flex; align-items: center; }
 .wordmark__img { display: block; height: 92px; width: auto; }
-.wordmark--lg .wordmark__img { height: 120px; }
 
 /* slashes — diagonal hairlines, rotated in by motion */
 .slash {
@@ -72,9 +68,7 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
   transform-origin: center;
   transition: transform .9s cubic-bezier(.2,.7,.2,1);
 }
-.slash--tall { height: 340px; }
 .slash--how { height: 330px; flex: none; margin: 30px 34px 0 0; }
-.slash--sm { height: 50px; }
 
 /* circular CTA buttons (work as <button> or <a>) */
 .circle {
@@ -105,25 +99,11 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 .header__bar { display: flex; align-items: center; justify-content: space-between; padding: 24px var(--pad-x) 18px; }
 .menu-toggle { display: block; width: 36px; cursor: pointer; padding: 4px 0; color: var(--ink); }
 .menu-toggle__img { display: block; width: 100%; height: auto; }
-.menu-toggle svg { width: 36px; height: auto; display: block; }
 
 /* ---- hero ---- */
 .hero { padding: 70px var(--pad-x) 0; }
-.hero__top { display: grid; grid-template-columns: 1fr auto; gap: 48px; align-items: start; }
-.hero__title {
-  font-family: var(--mono);
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: clamp(38px, 6.6vw, 84px);
-  line-height: 1.04;
-  letter-spacing: -0.015em;
-  margin: 0;
-}
-.hero__title span { display: block; }
-.hero__slashes { display: flex; gap: 54px; padding-top: 8px; }
 .hero__lead { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding: 30px 0 0; }
 .hero__blurb { justify-self: end; text-align: right; max-width: 46ch; font-size: 18px; line-height: 1.5; margin: 0; }
-.hero__cta { display: flex; justify-content: center; padding: 70px 0 84px; }
 
 /* ---- trust strip ---- */
 .strip { padding: 0 var(--pad-x); }
@@ -144,8 +124,7 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
   display: flex; flex-direction: column; gap: 34px;
 }
 
-/* ---- founding team (tilted mint photo cards) ---- */
-.team { padding: 90px var(--pad-x) 100px; }
+/* ---- founding team (tilted photo cards) ---- */
 .team__head { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 24px; align-items: baseline; padding: 30px 0 56px; }
 .team__intro { margin: 0; max-width: 46ch; font-size: 17px; line-height: 1.5; }
 .team__cards {
@@ -299,7 +278,6 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 .triband__icon { --icon-size: 34px; display: block; margin-bottom: 14px; }
 
 /* ---- how it works ---- */
-.how { padding: 0 var(--pad-x) 110px; }
 .how__track { display: flex; align-items: stretch; min-height: 440px; }
 .how__step { flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 30px 0; min-width: 0; }
 .how__step:not(:last-child) { margin-right: 0; }
@@ -327,7 +305,6 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 .slash--nav { height: 96px; flex: none; }
 
 /* ---- what we offer ---- */
-.offer { padding: 0 var(--pad-x) 40px; }
 .offer__block { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; padding: 80px 0 70px; }
 .offer__block--alt { padding: 30px 0 90px; }
 .offer__head { font-family: var(--mono); font-weight: 700; text-transform: uppercase; font-size: clamp(28px, 3.2vw, 42px); line-height: 1.04; margin: 0 0 22px; }
@@ -336,8 +313,6 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 .ruled-list > div { padding: 18px 2px; border-bottom: 1px solid var(--ink); font-size: 17px; }
 
 /* ---- pathways table ---- */
-.pathways { padding: 40px var(--pad-x) 90px; }
-.pathways__label { margin-bottom: 26px; }
 .pathways__table { border-top: 1px solid var(--ink); }
 .pathways__row { display: grid; grid-template-columns: 1.5fr 1fr 1.2fr 1fr; gap: 24px; align-items: baseline; padding: 26px 2px; border-bottom: 1px solid var(--ink); }
 .pathways__name { font-family: var(--mono); font-weight: 700; text-transform: uppercase; font-size: clamp(18px, 2vw, 30px); line-height: 1; }
@@ -351,7 +326,6 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 .cta__head { font-family: var(--mono); font-weight: 700; text-transform: uppercase; font-size: clamp(28px, 4vw, 52px); line-height: 1.06; text-align: center; margin: 0; }
 
 /* ---- join form ---- */
-.join { padding: 0 var(--pad-x) 30px; }
 .join__wrap { position: relative; max-width: 1000px; }
 .join__card { display: block; background: var(--card); padding: 48px 54px 60px; }
 .join__row3 { display: grid; grid-template-columns: 1fr 1px 1fr 1px 1fr; gap: 0; }
@@ -396,9 +370,6 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 /* ============================================================
    OVERLAY SCREENS — menu, router, plan, dashboard
    ============================================================ */
-#overlay { position: fixed; inset: 0; z-index: 90; pointer-events: none; }
-#overlay > * { pointer-events: auto; }
-
 .slash--inline { height: 30px; width: 0; border-left: 1.5px solid var(--ink); transform: rotate(12deg); display: inline-block; }
 
 /* ---- header link + white wordmark ---- */
@@ -411,7 +382,6 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 
 /* ---- full-screen menu ---- */
 .ov-menu { position: fixed; inset: 0; z-index: 100; background: var(--menu-bg); }
-.ov-menu[hidden] { display: none; }
 .ov-menu__top { display: flex; justify-content: flex-end; padding: 24px var(--pad-x) 18px; }
 .ov-menu__links {
   padding: 7vh var(--pad-x) 0;
@@ -430,9 +400,6 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 /* ============================================================
    PAGE SCREENS — router / plan / dashboard (in normal flow)
    ============================================================ */
-.page { padding-top: 24px; }
-.page__bar { display: flex; align-items: center; padding: 8px var(--pad-x) 18px; }
-.page__rule { margin: 0 var(--pad-x); }
 .ov-link { font-size: 15px; color: var(--muted); text-decoration: none; }
 .ov-link:hover { color: var(--ink); }
 
@@ -622,8 +589,6 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
    RESPONSIVE
    ============================================================ */
 @media (max-width: 860px) {
-  .hero__top { grid-template-columns: 1fr; }
-  .hero__slashes { display: none; }
   .hero__lead { grid-template-columns: 1fr; }
   .hero__blurb { justify-self: start; text-align: left; }
   .manifesto__grid { grid-template-columns: 1fr; }
