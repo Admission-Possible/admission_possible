@@ -295,7 +295,7 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 .crumbs {
   position: relative; min-height: 132px; display: flex; align-items: center;
   justify-content: space-between; gap: 10px; font-size: 15px;
-  /* 8 nowrap items — wrap instead of overflowing the page at narrow-desktop widths. */
+  /* Nowrap crumb items — wrap instead of overflowing the page at narrow-desktop widths. */
   flex-wrap: wrap;
 }
 .crumbs [data-nav] { cursor: pointer; white-space: nowrap; }
@@ -436,6 +436,9 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 .ov-school__name { font-size: 16px; }
 .ov-school__tag { font-size: 12px; color: var(--muted); margin-top: 4px; }
 .ov-plan__hint { font-size: 13px; color: var(--muted); margin-top: 24px; }
+/* Inline funnel links sit inside plain text — give them a visible affordance. */
+.ov-plan__hint a, .ov-dash__v a { text-decoration: underline; text-underline-offset: 2px; }
+.ov-plan__hint a:hover, .ov-dash__v a:hover { color: var(--accent); }
 .ov-plan__track { border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 34px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
 .ov-plan__trackname { font-family: var(--mono); font-weight: 700; text-transform: uppercase; font-size: clamp(22px, 3vw, 38px); margin-top: 14px; }
 .ov-plan__switch { font-size: 14px; color: var(--accent); cursor: pointer; text-decoration: underline; }

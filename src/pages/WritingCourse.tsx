@@ -1,5 +1,6 @@
 import { Circle } from '../components/Circle';
 import { Crumbs } from '../components/Crumbs';
+import { navCrumb } from '../data/nav';
 
 const MODULES: [string, string, string][] = [
   ['01', 'Essay topics', 'Values + Bullseye → three candidate topics'],
@@ -16,7 +17,7 @@ export default function WritingCourse() {
   return (
     <main className="interior">
       <div className="rule" />
-      <Crumbs crumbs={[{ label: 'What we offer', to: '/offer' }, { label: 'The writing course' }]} />
+      <Crumbs crumbs={[navCrumb('offer'), { label: 'The writing course' }]} />
       <div className="rule" />
 
       <div className="page-intro">

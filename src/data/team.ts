@@ -9,7 +9,7 @@ export interface TeamMember {
   photo: string;
   /** Wide hero image on the profile page. */
   storyPhoto: string;
-  /** Resting tilt of the card on the home page. */
+  /** Resting tilt of the directory card on the About page. */
   tilt: number;
   /** Short journey line, e.g. "Architecture → Brand → Web → AI". */
   path: string;
