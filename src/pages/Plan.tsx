@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Circle } from '../components/Circle';
 import { loadIntake, saveIntake } from '../data/storage';
 import type { Intake, School, TrackName } from '../types';
@@ -58,7 +58,9 @@ export default function Plan() {
           <SchoolCol title="Target" list={p.target} />
           <SchoolCol title="Likely" list={p.likely} />
         </div>
-        <div className="ov-plan__hint">Refine this in the List Builder.</div>
+        <div className="ov-plan__hint">
+          Refine this in the <Link to="/list-builder">List Builder</Link>.
+        </div>
       </div>
 
       <div className="ov-plan__track">

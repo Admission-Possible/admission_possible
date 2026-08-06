@@ -31,4 +31,10 @@ describe('Plan', () => {
     await user.click(screen.getByRole('button', { name: /switch to 1:1 coaching/i }));
     expect(screen.getByText('1:1 Coaching')).toBeInTheDocument();
   });
+
+  it('links the starter-list hint to the List Builder', () => {
+    saveIntake({ answers: {}, plan: computePlan({}) });
+    renderWithRouter(<App />, { route: '/plan' });
+    expect(screen.getByRole('link', { name: 'List Builder' })).toHaveAttribute('href', '/list-builder');
+  });
 });

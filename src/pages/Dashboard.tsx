@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Circle } from '../components/Circle';
 import { Icon } from '../components/Icon';
 import { loadIntake } from '../data/storage';
@@ -29,7 +29,11 @@ export default function Dashboard() {
   const plan = intake.plan;
   const track = intake.trackOverride ?? plan.trackName ?? 'Self-paced course';
   const coaching =
-    track === '1:1 Coaching' ? "We'll reach out to schedule your first session" : 'Get matched with a coach';
+    track === '1:1 Coaching' ? (
+      <Link to="/join">Share your contact info to schedule your first session</Link>
+    ) : (
+      <Link to="/join">Get matched with a coach</Link>
+    );
   const deadlines = DEADLINES.filter((d) => !d.match || plan.pathway.indexOf(d.match) >= 0);
 
   return (

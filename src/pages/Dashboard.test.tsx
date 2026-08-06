@@ -19,17 +19,18 @@ describe('Dashboard', () => {
     expect(await screen.findByText('What grade are you in?')).toBeInTheDocument();
   });
 
-  it('does not fabricate a session time on the 1:1 coaching track', () => {
+  it('links to the contact form instead of promising outreach on the 1:1 coaching track', () => {
     saveIntake({ answers: {}, plan: computePlan({}), trackOverride: '1:1 Coaching' });
     renderWithRouter(<App />, { route: '/dashboard' });
     expect(screen.queryByText(/Next session:/)).not.toBeInTheDocument();
-    expect(screen.getByText("We'll reach out to schedule your first session")).toBeInTheDocument();
+    expect(screen.queryByText(/We'll reach out/)).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /schedule your first session/i })).toHaveAttribute('href', '/join');
   });
 
-  it('prompts to get matched when the track is self-paced', () => {
+  it('links to the contact form to get matched when the track is self-paced', () => {
     saveIntake({ answers: {}, plan: computePlan({}) });
     renderWithRouter(<App />, { route: '/dashboard' });
-    expect(screen.getByText('Get matched with a coach')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Get matched with a coach' })).toHaveAttribute('href', '/join');
   });
 
   it('labels the fabricated progress as sample data', () => {
