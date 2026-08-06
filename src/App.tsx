@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router';
 import { Chrome } from './components/Chrome';
 import Home from './pages/Home';
+import About from './pages/About';
 import How from './pages/How';
 import Offer from './pages/Offer';
 import Pathways from './pages/Pathways';
@@ -19,6 +20,7 @@ export default function App() {
     <Routes>
       <Route element={<Chrome />}>
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
         <Route path="/how" element={<How />} />
         <Route path="/offer" element={<Offer />} />
         <Route path="/writing-course" element={<WritingCourse />} />

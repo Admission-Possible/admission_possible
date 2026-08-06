@@ -9,9 +9,9 @@ describe('App routing', () => {
     expect(screen.getByText('Impossible becomes')).toBeInTheDocument();
   });
 
-  it('renders How it works at /how', () => {
+  it('renders How admissions works at /how', () => {
     renderWithRouter(<App />, { route: '/how' });
-    expect(screen.getByRole('heading', { level: 1, name: 'How it works' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'How admissions works' })).toBeInTheDocument();
   });
 
   it('renders the Join form at /join', () => {

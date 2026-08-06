@@ -1,6 +1,10 @@
 export interface TeamMember {
   slug: string;
   name: string;
+  /** Full name as shown in the team directory. */
+  fullName: string;
+  /** Directory role chips (Founding Team, Technical, …). */
+  roles: string[];
   /** Card portrait (15:11 landscape). */
   photo: string;
   /** Wide hero image on the profile page. */
@@ -24,6 +28,8 @@ export const TEAM: TeamMember[] = [
   {
     slug: 'jose',
     name: 'Jose',
+    fullName: 'Jose Cruz',
+    roles: ['Founding Team', 'Technical', 'Outreach', 'Marketing'],
     photo: '/team/jose.png',
     storyPhoto: '/team/jose-story.png',
     tilt: -6,
@@ -37,7 +43,9 @@ export const TEAM: TeamMember[] = [
   },
   {
     slug: 'hoalin',
-    name: 'Hoalin',
+    name: 'Haolin',
+    fullName: 'Haolin Feng',
+    roles: ['Founding Team', 'Operational', 'Counseling', 'Marketing'],
     photo: '/team/hoalin.svg',
     storyPhoto: '/team/hoalin-story.svg',
     tilt: 5,
@@ -52,6 +60,8 @@ export const TEAM: TeamMember[] = [
   {
     slug: 'angeline',
     name: 'Angeline',
+    fullName: 'Angeline Martinez',
+    roles: ['Founding Team', 'Operational', 'Counseling'],
     photo: '/team/angeline.svg',
     storyPhoto: '/team/angeline-story.svg',
     tilt: -3,
@@ -61,6 +71,22 @@ export const TEAM: TeamMember[] = [
     beliefSub:
       "I care about the small things, the verb, the detail, the ending, because that's where a real voice lives. Your story stays yours. I just help it land.",
     tags: ['Essays', 'Storytelling', 'Brand & voice', 'Workshops', 'Editing', 'Design'],
+  },
+  {
+    slug: 'rehan',
+    name: 'Rehan',
+    fullName: 'Rehan Sha',
+    photo: '/team/rehan.svg',
+    storyPhoto: '/team/rehan-story.svg',
+    tilt: 4,
+    path: 'First-gen → Engineering → Mentor',
+    bio: 'I learned the application process the hard way — by getting it wrong first and fixing it alone. Now I build the tools and sit with students one-on-one so nobody has to figure it out by trial and error like I did.',
+    belief:
+      'I believe the right guidance at the right moment changes the whole trajectory, and it should never depend on luck.',
+    beliefSub:
+      'I work where the product meets the person: the checklists, the reminders, the quiet coaching call the week a deadline feels impossible.',
+    tags: ['Engineering', 'Coaching', 'College lists', 'Deadlines', 'Mentorship', 'First-gen advocacy'],
+    roles: ['Founding Team', 'Technical', 'Counseling'],
   },
 ];
 

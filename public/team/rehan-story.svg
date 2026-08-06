@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="760" viewBox="0 0 1600 760" role="img" aria-label="Studio portrait placeholder">
+  <rect width="1600" height="760" fill="#EDE7DF"/>
+  <rect x="70" y="90" width="150" height="150" rx="16" fill="#7FB2DD"/>
+  <rect x="70" y="270" width="150" height="220" rx="16" fill="#2B2B28"/>
+  <circle cx="300" cy="170" r="58" fill="#8FCB9B"/>
+  <g>
+    <ellipse cx="800" cy="620" rx="240" ry="200" fill="#7F9BB3"/>
+    <circle cx="800" cy="330" r="130" fill="#8FB2CB"/>
+  </g>
+  <text x="800" y="380" font-family="Inter, system-ui, sans-serif" font-size="160" font-weight="700" fill="#FBFAF1" text-anchor="middle">R</text>
+  <rect x="1380" y="90" width="150" height="400" rx="16" fill="#D0CABF"/>
+</svg>

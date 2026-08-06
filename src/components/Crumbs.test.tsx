@@ -9,7 +9,7 @@ describe('Crumbs', () => {
     renderWithRouter(<Crumbs crumbs={navCrumbs('how')} />);
 
     // The current page is enlarged, not a link.
-    const current = screen.getByText('How it works');
+    const current = screen.getByText('How admissions works');
     expect(current.classList.contains('crumbs__current')).toBe(true);
     expect(current.closest('a')).toBeNull();
 

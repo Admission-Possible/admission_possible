@@ -1,5 +1,6 @@
 import { Circle } from '../components/Circle';
 import { Crumbs } from '../components/Crumbs';
+import { navCrumb } from '../data/nav';
 
 const FACTORS: [string, string][] = [
   ['Academic', 'Programs, rigor, admit range vs your profile'],
@@ -13,7 +14,7 @@ export default function ListBuilder() {
   return (
     <main className="interior">
       <div className="rule" />
-      <Crumbs crumbs={[{ label: 'How it works', to: '/how' }, { label: 'College list builder' }]} />
+      <Crumbs crumbs={[navCrumb('how'), { label: 'College list builder' }]} />
       <div className="rule" />
 
       <div className="page-intro">

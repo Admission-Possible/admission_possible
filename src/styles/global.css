@@ -149,13 +149,61 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 .team__head { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 24px; align-items: baseline; padding: 30px 0 56px; }
 .team__intro { margin: 0; max-width: 46ch; font-size: 17px; line-height: 1.5; }
 .team__cards {
-  display: grid; grid-template-columns: repeat(3, 1fr);
+  display: grid; grid-template-columns: repeat(4, 1fr);
   gap: clamp(24px, 4vw, 56px);
   align-items: start;
 }
-/* Each card lifts to a different orientation; middle one sits lower for rhythm. */
+/* Each of the four cards lifts to a different orientation; alternating vertical
+   offsets stagger the 4-across row so it reads as a loose composition, not a strip. */
 .team__cards > :nth-child(2) { margin-top: 40px; }
 .team__cards > :nth-child(3) { margin-top: 14px; }
+.team__cards > :nth-child(4) { margin-top: 48px; }
+/* Narrow desktop: fold the four cards into a 2×2 grid so they aren't crushed.
+   Keep a light per-row stagger (2nd and 4th sit lower), drop the 4-across offsets. */
+@media (min-width: 861px) and (max-width: 1100px) {
+  .team__cards { grid-template-columns: repeat(2, 1fr); }
+  .team__cards > :nth-child(3) { margin-top: 0; }
+  .team__cards > :nth-child(4) { margin-top: 40px; }
+}
+
+/* ---- about page ---- */
+.about__intro { padding: 10px 0 0; }
+.about__grid { display: grid; grid-template-columns: 130px 1px minmax(0, 1fr); gap: 24px; }
+.about__title { margin: 0 0 18px; font-family: var(--display); font-weight: 600; letter-spacing: -0.02em; font-size: clamp(34px, 4.4vw, 58px); line-height: 1.02; }
+.about__lede { margin: 0 0 70px; max-width: 62ch; font-size: 18px; line-height: 1.6; }
+.about__team { padding-bottom: 30px; }
+.about__panel { margin-top: 54px; background: var(--card); border-radius: 24px; padding: 40px 46px 44px; }
+.about__panel-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 24px; margin-bottom: 22px; }
+.about__panel-name { font-family: var(--display); font-weight: 600; letter-spacing: -0.02em; font-size: clamp(24px, 2.4vw, 32px); }
+.about__panel-path { font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.about__panel-cols { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 40px; }
+.about__panel-bio { margin: 0; font-size: 17px; line-height: 1.6; }
+.about__panel-belief { margin: 0 0 18px; font-weight: 600; font-size: 17px; line-height: 1.5; }
+.about__panel-roles { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.about__panel-more { display: inline-block; margin-top: 26px; font-family: var(--display); font-weight: 500; font-size: 17px; text-decoration: underline; }
+
+/* ---- how: phase details ---- */
+.phases { padding: 60px 0 30px; }
+.phase { display: grid; grid-template-columns: 90px 220px minmax(0, 1fr); gap: 24px; align-items: baseline; padding: 34px 0; border-top: 1px solid var(--hairline); }
+.phase__num { font-family: var(--mono); font-weight: 700; font-size: 15px; color: var(--muted); }
+.phase__title { margin: 0; font-family: var(--display); font-weight: 600; letter-spacing: -0.02em; font-size: clamp(24px, 2.6vw, 34px); line-height: 1.05; }
+.phase__body { max-width: 62ch; }
+.phase__line { margin: 0 0 10px; font-size: 16px; line-height: 1.55; }
+.phase__line:last-child { margin-bottom: 0; }
+
+@media (max-width: 760px) {
+  .phase { grid-template-columns: 1fr; gap: 8px; }
+}
+
+/* Role chips (used in the About intro panel). */
+.dir__chip { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--ink); }
+
+@media (max-width: 760px) {
+  .about__grid { grid-template-columns: 1fr; }
+  .about__grid .vrule { display: none; }
+  .about__panel { padding: 28px 24px 32px; }
+  .about__panel-cols { grid-template-columns: 1fr; gap: 22px; }
+}
 
 .teamcard {
   display: block; text-decoration: none; color: var(--card);
@@ -171,11 +219,14 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
   box-shadow: 0 22px 46px rgba(40, 38, 32, 0.16);
 }
 .teamcard__name {
-  margin: 4px 4px 18px;
+  display: block; margin: 4px 4px 18px;
   font-family: var(--display); font-weight: 600; letter-spacing: -0.02em;
-  font-size: clamp(26px, 2.4vw, 34px); line-height: 1; color: var(--card);
+  font-size: clamp(26px, 2.4vw, 34px); line-height: 1; color: var(--card); text-align: left;
 }
-.teamcard__frame { border-radius: 18px; overflow: hidden; background: #cdcabf; }
+.teamcard__frame { display: block; border-radius: 18px; overflow: hidden; background: #cdcabf; }
+/* Button variant (About page): same skin as the link card. */
+.teamcard--button { width: 100%; border: none; cursor: pointer; font: inherit; text-align: left; }
+.teamcard--button.is-selected { transform: rotate(0deg) translateY(-6px); box-shadow: 0 22px 46px rgba(40, 38, 32, 0.16); outline: 3px solid var(--ink); outline-offset: 4px; }
 .teamcard__photo {
   display: block; width: 100%; height: auto; aspect-ratio: 15 / 11; object-fit: cover;
 }
@@ -266,6 +317,8 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 .crumbs {
   position: relative; min-height: 132px; display: flex; align-items: center;
   justify-content: space-between; gap: 10px; font-size: 15px;
+  /* 8 nowrap items — wrap instead of overflowing the page at narrow-desktop widths. */
+  flex-wrap: wrap;
 }
 .crumbs [data-nav] { cursor: pointer; white-space: nowrap; }
 .crumbs a { color: var(--ink); text-decoration: none; }
@@ -578,7 +631,7 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
   .manifesto__lines { padding-left: 0; margin-top: 24px; }
   .team__head { grid-template-columns: 1fr; gap: 12px; padding-bottom: 36px; }
   .team__cards { grid-template-columns: 1fr; gap: 40px; max-width: 420px; margin: 0 auto; }
-  .team__cards > :nth-child(2), .team__cards > :nth-child(3) { margin-top: 0; }
+  .team__cards > :nth-child(2), .team__cards > :nth-child(3), .team__cards > :nth-child(4) { margin-top: 0; }
   .teamcard { transform: rotate(0deg); }
   .how__track { flex-direction: column; min-height: 0; gap: 8px; }
   .how__track .slash--how { display: none; }

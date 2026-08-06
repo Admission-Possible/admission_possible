@@ -11,8 +11,8 @@ export default function TeamMember() {
 
   return (
     <main className="interior story">
-      <Link className="story__back" to="/">
-        <span aria-hidden="true">&larr;</span> Back to Home
+      <Link className="story__back" to="/about">
+        <span aria-hidden="true">&larr;</span> Back to About us
       </Link>
 
       <h1 className="story__title" data-reveal="">

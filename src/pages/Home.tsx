@@ -1,7 +1,5 @@
 import { Circle } from '../components/Circle';
 import { IntroFloat } from '../components/IntroFloat';
-import { TeamCard } from '../components/TeamCard';
-import { TEAM } from '../data/team';
 
 export default function Home() {
   return (
@@ -18,22 +16,6 @@ export default function Home() {
             The college application, demystified. Where to apply, how to apply, and how to write the essays that get you
             in. Free, and built for the first in their family. Para todos.
           </p>
-        </div>
-      </section>
-
-      {/* FOUNDING TEAM */}
-      <section className="team">
-        <div className="rule" />
-        <div className="team__head">
-          <div className="label">Founding team</div>
-          <p className="team__intro">
-            Built by first-gen students who walked this road. Meet the people behind the plan.
-          </p>
-        </div>
-        <div className="team__cards">
-          {TEAM.map((m) => (
-            <TeamCard key={m.slug} name={m.name} photo={m.photo} to={`/team/${m.slug}`} tilt={m.tilt} />
-          ))}
         </div>
       </section>
 
@@ -60,17 +42,8 @@ export default function Home() {
           <div className="label">Manifesto</div>
           <div className="vrule" />
           <div className="manifesto__lines">
-            <div data-reveal="">They never said you couldn't. They just never showed you how.</div>
-            <div data-reveal="">
-              There's a rulebook for getting in. Some kids get it at the dinner table — we never did.
-            </div>
-            <div data-reveal="">We weren't underqualified. We were uninformed.</div>
-            <div data-reveal="">
-              You've read systems nobody explained your whole life. That's not the disadvantage. That's the skill.
-            </div>
-            <div data-reveal="">
-              So we built the map we never got. Every essay, every list, every deadline. Free — help one, become one.
-            </div>
+            <div data-reveal="">Your dreams feel impossible on your own</div>
+            <div data-reveal="">We are here to help make them possible</div>
           </div>
           <div />
         </div>
