@@ -334,6 +334,7 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 .join__row3 .field:nth-child(5) { padding: 0 0 0 28px; }
 .field--mt { margin-top: 40px; padding-right: 0; }
 .field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+.field__req { color: var(--accent); }
 .field input, .field textarea {
   width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--ink);
   padding: 8px 0; font-size: 18px; color: var(--ink); outline: none;

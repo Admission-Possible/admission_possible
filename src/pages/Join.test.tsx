@@ -11,8 +11,8 @@ afterEach(() => {
 });
 
 const fillValid = async (user: ReturnType<typeof userEvent.setup>) => {
-  await user.type(screen.getByLabelText('First name'), 'Ada');
-  await user.type(screen.getByLabelText('Email'), 'ada@example.com');
+  await user.type(screen.getByLabelText(/^first name/i), 'Ada');
+  await user.type(screen.getByLabelText(/^email/i), 'ada@example.com');
 };
 
 const submit = (user: ReturnType<typeof userEvent.setup>) => user.click(screen.getByRole('button', { name: 'Join' }));
@@ -24,8 +24,8 @@ describe('Join form', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     renderWithRouter(<Join />);
-    await user.type(screen.getByLabelText('First name'), 'Ada');
-    await user.type(screen.getByLabelText('Email'), 'not-an-email');
+    await user.type(screen.getByLabelText(/^first name/i), 'Ada');
+    await user.type(screen.getByLabelText(/^email/i), 'not-an-email');
     await submit(user);
 
     expect(screen.getByRole('alert')).toHaveTextContent(/valid email/i);
@@ -39,7 +39,7 @@ describe('Join form', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     renderWithRouter(<Join />);
-    await user.type(screen.getByLabelText('Email'), 'ada@example.com');
+    await user.type(screen.getByLabelText(/^email/i), 'ada@example.com');
     await submit(user);
 
     expect(screen.getByRole('alert')).toHaveTextContent(/first name/i);
@@ -156,13 +156,64 @@ describe('Join form', () => {
     saveIntake({ answers: {}, plan: computePlan({ grade: '11th grade' }) });
 
     renderWithRouter(<Join />);
-    expect(screen.getByLabelText('Grade level')).toHaveValue('11th grade');
+    expect(screen.getByLabelText(/^grade level/i)).toHaveValue('11th grade');
   });
 
   it('leaves grade blank when there is no intake', () => {
     localStorage.clear();
     sessionStorage.clear();
     renderWithRouter(<Join />);
-    expect(screen.getByLabelText('Grade level')).toHaveValue('');
+    expect(screen.getByLabelText(/^grade level/i)).toHaveValue('');
+  });
+
+  // #39: browser autofill exists for exactly these fields (WCAG 1.3.5).
+  it('carries autocomplete tokens on the identity fields', () => {
+    renderWithRouter(<Join />);
+    expect(screen.getByLabelText(/^first name/i)).toHaveAttribute('autocomplete', 'given-name');
+    expect(screen.getByLabelText(/^last name/i)).toHaveAttribute('autocomplete', 'family-name');
+    expect(screen.getByLabelText(/^email/i)).toHaveAttribute('autocomplete', 'email');
+  });
+
+  it('marks the required fields before submission, visibly and programmatically', () => {
+    renderWithRouter(<Join />);
+    for (const field of [/^first name/i, /^email/i]) {
+      const input = screen.getByLabelText(field);
+      expect(input).toBeRequired();
+      expect(input).toHaveAttribute('aria-required', 'true');
+      // The label itself says so, not colour alone.
+      expect(input).toHaveAccessibleName(/required/i);
+    }
+  });
+
+  it('ties the error to the offending field and moves focus there', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal('fetch', vi.fn());
+    renderWithRouter(<Join />);
+
+    // Empty first name.
+    await user.type(screen.getByLabelText(/^email/i), 'ada@example.com');
+    await submit(user);
+
+    const first = screen.getByLabelText(/^first name/i);
+    expect(first).toHaveAttribute('aria-invalid', 'true');
+    expect(first).toHaveAccessibleDescription(/first name/i);
+    expect(first).toHaveFocus();
+  });
+
+  it('moves focus to the email field when only the email is invalid', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal('fetch', vi.fn());
+    renderWithRouter(<Join />);
+
+    await user.type(screen.getByLabelText(/^first name/i), 'Ada');
+    await user.type(screen.getByLabelText(/^email/i), 'not-an-email');
+    await submit(user);
+
+    const email = screen.getByLabelText(/^email/i);
+    expect(email).toHaveAttribute('aria-invalid', 'true');
+    expect(email).toHaveAccessibleDescription(/valid email/i);
+    expect(email).toHaveFocus();
+    // The name field, which is fine, is not flagged.
+    expect(screen.getByLabelText(/^first name/i)).not.toHaveAttribute('aria-invalid');
   });
 });
