@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Circle } from '../components/Circle';
 import { Crumbs } from '../components/Crumbs';
+import { useHydrated } from '../hooks/useHydrated';
 import { trackEvent } from '../data/analytics';
 import { navCrumbs } from '../data/nav';
 import { loadIntake } from '../data/storage';
@@ -53,7 +54,11 @@ export default function Join() {
   const [submitting, setSubmitting] = useState(false);
   const [fallback, setFallback] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [intake] = useState(() => loadIntake());
+  // The intake already asked for grade; don't make the student answer twice.
+  // Derived so the prerendered field (empty) matches the first client render,
+  // then fills in; typing overlays it (#45).
+  const [gradeEdit, setGradeEdit] = useState<string | null>(null);
+  const hydrated = useHydrated();
   const formRef = useRef<HTMLFormElement>(null);
   const labelTimer = useRef<number | undefined>(undefined);
   const copyTimer = useRef<number | undefined>(undefined);
@@ -149,8 +154,8 @@ export default function Join() {
   };
 
   const contact = contactEmail();
-  // The intake already asked for grade; don't make the student answer twice.
-  const knownGrade = typeof intake?.plan.grade === 'string' ? intake.plan.grade : '';
+  const storedGrade = hydrated ? (loadIntake()?.plan.grade ?? '') : '';
+  const grade = gradeEdit ?? storedGrade;
 
   return (
     <main className="interior">
@@ -208,7 +213,8 @@ export default function Join() {
               type="text"
               name="grade"
               placeholder="e.g. 11th grade"
-              defaultValue={knownGrade}
+              value={grade}
+              onChange={(e) => setGradeEdit(e.target.value)}
               autoComplete="off"
             />
           </div>

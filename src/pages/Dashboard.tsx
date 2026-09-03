@@ -1,11 +1,10 @@
-import { useState } from 'react';
 import { Link } from 'react-router';
 import { Circle } from '../components/Circle';
 import { Icon } from '../components/Icon';
 import { NoPlan } from '../components/NoPlan';
 import { planSystems } from '../data/plan';
+import { useHydrated } from '../hooks/useHydrated';
 import { loadIntake } from '../data/storage';
-import type { Intake } from '../types';
 
 // Typical fall-cycle dates. `system` keys a row to an application system that
 // is actually on the student's list (see planSystems) rather than to the
@@ -22,8 +21,12 @@ const DEADLINES: { sys: string; date: string; system: string }[] = [
 ];
 
 export default function Dashboard() {
-  const [intake] = useState<Intake | null>(() => loadIntake());
+  // Derived, not synced: the prerender has no storage, so the first client
+  // render must agree with it before reading (#45).
+  const hydrated = useHydrated();
+  const intake = hydrated ? loadIntake() : null;
 
+  if (!hydrated) return null;
   // No silent redirect: say what happened and offer the way back.
   if (!intake || !intake.plan) return <NoPlan />;
 

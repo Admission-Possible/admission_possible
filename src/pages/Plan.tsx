@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { Circle } from '../components/Circle';
 import { NoPlan } from '../components/NoPlan';
 import { planToText } from '../data/planText';
+import { useHydrated } from '../hooks/useHydrated';
 import { loadIntake, saveIntake } from '../data/storage';
 import type { Intake, School, TrackName } from '../types';
 
@@ -21,11 +22,17 @@ function SchoolCol({ title, list }: { title: string; list: School[] }) {
 }
 
 export default function Plan() {
-  const [intake, setIntake] = useState<Intake | null>(() => loadIntake());
+  // The prerender has no storage; showing NoPlan before hydration would tell a
+  // returning student their plan was lost (#45). Derived rather than synced
+  // into state, with a track switch overlaying it.
+  const hydrated = useHydrated();
+  const [switched, setSwitched] = useState<Intake | null>(null);
+  const intake = switched ?? (hydrated ? loadIntake() : null);
   const [copied, setCopied] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const copyTimer = useRef<number | undefined>(undefined);
 
+  if (!hydrated) return null;
   // No silent redirect: say what happened and offer the way back.
   if (!intake || !intake.plan) return <NoPlan />;
 
@@ -43,7 +50,7 @@ export default function Plan() {
       return;
     }
     setSaveError(false);
-    setIntake(updated);
+    setSwitched(updated);
   };
 
   const copyPlan = async () => {

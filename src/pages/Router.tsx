@@ -1,40 +1,60 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Circle } from '../components/Circle';
 import { Slash } from '../components/Slash';
 import { QUESTIONS } from '../data/questions';
 import { trackEvent } from '../data/analytics';
 import { computePlan } from '../data/plan';
+import { useHydrated } from '../hooks/useHydrated';
 import { clearDraft, loadDraft, loadIntake, saveDraft, saveIntake } from '../data/storage';
 import type { Answers, Intake } from '../types';
 
 // The 7-step intake. Computes the plan and hands off via storage.
 export default function Router() {
   const navigate = useNavigate();
-  // Rehydrate from the per-tab draft so pull-to-refresh or a gesture-back on
-  // steps 2-7 doesn't silently discard every answer.
-  const [draft] = useState(loadDraft);
-  // A completed intake seeds the questions so re-entry isn't seven questions
-  // from memory. The answers were already persisted; nothing read them.
-  const [prior] = useState<Intake | null>(loadIntake);
-  const [step, setStep] = useState(() => {
-    const restored = draft?.step ?? 0;
-    // Clamp: a stale draft from a shorter/longer question set must not index out.
-    return Math.min(Math.max(restored, 0), QUESTIONS.length - 1);
-  });
-  const [answers, setAnswers] = useState<Answers>(() => draft?.answers ?? prior?.answers ?? {});
+  // This route is prerendered in Node, where there is no storage, so the seed
+  // is *derived* and only applied once hydrated — the first client paint has to
+  // agree with the served HTML (#45). Anything the student then does overlays
+  // it via `edits`.
+  const hydrated = useHydrated();
+  const [edits, setEdits] = useState<{ step: number; answers: Answers } | null>(null);
+
+  // The per-tab draft wins, so pull-to-refresh or a gesture-back on steps 2-7
+  // doesn't discard answers; otherwise fall back to a completed intake so
+  // re-entry isn't seven questions from memory.
+  const draft = useMemo(() => (hydrated ? loadDraft() : null), [hydrated]);
+  const prior: Intake | null = useMemo(() => (hydrated ? loadIntake() : null), [hydrated]);
+  const seed = useMemo(
+    () =>
+      draft
+        ? // Clamp: a stale draft from a shorter/longer question set must not index out.
+          { step: Math.min(Math.max(draft.step, 0), QUESTIONS.length - 1), answers: draft.answers }
+        : prior
+          ? { step: 0, answers: prior.answers }
+          : null,
+    [draft, prior],
+  );
+
+  const step = edits?.step ?? seed?.step ?? 0;
+  // Memoised: a fresh {} each render would re-run the draft-save effect below
+  // on every render rather than on every change.
+  const answers: Answers = useMemo(() => edits?.answers ?? seed?.answers ?? {}, [edits, seed]);
   // Only announce the reseed when it actually happened — an in-progress draft
   // takes precedence, and there is nothing to say on a first run.
-  const resumed = !draft && !!prior;
+  const resumed = hydrated && !draft && !!prior;
   const [saveError, setSaveError] = useState(false);
   const questionRef = useRef<HTMLHeadingElement>(null);
   const firstRender = useRef(true);
 
+  const setStep = (next: number) => setEdits({ step: next, answers });
+  const setAnswers = (next: Answers) => setEdits({ step, answers: next });
+
   // Persist progress on every change, so there is no window where an answer is
   // only in React state.
   useEffect(() => {
+    if (!hydrated) return;
     saveDraft(step, answers);
-  }, [step, answers]);
+  }, [hydrated, step, answers]);
 
   // One event per step reached, so the funnel's drop-off point is visible.
   useEffect(() => {
@@ -64,19 +84,21 @@ export default function Router() {
   const isSelected = (opt: string) => (q.multi ? Array.isArray(sel) && sel.indexOf(opt) >= 0 : sel === opt);
 
   const select = (opt: string) => {
-    setAnswers((prev) => {
-      const a: Answers = { ...prev };
-      if (q.multi) {
-        const cur = Array.isArray(a[q.key]) ? [...(a[q.key] as string[])] : [];
-        const i = cur.indexOf(opt);
-        if (i >= 0) cur.splice(i, 1);
-        else cur.push(opt);
-        a[q.key] = cur;
-      } else {
-        a[q.key] = opt;
-      }
-      return a;
-    });
+    setAnswers(
+      (() => {
+        const a: Answers = { ...answers };
+        if (q.multi) {
+          const cur = Array.isArray(a[q.key]) ? [...(a[q.key] as string[])] : [];
+          const i = cur.indexOf(opt);
+          if (i >= 0) cur.splice(i, 1);
+          else cur.push(opt);
+          a[q.key] = cur;
+        } else {
+          a[q.key] = opt;
+        }
+        return a;
+      })(),
+    );
   };
 
   const next = () => {

@@ -1,12 +1,15 @@
-import { useState } from 'react';
 import { Circle } from '../components/Circle';
 import { Crumbs } from '../components/Crumbs';
 import { navCrumbs } from '../data/nav';
 import { PATHWAYS } from '../data/pathways';
+import { useHydrated } from '../hooks/useHydrated';
 import { loadIntake } from '../data/storage';
 
 export default function Pathways() {
-  const [intake] = useState(() => loadIntake());
+  // Storage is unavailable during the prerender, so the first render must
+  // match it and the plan-aware bits appear after hydration (#45).
+  const hydrated = useHydrated();
+  const intake = hydrated ? loadIntake() : null;
 
   return (
     <main className="interior">
