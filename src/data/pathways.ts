@@ -11,8 +11,11 @@ export const PATHWAYS: Pathway[] = [
   {
     name: 'UC Application',
     bestFor: 'All UC campuses',
-    fact: 'Its own Personal Insight Qs',
-    money: 'No separate supplements',
+    fact: 'Its own Personal Insight Qs, no separate supplements',
+    // The money column previously held "No separate supplements", which is not
+    // a cost fact. Left blank rather than asserting a fee policy we haven't
+    // verified — the note under the table tells students where to check.
+    money: '—',
   },
   {
     name: 'QuestBridge',
@@ -21,6 +24,6 @@ export const PATHWAYS: Pathway[] = [
     money: 'Free to apply',
   },
   { name: 'Coalition', bestFor: 'Member schools', fact: 'Alternative to Common App', money: 'Fee waivers available' },
-  { name: 'ApplyTexas', bestFor: 'Texas publics', fact: 'Standard Texas route', money: 'Its own essays' },
+  { name: 'ApplyTexas', bestFor: 'Texas publics', fact: 'Standard Texas route, its own essays', money: '—' },
   { name: 'CBCA', bestFor: 'HBCUs', fact: 'One app, many schools', money: 'One low fee' },
 ];

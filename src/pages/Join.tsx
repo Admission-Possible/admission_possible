@@ -155,6 +155,9 @@ export default function Join() {
       <Crumbs crumbs={navCrumbs('join')} />
       <div className="rule rule--mb" />
 
+      {/* Also missing an h1 — not listed in #42, found by the sweep's own test. */}
+      <h1 className="visually-hidden">Join</h1>
+
       <div className="join__wrap">
         <form className="join__card" onSubmit={onSubmit} noValidate ref={formRef}>
           <div className="join__row3">

@@ -11,11 +11,15 @@ export default function Offer() {
       <Crumbs crumbs={navCrumbs('offer')} />
       <div className="rule" />
 
+      {/* The page's two tracks are h3s under no h1, so the outline started at
+          level 3. Visually hidden: the crumb band already names the page. */}
+      <h1 className="visually-hidden">What we offer</h1>
+
       {/* Block A: headline left, ruled list right */}
       <div className="offer__block">
         <div data-reveal="">
           <Icon name="course" className="offer__head-icon" />
-          <h3 className="offer__head">Self-paced course</h3>
+          <h2 className="offer__head">Self-paced course</h2>
           <p className="offer__body">
             Work independently, not alone. An eight-module path through the essays, from picking a topic to the last
             short answer. The modules are written; we're building them out lesson by lesson. Free.
@@ -44,7 +48,7 @@ export default function Offer() {
         </div>
         <div data-reveal="">
           <Icon name="coaching" className="offer__head-icon" />
-          <h3 className="offer__head">1:1 Coaching</h3>
+          <h2 className="offer__head">1:1 Coaching</h2>
           <p className="offer__body">
             Want a person? Get matched with a coach who was a first-gen applicant two years ago. Free — there's nothing
             to pay for anywhere on this site.
