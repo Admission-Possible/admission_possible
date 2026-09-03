@@ -330,6 +330,8 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
   font-family: var(--display); font-weight: 600; text-transform: uppercase;
   font-size: 12px; letter-spacing: 0.06em;
 }
+.story__tag--role { background: var(--hairline); }
+.story__bio--placeholder { max-width: 60ch; margin: 40px 0 48px; }
 
 @media (max-width: 860px) {
   .story__grid { grid-template-columns: 1fr; gap: 28px; }

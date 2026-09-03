@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { Crumbs } from '../components/Crumbs';
 import { TeamCard } from '../components/TeamCard';
 import { navCrumbs } from '../data/nav';
-import { TEAM, getMember } from '../data/team';
+import { TEAM, getMember, hasStory } from '../data/team';
 
 // Directory chip palette (mirrors the planning doc's tag colors).
 // Dark chips get cream text; light chips inherit ink.
@@ -72,6 +72,7 @@ export default function About() {
               onSelect={() => setSelected(selected === m.slug ? null : m.slug)}
               selected={selected === m.slug}
               panelId="about-member-panel"
+              hasStory={hasStory(m)}
             />
           ))}
         </div>
@@ -86,12 +87,14 @@ export default function About() {
           >
             <div className="about__panel-head">
               <span className="about__panel-name">{open.fullName}</span>
-              <span className="about__panel-path">{open.path}</span>
+              {open.path && <span className="about__panel-path">{open.path}</span>}
             </div>
             <div className="about__panel-cols">
-              <p className="about__panel-bio">{open.bio}</p>
+              <p className="about__panel-bio">
+                {open.bio ?? `${open.name} is on the founding team. Their profile isn't written yet.`}
+              </p>
               <div>
-                <p className="about__panel-belief">{open.belief}</p>
+                {open.belief && <p className="about__panel-belief">{open.belief}</p>}
                 <ul className="about__panel-roles" aria-label="Roles">
                   {open.roles.map((role) => (
                     <li key={role} className="dir__chip" style={ROLE_STYLES[role] ?? { background: '#DCD6CE' }}>
@@ -101,9 +104,12 @@ export default function About() {
                 </ul>
               </div>
             </div>
-            <Link className="about__panel-more" to={`/team/${open.slug}`}>
-              Read my full story &rarr;
-            </Link>
+            {/* Only promise a story where one exists. */}
+            {hasStory(open) && (
+              <Link className="about__panel-more" to={`/team/${open.slug}`}>
+                Read my full story &rarr;
+              </Link>
+            )}
           </div>
         )}
       </section>

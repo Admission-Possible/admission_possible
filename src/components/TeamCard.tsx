@@ -10,13 +10,15 @@ interface TeamCardProps {
   selected: boolean;
   /** id of the intro panel this card controls while selected. */
   panelId: string;
+  /** False when this member has no approved copy — don't promise a story. */
+  hasStory?: boolean;
 }
 
 // Mint photo card in the style of the reference: name heading, framed portrait,
 // and a "Get to know me" prompt. Cards sit at a slight tilt and straighten on hover.
 // aria-controls is set only on the selected card: while collapsed the shared panel
 // is not in the DOM, and a collapsed card shouldn't claim another member's panel.
-export function TeamCard({ name, photo, tilt = 0, onSelect, selected, panelId }: TeamCardProps) {
+export function TeamCard({ name, photo, tilt = 0, onSelect, selected, panelId, hasStory = true }: TeamCardProps) {
   const style = { '--tilt': `${tilt}deg` } as CSSProperties;
 
   // The reveal wrapper owns the fade/translate transform; the inner button
@@ -36,7 +38,7 @@ export function TeamCard({ name, photo, tilt = 0, onSelect, selected, panelId }:
           {/* Decorative: the button text already names the member. */}
           <img className="teamcard__photo" src={photo} alt="" loading="lazy" />
         </span>
-        <span className="teamcard__link">Get to know me &rarr;</span>
+        <span className="teamcard__link">{hasStory ? 'Get to know me →' : 'Founding team'}</span>
       </button>
     </div>
   );

@@ -11,19 +11,39 @@ export interface TeamMember {
   storyPhoto: string;
   /** Resting tilt of the directory card on the About page. */
   tilt: number;
-  /** Short journey line, e.g. "Architecture → Brand → Web → AI". */
-  path: string;
+  /**
+   * Short journey line, e.g. "Architecture → Brand → Web → AI".
+   *
+   * Every narrative field below is optional. A member with no approved copy
+   * renders a plain "profile coming soon" state — the alternative was
+   * publishing invented first-person testimony under a real person's name.
+   */
+  path?: string;
   /** Middle-column narrative. */
-  bio: string;
+  bio?: string;
   /** Right-column bold statement. */
-  belief: string;
+  belief?: string;
   /** Muted sub-paragraph under the statement. */
-  beliefSub: string;
+  beliefSub?: string;
   /** Pastel pill tags. */
-  tags: string[];
+  tags?: string[];
 }
 
-// Filler content. Swap for real bios/photos when ready.
+/** True once this member has approved copy to show. */
+export function hasStory(member: TeamMember): boolean {
+  return Boolean(member.bio && member.belief);
+}
+
+// Only Jose has approved copy and real photos.
+//
+// The other three previously shipped detailed first-person life stories and
+// belief statements — including specific claims about their schooling — under
+// their real full names, next to monogram placeholder portraits, on a page
+// styled as personal testimony. None of it was theirs. It has been removed
+// rather than left in place behind a "filler content" comment no visitor sees.
+//
+// To restore a profile: add real photos under public/team/, then fill in path,
+// bio, belief, beliefSub and tags with copy that person has actually approved.
 export const TEAM: TeamMember[] = [
   {
     slug: 'jose',
@@ -42,20 +62,13 @@ export const TEAM: TeamMember[] = [
     tags: ['Product', 'Engineering', 'First-gen advocacy', 'Essay strategy', 'Mentorship', 'Systems design'],
   },
   {
-    slug: 'hoalin',
+    slug: 'haolin',
     name: 'Haolin',
     fullName: 'Haolin Feng',
     roles: ['Founding Team', 'Operational', 'Counseling', 'Marketing'],
-    photo: '/team/hoalin.svg',
-    storyPhoto: '/team/hoalin-story.svg',
+    photo: '/team/haolin.svg',
+    storyPhoto: '/team/haolin-story.svg',
     tilt: 5,
-    path: 'Public school → Berkeley → Builder',
-    bio: "I came up through overcrowded classrooms and a counselor who had four hundred other students. Everything I learned about applying, I learned too late or by accident. I'm here so the next kid learns it on time.",
-    belief:
-      'I believe access is a design problem, not a talent problem. Talent is everywhere. The instructions are not.',
-    beliefSub:
-      'My job is to turn the chaos of deadlines, portals, and fine print into something that feels calm and doable, one clear step at a time.',
-    tags: ['Operations', 'Financial aid', 'Outreach', 'Curriculum', 'Community', 'Coaching'],
   },
   {
     slug: 'angeline',
@@ -65,12 +78,6 @@ export const TEAM: TeamMember[] = [
     photo: '/team/angeline.svg',
     storyPhoto: '/team/angeline-story.svg',
     tilt: -3,
-    path: 'Immigrant household → Art school → Storytelling',
-    bio: "I was the first in my family to write a personal statement, and I had no idea what 'show, don't tell' even meant. I fell in love with helping people find the line in their story that makes an admissions officer lean in.",
-    belief: 'I believe every student already has the essay inside them. They just need someone to help them hear it.',
-    beliefSub:
-      "I care about the small things, the verb, the detail, the ending, because that's where a real voice lives. Your story stays yours. I just help it land.",
-    tags: ['Essays', 'Storytelling', 'Brand & voice', 'Workshops', 'Editing', 'Design'],
   },
   {
     slug: 'rehan',
@@ -79,13 +86,6 @@ export const TEAM: TeamMember[] = [
     photo: '/team/rehan.svg',
     storyPhoto: '/team/rehan-story.svg',
     tilt: 4,
-    path: 'First-gen → Engineering → Mentor',
-    bio: 'I learned the application process the hard way — by getting it wrong first and fixing it alone. Now I build the tools and sit with students one-on-one so nobody has to figure it out by trial and error like I did.',
-    belief:
-      'I believe the right guidance at the right moment changes the whole trajectory, and it should never depend on luck.',
-    beliefSub:
-      'I work where the product meets the person: the checklists, the reminders, the quiet coaching call the week a deadline feels impossible.',
-    tags: ['Engineering', 'Coaching', 'College lists', 'Deadlines', 'Mentorship', 'First-gen advocacy'],
     roles: ['Founding Team', 'Technical', 'Counseling'],
   },
 ];

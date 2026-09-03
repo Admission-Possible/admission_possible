@@ -22,17 +22,23 @@ describe('About page', () => {
     expect(joseCard).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByText(/translator in my family/)).toBeInTheDocument();
 
-    // Selecting another founder swaps the intro.
+    // Selecting another founder swaps the intro. Haolin has no approved copy
+    // yet (#46), so the panel says so rather than inventing testimony.
     await user.click(screen.getByRole('button', { name: /hey, i'm haolin/i }));
     expect(screen.queryByText(/translator in my family/)).not.toBeInTheDocument();
-    expect(screen.getByText(/overcrowded classrooms/)).toBeInTheDocument();
+    expect(screen.getByText(/profile isn't written yet/i)).toBeInTheDocument();
   });
 
-  it('links the expanded intro to the full story page', async () => {
+  it('links to the full story only for members who have one', async () => {
     const user = userEvent.setup();
     renderWithRouter(<App />, { route: '/about' });
+
+    await user.click(screen.getByRole('button', { name: /hey, i'm jose/i }));
+    expect(screen.getByRole('link', { name: /full story/i })).toHaveAttribute('href', '/team/jose');
+
+    // #46: promising a story that does not exist is the thing being fixed.
     await user.click(screen.getByRole('button', { name: /hey, i'm rehan/i }));
-    expect(screen.getByRole('link', { name: /full story/i })).toHaveAttribute('href', '/team/rehan');
+    expect(screen.queryByRole('link', { name: /full story/i })).not.toBeInTheDocument();
   });
 
   it('shows the selected founder roles in the expanded intro', async () => {
