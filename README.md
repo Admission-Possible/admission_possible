@@ -41,14 +41,14 @@ The original vanilla implementation is preserved in git history (see the
 
 ## Tech stack
 
-| Concern     | Choice                                     |
-| ----------- | ------------------------------------------ |
-| UI          | **React 19** + **TypeScript** (strict)     |
-| Build / dev | **Vite 8**                                 |
-| Routing     | **React Router 8** (client-side)           |
-| Styling     | A single hand-authored `global.css`        |
-| Tests       | **Vitest 4** + **Testing Library** (jsdom) |
-| Hosting     | Static SPA (Vercel rewrite / SPA fallback) |
+| Concern     | Choice                                                       |
+| ----------- | ------------------------------------------------------------ |
+| UI          | **React 19** + **TypeScript** (strict)                       |
+| Build / dev | **Vite 8**                                                   |
+| Routing     | **React Router 8** (client-side)                             |
+| Styling     | A single hand-authored `global.css`                          |
+| Tests       | **Vitest 4** + **Testing Library** (jsdom)                   |
+| Hosting     | Prerendered static site on Vercel (client-routed after load) |
 
 ---
 
@@ -255,10 +255,24 @@ build on every push and PR to `main`.
 
 ## Deployment
 
-This is a client-routed SPA, so the host must serve `index.html` for every
-path (preserving the old site's direct-URL behaviour). `vercel.json` does this
-with a catch-all rewrite. On other static hosts, add the equivalent SPA
-fallback (e.g. a `404.html` copy of `index.html` for GitHub Pages).
+Every route is **prerendered to its own HTML file** at build time, so crawlers
+and link-preview bots get real content instead of an empty root div, and each
+page carries its own title, description and canonical. `npm run build` does
+three things: the client bundle, an SSR bundle from `src/entry-server.tsx`, and
+`scripts/prerender.mjs`, which writes `dist/<route>/index.html` for every entry
+in `src/data/routes.ts` plus a `404.html`.
+
+Two consequences worth knowing:
+
+- **There is no SPA catch-all rewrite any more.** It was what turned unknown
+  paths into 200-status soft 404s. Unmatched paths now get `404.html` with a
+  real 404. **A new route must be added to `src/data/routes.ts` or it will 404
+  in production** — a test fails if the manifest drifts from `App.tsx`.
+- **Never read storage during render.** The prerender runs in Node with no
+  `localStorage`, so a component that reads stored intake inline renders
+  differently on a returning student's first paint, and React throws the
+  prerendered tree away. Go through `useHydrated()` (see `src/hooks/`); a test
+  hydrates every route and fails on any mismatch.
 
 ### Security headers
 
