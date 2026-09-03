@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router';
 import { NAV } from '../data/nav';
 import { hasIntake } from '../data/storage';
 import { titleForPath } from '../data/titles';
+import { useHydrated } from '../hooks/useHydrated';
 import { useReveal } from '../hooks/useReveal';
 import { Header } from './Header';
 import { Menu } from './Menu';
@@ -18,16 +19,17 @@ export function Chrome() {
   // A route change should move focus; the first paint should not steal it.
   const firstRender = useRef(true);
 
-  // Re-checked per navigation rather than once on mount: finishing the intake
-  // navigates here, and the "My plan" link has to appear on that same trip.
-  const [hasPlan, setHasPlan] = useState(hasIntake);
+  // Derived per render, so finishing the intake reveals the "My plan" link on
+  // that same navigation. False until hydrated, so the first client paint
+  // matches the prerendered HTML (#45).
+  const hydrated = useHydrated();
+  const hasPlan = hydrated && hasIntake();
 
   // On navigation: close the menu (state adjusted during render, per React docs).
   const [prevPathname, setPrevPathname] = useState(pathname);
   if (prevPathname !== pathname) {
     setPrevPathname(pathname);
     setMenuOpen(false);
-    setHasPlan(hasIntake());
   }
 
   useReveal();

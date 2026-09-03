@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { Circle } from '../components/Circle';
 import { Crumbs } from '../components/Crumbs';
 import { navCrumb } from '../data/nav';
+import { useHydrated } from '../hooks/useHydrated';
 import { loadIntake } from '../data/storage';
 import type { School } from '../types';
 
@@ -72,7 +73,10 @@ function YourList({ reach, target, likely }: { reach: School[]; target: School[]
 export default function ListBuilder() {
   // The page promised a tool and rendered a brochure — it imported no storage
   // at all, so it could never show the list it offered to refine.
-  const [intake] = useState(() => loadIntake());
+  // Storage is unavailable during the prerender, so the first render must
+  // match it and the plan-aware bits appear after hydration (#45).
+  const hydrated = useHydrated();
+  const intake = hydrated ? loadIntake() : null;
   const plan = intake?.plan;
 
   return (
