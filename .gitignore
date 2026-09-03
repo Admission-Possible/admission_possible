@@ -8,6 +8,9 @@ node_modules
 .env.*
 !.env.example
 
+# coverage output
+coverage
+
 # build output
 dist
 dist-ssr
