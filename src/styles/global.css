@@ -343,6 +343,15 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 .join__error { margin-top: 28px; font-size: 15px; color: var(--accent); }
 .join__note { margin-top: 28px; font-size: 15px; color: var(--muted); }
 .join__note a { text-decoration: underline; }
+/* Delivery failed: the composed message, kept on screen so nothing is retyped. */
+.join__fallback { margin-top: 28px; }
+.join__fallback label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+.join__fallback-text {
+  width: 100%; background: transparent; border: 1px solid var(--hairline);
+  padding: 12px; font-family: var(--mono); font-size: 14px; color: var(--ink); resize: vertical;
+}
+.join__fallback-actions { display: flex; align-items: center; gap: 20px; margin-top: 12px; }
+.join__fallback-actions a { font-size: 15px; text-decoration: underline; }
 .join__email { font-family: var(--mono); font-weight: 700; text-transform: uppercase; font-size: clamp(20px, 2.4vw, 32px); margin-top: 90px; }
 
 /* ---- footer ---- */
