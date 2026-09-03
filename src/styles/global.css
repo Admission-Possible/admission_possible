@@ -365,6 +365,14 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 .footer__links a:hover { color: var(--accent); }
 .footer__legal { display: flex; justify-content: space-between; align-items: baseline; padding-top: 16px; font-size: 13px; flex-wrap: wrap; gap: 8px; }
 .footer__tag { font-family: var(--mono); font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 0.04em; }
+.footer__legal-link { text-decoration: underline; }
+
+/* ---- legal / privacy ---- */
+.legal { max-width: 760px; }
+.legal__sec { padding: 40px 0 0; }
+.legal__h { margin: 0 0 16px; font-family: var(--display); font-weight: 600; letter-spacing: -0.01em; font-size: clamp(20px, 2vw, 26px); }
+.legal p { margin: 0 0 16px; font-size: 17px; line-height: 1.65; }
+.legal a { text-decoration: underline; }
 
 /* ---- reveal motion default state ---- */
 .is-animated [data-reveal] { opacity: 0; transform: translateY(24px); }
