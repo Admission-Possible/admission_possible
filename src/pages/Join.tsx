@@ -46,6 +46,9 @@ function composeMessage(p: JoinPayload): string {
 export default function Join() {
   const [label, setLabel] = useState('Join');
   const [error, setError] = useState<string | null>(null);
+  // Which field the error belongs to, so it can be announced on that input
+  // rather than as a loose paragraph the user has to hunt for.
+  const [errorField, setErrorField] = useState<'first' | 'email' | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [fallback, setFallback] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -77,15 +80,23 @@ export default function Join() {
     };
 
     // Validate before we celebrate: we need a name to greet you by and an email to reach you at.
+    const fail = (field: 'first' | 'email', message: string) => {
+      setError(message);
+      setErrorField(field);
+      // Move to the offending input: a screen-reader user otherwise hears a
+      // generic error and has to hunt across five fields for the one to fix.
+      formRef.current?.querySelector<HTMLInputElement>(`#${field}`)?.focus();
+    };
     if (!payload.first) {
-      setError('Please enter your first name so we know who to reach.');
+      fail('first', 'Please enter your first name so we know who to reach.');
       return;
     }
     if (!isValidEmail(payload.email)) {
-      setError('Please enter a valid email address.');
+      fail('email', 'Please enter a valid email address.');
       return;
     }
     setError(null);
+    setErrorField(null);
     setFallback(null);
     setCopied(false);
     setSubmitting(true);
@@ -112,6 +123,7 @@ export default function Join() {
       // they can actually use, rather than asking them to retype it into email.
       setLabel('Try again');
       setError("We couldn't send that just now — here's your message so nothing is lost.");
+      setErrorField(null);
       setFallback(composeMessage(payload));
     } finally {
       window.clearTimeout(timer);
@@ -147,30 +159,59 @@ export default function Join() {
         <form className="join__card" onSubmit={onSubmit} noValidate ref={formRef}>
           <div className="join__row3">
             <div className="field">
-              <label htmlFor="first">First name</label>
-              <input id="first" type="text" name="first" />
+              <label htmlFor="first">
+                First name <span className="field__req">(required)</span>
+              </label>
+              <input
+                id="first"
+                type="text"
+                name="first"
+                autoComplete="given-name"
+                required
+                aria-required="true"
+                aria-invalid={errorField === 'first' || undefined}
+                aria-describedby={errorField === 'first' ? 'join-error' : undefined}
+              />
             </div>
             <div className="vrule" />
             <div className="field">
               <label htmlFor="last">Last name</label>
-              <input id="last" type="text" name="last" />
+              <input id="last" type="text" name="last" autoComplete="family-name" />
             </div>
             <div className="vrule" />
             <div className="field">
-              <label htmlFor="email">Email</label>
-              <input id="email" type="email" name="email" />
+              <label htmlFor="email">
+                Email <span className="field__req">(required)</span>
+              </label>
+              <input
+                id="email"
+                type="email"
+                name="email"
+                autoComplete="email"
+                required
+                aria-required="true"
+                aria-invalid={errorField === 'email' || undefined}
+                aria-describedby={errorField === 'email' ? 'join-error' : undefined}
+              />
             </div>
           </div>
           <div className="field field--mt">
             <label htmlFor="grade">Grade level</label>
-            <input id="grade" type="text" name="grade" placeholder="e.g. 11th grade" defaultValue={knownGrade} />
+            <input
+              id="grade"
+              type="text"
+              name="grade"
+              placeholder="e.g. 11th grade"
+              defaultValue={knownGrade}
+              autoComplete="off"
+            />
           </div>
           <div className="field field--mt">
             <label htmlFor="needs">What do you need help with?</label>
             <textarea id="needs" name="needs" rows={3} />
           </div>
           {error && (
-            <p className="join__error" role="alert" aria-live="polite">
+            <p className="join__error" id="join-error" role="alert" aria-live="polite">
               {error}
             </p>
           )}
