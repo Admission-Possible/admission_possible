@@ -25,8 +25,9 @@ export default function WritingCourse() {
           Show me you can write. Don't just tell me.
         </h1>
         <p className="page-intro__lede" data-reveal="">
-          Every lesson ends in production. You write, right there, and a coach pushes you. You leave with a finished
-          personal statement and a stack of supplementals.
+          This is the path we take you through, module by module — from picking a topic to the last short answer. The
+          syllabus below is real; the in-browser lessons are still being built. Ask for a coach and we'll work through
+          it with you over email in the meantime.
         </p>
       </div>
 
@@ -43,7 +44,9 @@ export default function WritingCourse() {
       </div>
 
       <div className="section-cta">
-        <Circle to="/router">Start writing</Circle>
+        {/* Was /router, which restarted the 7-question intake from scratch —
+            a dead end for anyone who had already finished it. */}
+        <Circle to="/join">Ask for a coach</Circle>
       </div>
     </main>
   );

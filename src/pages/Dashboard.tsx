@@ -36,7 +36,7 @@ export default function Dashboard() {
   return (
     <main className="ov-dash">
       <div className="label">Your dashboard</div>
-      <h1 className="ov-dash__title">Buenos días. Let's keep moving.</h1>
+      <h1 className="ov-dash__title">Let's keep moving.</h1>
       <p className="ov-dash__sample" role="note">
         This is a preview with sample progress data. Deadlines are typical fall dates — confirm each on the official
         site.
