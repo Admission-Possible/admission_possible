@@ -1,8 +1,10 @@
 import { Link, Navigate, useParams } from 'react-router';
 import { getMember } from '../data/team';
 
-// Pastel palette cycled across the skill pills (mirrors the reference layout).
-const TAG_COLORS = ['#E07A6B', '#E8B84B', '#8FCB9B', '#7FB2DD', '#D69CC4', '#E07A6B'];
+// Pastel palette cycled across the skill pills. Pills carry ink text, not
+// white — white ran 1.84-2.93:1 on these fills. Ink clears 4.9:1 on all of
+// them; the coral was lightened from #E07A6B (ink 3.90:1) to reach that.
+const TAG_COLORS = ['#E8968A', '#E8B84B', '#8FCB9B', '#7FB2DD', '#D69CC4', '#E8968A'];
 
 export default function TeamMember() {
   const { slug } = useParams();
