@@ -31,8 +31,8 @@ describe('Privacy', () => {
     expect(text).toMatch(/grade level/i);
     // Intake stays on-device — the single most load-bearing claim on the page.
     expect(text).toMatch(/on your device/i);
-    // The Google Fonts third party is disclosed rather than glossed over.
-    expect(text).toMatch(/Google Fonts/i);
+    // Third parties are named honestly; #49 removed the last one.
+    expect(text).toMatch(/nothing from anyone else's servers/i);
     // Minors are addressed explicitly.
     expect(text).toMatch(/under 18/i);
   });

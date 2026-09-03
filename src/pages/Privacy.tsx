@@ -54,9 +54,8 @@ export default function Privacy() {
           or what you click.
         </p>
         <p>
-          One thing to be straight about: our page fonts load from Google Fonts, so Google's servers receive your IP
-          address when a page loads, as they would on any site using them. We are moving to self-hosted fonts to remove
-          that.
+          The site loads nothing from anyone else's servers. Our fonts used to come from Google Fonts, which meant
+          Google received your IP address on every page load; they are served from this site now, so that has stopped.
         </p>
       </section>
 
