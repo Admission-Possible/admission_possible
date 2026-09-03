@@ -33,7 +33,14 @@ export function Footer({ hasPlan = false }: FooterProps) {
       </div>
       <div className="rule" />
       <div className="footer__legal">
-        <div>© (Ad)mission Possible {new Date().getFullYear()}. A nonprofit. Admission, made possible.</div>
+        <div>
+          {/* Was "A nonprofit." — the project is not incorporated, and the one
+              line meant to build trust was a misrepresentation on every page. */}
+          © (Ad)mission Possible {new Date().getFullYear()}. A student-run project.{' '}
+          <Link className="footer__legal-link" to="/privacy">
+            Privacy
+          </Link>
+        </div>
         <div className="footer__tag">● First-gen access</div>
       </div>
     </footer>
