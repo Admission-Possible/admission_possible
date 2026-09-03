@@ -8,5 +8,9 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
+    // Vitest stubs CSS imports to an empty string by default, which would make
+    // the computed contrast checks in src/styles/contrast.test.ts silently
+    // vacuous. Processing CSS keeps `?raw` imports real.
+    css: true,
   },
 });

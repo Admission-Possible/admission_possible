@@ -69,7 +69,12 @@ export function Menu({ open, current, hasPlan = false, onClose }: MenuProps) {
         {navLinks(hasPlan).map((n, i) => (
           <Fragment key={n.id}>
             {i > 0 && <span className="ov-menu__sep"> \ </span>}
-            <Link className={'ov-menu__link' + (n.id === current ? ' is-current' : '')} to={n.path} onClick={onClose}>
+            <Link
+              className={'ov-menu__link' + (n.id === current ? ' is-current' : '')}
+              to={n.path}
+              onClick={onClose}
+              aria-current={n.id === current ? 'page' : undefined}
+            >
               {n.label}
             </Link>
           </Fragment>
