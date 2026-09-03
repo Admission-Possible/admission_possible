@@ -43,12 +43,12 @@
     />
     <meta name="twitter:image" content="https://admission-possible.vercel.app/og-card.png" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Fonts are self-hosted (see @font-face in src/styles/global.css). The
+         Google Fonts stylesheet was render-blocking, a third-party single point
+         of failure, and disclosed every visitor's IP to Google. Preload the two
+         faces the first screen actually paints with. -->
+    <link rel="preload" href="/fonts/geist-mono-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
     <div id="root"></div>
