@@ -112,3 +112,39 @@ describe('intake draft', () => {
     expect(loadDraft()).toBeNull();
   });
 });
+
+describe('isValidIntake rejects tampered payloads', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+  });
+
+  // #52: arrays were checked, elements were not — [null] reached Plan and threw.
+  it('rejects a school list holding a null element', () => {
+    localStorage.setItem(
+      'ap.intake',
+      JSON.stringify({ plan: { pathway: 'x', why: 'y', reach: [null], target: [], likely: [] } }),
+    );
+    expect(loadIntake()).toBeNull();
+  });
+
+  it('rejects a school entry with no name', () => {
+    localStorage.setItem(
+      'ap.intake',
+      JSON.stringify({ plan: { pathway: 'x', why: 'y', reach: [{ tag: 't' }], target: [], likely: [] } }),
+    );
+    expect(loadIntake()).toBeNull();
+  });
+
+  // An arbitrary override flowed straight through the track ternaries.
+  it('rejects a trackOverride that is not a real track name', () => {
+    const intake = { answers: {}, plan: computePlan({}), trackOverride: 'EVIL' };
+    localStorage.setItem('ap.intake', JSON.stringify(intake));
+    expect(loadIntake()).toBeNull();
+  });
+
+  it('accepts a valid trackOverride', () => {
+    saveIntake({ answers: {}, plan: computePlan({}), trackOverride: '1:1 Coaching' });
+    expect(loadIntake()?.trackOverride).toBe('1:1 Coaching');
+  });
+});

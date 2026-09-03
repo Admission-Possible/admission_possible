@@ -1,4 +1,4 @@
-import type { Answers, Draft, Intake } from '../types';
+import type { Answers, Draft, Intake, School } from '../types';
 
 // Storage helpers carrying intake state across the router -> plan -> dashboard flow.
 //
@@ -67,18 +67,33 @@ export function saveIntake(data: Intake): boolean {
   return durable || fallback;
 }
 
+const TRACK_NAMES = ['Self-paced course', '1:1 Coaching'];
+
+/** Every entry must be a real {name, tag} — `[null]` used to pass and crash the render. */
+function isSchoolList(value: unknown): boolean {
+  return (
+    Array.isArray(value) &&
+    value.every((s) => typeof s === 'object' && s !== null && typeof (s as School).name === 'string')
+  );
+}
+
 // Narrow an unknown parsed value to a valid Intake. Guards against a corrupt or
-// tampered-with payload reaching the pages, where a `.map` on a missing array
-// would crash the render.
+// tampered-with payload reaching the pages, where a `.map` over a bad element
+// would crash the render — costing the student their plan by way of the
+// ErrorBoundary.
 function isValidIntake(value: unknown): value is Intake {
   if (typeof value !== 'object' || value === null) return false;
   const plan = (value as { plan?: unknown }).plan;
   if (typeof plan !== 'object' || plan === null) return false;
   const p = plan as Record<string, unknown>;
+  const override = (value as { trackOverride?: unknown }).trackOverride;
+  // An arbitrary trackOverride used to flow straight through the track
+  // ternaries on Plan and Dashboard.
+  if (override !== undefined && !TRACK_NAMES.includes(override as string)) return false;
   return (
-    Array.isArray(p.reach) &&
-    Array.isArray(p.target) &&
-    Array.isArray(p.likely) &&
+    isSchoolList(p.reach) &&
+    isSchoolList(p.target) &&
+    isSchoolList(p.likely) &&
     typeof p.pathway === 'string' &&
     typeof p.why === 'string'
   );

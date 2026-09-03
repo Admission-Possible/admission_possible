@@ -23,6 +23,7 @@ function SchoolCol({ title, list }: { title: string; list: School[] }) {
 export default function Plan() {
   const [intake, setIntake] = useState<Intake | null>(() => loadIntake());
   const [copied, setCopied] = useState(false);
+  const [saveError, setSaveError] = useState(false);
   const copyTimer = useRef<number | undefined>(undefined);
 
   // No silent redirect: say what happened and offer the way back.
@@ -35,7 +36,13 @@ export default function Plan() {
   const toggleTrack = () => {
     const nextTrack: TrackName = activeTrack === 'Self-paced course' ? '1:1 Coaching' : 'Self-paced course';
     const updated: Intake = { ...intake, trackOverride: nextTrack };
-    saveIntake(updated);
+    // Router surfaces this same failure; Plan discarded the boolean, so a
+    // blocked-storage switch looked like it worked and silently didn't persist.
+    if (!saveIntake(updated)) {
+      setSaveError(true);
+      return;
+    }
+    setSaveError(false);
     setIntake(updated);
   };
 
@@ -96,6 +103,12 @@ export default function Plan() {
           {other}
         </button>
       </div>
+      {saveError && (
+        <p className="ov-router__error" role="alert">
+          We couldn't save that change — your browser is blocking site storage (this can happen in private browsing).
+          Allow storage for this site and try again.
+        </p>
+      )}
       {/* 'Not sure yet' used to collapse silently into self-paced. Say so. */}
       {p.trackChosen === false && !intake.trackOverride && (
         <p className="ov-plan__tracknote">
