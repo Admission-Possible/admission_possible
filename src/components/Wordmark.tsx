@@ -8,7 +8,9 @@ export function Wordmark({ white }: WordmarkProps) {
   const cls = 'wordmark' + (white ? ' wordmark--white' : '');
   return (
     <div className={cls}>
-      <img className="wordmark__img" src="/logo.png" alt="Admission Possible" />
+      {/* Intrinsic size declared so the wordmark's horizontal extent doesn't
+          shift on decode; CSS still drives the rendered height. */}
+      <img className="wordmark__img" src="/logo.webp" alt="Admission Possible" width={190} height={184} />
     </div>
   );
 }
