@@ -3,7 +3,10 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "(Ad)mission Possible — the college application, demystified.",
+  "description": "(Ad)mission Possible \u2014 the college application, demystified.",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
