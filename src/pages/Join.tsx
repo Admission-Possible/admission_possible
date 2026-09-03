@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Circle } from '../components/Circle';
 import { Crumbs } from '../components/Crumbs';
 import { navCrumbs } from '../data/nav';
+import { loadIntake } from '../data/storage';
 
 type JoinPayload = {
   first: string;
@@ -48,6 +49,7 @@ export default function Join() {
   const [submitting, setSubmitting] = useState(false);
   const [fallback, setFallback] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [intake] = useState(() => loadIntake());
   const formRef = useRef<HTMLFormElement>(null);
   const labelTimer = useRef<number | undefined>(undefined);
   const copyTimer = useRef<number | undefined>(undefined);
@@ -132,6 +134,8 @@ export default function Join() {
   };
 
   const contact = contactEmail();
+  // The intake already asked for grade; don't make the student answer twice.
+  const knownGrade = typeof intake?.plan.grade === 'string' ? intake.plan.grade : '';
 
   return (
     <main className="interior">
@@ -159,7 +163,7 @@ export default function Join() {
           </div>
           <div className="field field--mt">
             <label htmlFor="grade">Grade level</label>
-            <input id="grade" type="text" name="grade" placeholder="e.g. 11th grade" />
+            <input id="grade" type="text" name="grade" placeholder="e.g. 11th grade" defaultValue={knownGrade} />
           </div>
           <div className="field field--mt">
             <label htmlFor="needs">What do you need help with?</label>
