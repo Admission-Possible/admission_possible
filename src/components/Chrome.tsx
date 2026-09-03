@@ -32,9 +32,18 @@ export function Chrome() {
 
   useReveal();
 
-  // Lock body scroll while the full-screen menu is open.
+  // Lock body scroll while the full-screen menu is open, and always restore on
+  // cleanup. Without it, a render that throws while the menu is open unmounts
+  // Chrome with overflow:hidden stuck, so the ErrorBoundary fallback renders on
+  // an unscrollable body and its "Start over" button can clip off-screen — the
+  // one code path that exists for when things are already wrong.
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    if (!menuOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
   }, [menuOpen]);
 
   // Escape closes the menu.

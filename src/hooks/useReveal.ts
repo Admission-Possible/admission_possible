@@ -70,7 +70,14 @@ export function useReveal() {
     }
 
     check();
-    const fallback = window.setTimeout(() => all.forEach(show), 1600);
+    // Legacy safety net, kept but scoped. It used to force-show every
+    // [data-reveal] node regardless of position, so below-fold content
+    // finished revealing invisibly and the scroll machinery only mattered for
+    // the first 1.6s of each navigation. Now it only rescues what is actually
+    // in view; off-screen nodes stay with the observer. Where there is no
+    // IntersectionObserver at all, everything is shown so nothing can be
+    // stranded invisible.
+    const fallback = window.setTimeout(() => (io ? check() : all.forEach(show)), 1600);
 
     return () => {
       window.removeEventListener('scroll', onScroll);
