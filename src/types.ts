@@ -34,6 +34,18 @@ export interface Plan {
   target: School[];
   likely: School[];
   trackName: TrackName;
+  /**
+   * Application systems actually present on the student's list, so deadlines
+   * come from the schools rather than the single first-match pathway label.
+   * Optional: plans saved before this field existed are still valid.
+   */
+  systems?: string[];
+  /** False when the student answered 'Not sure yet' — the track is a default, not a choice. */
+  trackChosen?: boolean;
+  /** The intake's grade answer, carried through so later steps needn't re-ask. */
+  grade?: string;
+  /** Grade-appropriate framing for the deadline panel. */
+  timeline?: string;
 }
 
 /** Router answers: single-select stores a string, multi-select stores a string[]. */

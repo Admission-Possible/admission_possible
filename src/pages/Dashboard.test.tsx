@@ -59,4 +59,23 @@ describe('Dashboard', () => {
     renderWithRouter(<App />, { route: '/dashboard' });
     expect(screen.getByText('UC Application')).toBeInTheDocument();
   });
+
+  // #35: the exact case from the issue — a QuestBridge profile picking the West
+  // was shown UC schools with no UC deadline row.
+  it('shows the UC deadline when UC schools are on the list', () => {
+    saveIntake({
+      answers: {},
+      plan: computePlan({ firstgen: 'Yes', pell: 'Yes', gpa: '3.8–4.0, lots of rigor', regions: ['West'] }),
+    });
+    renderWithRouter(<App />, { route: '/dashboard' });
+    expect(screen.getByText('UC Application')).toBeInTheDocument();
+    expect(screen.getByText('QuestBridge')).toBeInTheDocument();
+  });
+
+  // #36: grade was dead data; a 9th grader saw senior deadline pressure.
+  it('frames deadlines for the grade the student gave', () => {
+    saveIntake({ answers: {}, plan: computePlan({ grade: '9th grade' }) });
+    renderWithRouter(<App />, { route: '/dashboard' });
+    expect(screen.getByText(/aren't yours yet/i)).toBeInTheDocument();
+  });
 });

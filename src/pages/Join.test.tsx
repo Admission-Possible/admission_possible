@@ -148,4 +148,21 @@ describe('Join form', () => {
     const link = within(document.body).getByRole('link', { name: 'hi@example.test' });
     expect(link).toHaveAttribute('href', 'mailto:hi@example.test');
   });
+
+  // #36: the intake already captured grade; Join asked for it again, blank.
+  it('prefills grade from the stored intake', async () => {
+    const { computePlan } = await import('../data/plan');
+    const { saveIntake } = await import('../data/storage');
+    saveIntake({ answers: {}, plan: computePlan({ grade: '11th grade' }) });
+
+    renderWithRouter(<Join />);
+    expect(screen.getByLabelText('Grade level')).toHaveValue('11th grade');
+  });
+
+  it('leaves grade blank when there is no intake', () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    renderWithRouter(<Join />);
+    expect(screen.getByLabelText('Grade level')).toHaveValue('');
+  });
 });

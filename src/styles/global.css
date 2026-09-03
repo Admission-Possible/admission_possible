@@ -428,6 +428,7 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 .ov-router__hint { margin-left: 14px; }
 .ov-router__error { margin: 18px 0 0; font-size: 15px; color: var(--accent); max-width: 640px; }
 .ov-dash__sample { margin: 14px 0 0; font-size: 15px; color: var(--muted); max-width: 640px; }
+.ov-dash__timeline { margin: 12px 0 0; font-size: 16px; line-height: 1.6; max-width: 62ch; }
 .ov-router__q { font-family: var(--mono); font-weight: 700; text-transform: uppercase; font-size: clamp(26px, 3.6vw, 46px); line-height: 1.06; margin: 0 0 44px; }
 .ov-ans__list { border-top: 1px solid var(--ink); }
 .ov-ans { display: flex; align-items: center; gap: 18px; padding: 22px 4px; border-bottom: 1px solid var(--ink); cursor: pointer; width: 100%; text-align: left; color: inherit; }
@@ -460,6 +461,7 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 .ov-plan__trackname { font-family: var(--mono); font-weight: 700; text-transform: uppercase; font-size: clamp(22px, 3vw, 38px); margin-top: 14px; }
 .ov-plan__switch { font-size: 14px; color: var(--accent); cursor: pointer; text-decoration: underline; }
 /* The plan is stored on this device only — these give it a way out of the tab. */
+.ov-plan__tracknote { margin: 16px 0 0; font-size: 15px; line-height: 1.6; color: var(--muted); }
 .ov-plan__export { display: flex; gap: 28px; flex-wrap: wrap; padding: 26px 0 0; }
 .ov-plan__cta { display: flex; justify-content: center; padding: 70px 0 0; }
 

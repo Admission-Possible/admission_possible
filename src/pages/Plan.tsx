@@ -96,6 +96,13 @@ export default function Plan() {
           {other}
         </button>
       </div>
+      {/* 'Not sure yet' used to collapse silently into self-paced. Say so. */}
+      {p.trackChosen === false && !intake.trackOverride && (
+        <p className="ov-plan__tracknote">
+          You said you weren't sure yet, so we've started you on the self-paced course. Switch whenever you like —
+          nothing is locked in.
+        </p>
+      )}
 
       {/* The plan is saved on this device only, so give it a way out of the tab. */}
       <div className="ov-plan__export">

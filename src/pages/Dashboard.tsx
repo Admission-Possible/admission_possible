@@ -3,18 +3,22 @@ import { Link } from 'react-router';
 import { Circle } from '../components/Circle';
 import { Icon } from '../components/Icon';
 import { NoPlan } from '../components/NoPlan';
+import { planSystems } from '../data/plan';
 import { loadIntake } from '../data/storage';
 import type { Intake } from '../types';
 
-// Typical fall-cycle dates; `match` keys a row to the recommended pathway
-// (empty = always shown). Exact dates shift every year — the sample-data
-// note tells students to confirm on each system's official site.
-const DEADLINES: { sys: string; date: string; match: string }[] = [
-  { sys: 'QuestBridge', date: 'Sep 26', match: 'QuestBridge' },
-  { sys: 'Common App (EA)', date: 'Nov 1', match: '' },
-  { sys: 'UC Application', date: 'Nov 30', match: 'UC Application' },
-  { sys: 'ApplyTexas (priority)', date: 'Dec 1', match: 'ApplyTexas' },
-  { sys: 'CBCA', date: 'Rolling', match: 'CBCA' },
+// Typical fall-cycle dates. `system` keys a row to an application system that
+// is actually on the student's list (see planSystems) rather than to the
+// pathway label — the label is a single first-match string, so it routinely
+// omitted a system the student had been given schools for. Exact dates shift
+// every year; the sample-data note tells students to confirm each one.
+const DEADLINES: { sys: string; date: string; system: string }[] = [
+  { sys: 'QuestBridge', date: 'Sep 26', system: 'QuestBridge' },
+  { sys: 'Common App (EA)', date: 'Nov 1', system: 'Common App' },
+  { sys: 'UC Application', date: 'Nov 30', system: 'UC App' },
+  { sys: 'Cal State Apply', date: 'Dec 2', system: 'Cal State Apply' },
+  { sys: 'ApplyTexas (priority)', date: 'Dec 1', system: 'ApplyTexas' },
+  { sys: 'CBCA', date: 'Rolling', system: 'CBCA' },
 ];
 
 export default function Dashboard() {
@@ -31,7 +35,8 @@ export default function Dashboard() {
     ) : (
       <Link to="/join">Get matched with a coach</Link>
     );
-  const deadlines = DEADLINES.filter((d) => !d.match || plan.pathway.indexOf(d.match) >= 0);
+  const systems = planSystems(plan);
+  const deadlines = DEADLINES.filter((d) => systems.indexOf(d.system) >= 0);
 
   return (
     <main className="ov-dash">
@@ -41,6 +46,7 @@ export default function Dashboard() {
         This is a preview with sample progress data. Deadlines are typical fall dates — confirm each on the official
         site.
       </p>
+      {plan.timeline && <p className="ov-dash__timeline">{plan.timeline}</p>}
 
       <div className="ov-dash__next">
         <div>
