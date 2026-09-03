@@ -6,7 +6,7 @@ describe('Wordmark', () => {
   it('renders the logo image with accessible alt text', () => {
     const { container } = render(<Wordmark />);
     const img = container.querySelector('img.wordmark__img');
-    expect(img?.getAttribute('src')).toBe('/logo.png');
+    expect(img?.getAttribute('src')).toBe('/logo.webp');
     expect(img?.getAttribute('alt')).toBe('Admission Possible');
   });
 

@@ -1,14 +1,18 @@
 // Campus photos, cycled across the tile slots. Drop more files in /public/intro
 // and add their paths here to vary the field further.
+//
+// Sized to 340x453 — 2x the largest tile (w:170, rendered at a 3:4 box) — and
+// encoded as WebP. The PNG originals were 7.1MB combined for tiles no wider
+// than 170 CSS px.
 const IMAGES = [
-  '/intro/yale.png',
-  '/intro/mit.png',
-  '/intro/harvard.png',
-  '/intro/princeton.png',
-  '/intro/yale.png',
-  '/intro/mit.png',
-  '/intro/harvard.png',
-  '/intro/princeton.png',
+  '/intro/yale.webp',
+  '/intro/mit.webp',
+  '/intro/harvard.webp',
+  '/intro/princeton.webp',
+  '/intro/yale.webp',
+  '/intro/mit.webp',
+  '/intro/harvard.webp',
+  '/intro/princeton.webp',
 ];
 
 type Depth = 'far' | 'mid' | 'near';
