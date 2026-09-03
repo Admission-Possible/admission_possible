@@ -565,6 +565,17 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
   from { --inward: 1; }
   to   { --inward: 0; }
 }
+/* WCAG 2.2.2 pause, also applied when the hero scrolls out of view. */
+.intro__stage.is-paused,
+.intro__stage.is-paused .itile__inner { animation-play-state: paused; }
+.intro__pause {
+  position: absolute; right: var(--pad-x); bottom: 28px; z-index: 6;
+  font-family: var(--mono); font-weight: 700; text-transform: uppercase;
+  font-size: 12px; letter-spacing: 0.04em; color: var(--ink);
+  background: var(--card); border: 1px solid var(--ink);
+  padding: 9px 16px; border-radius: 999px; cursor: pointer;
+}
+.intro__pause:hover { background: var(--bg); }
 .intro__field { position: absolute; inset: 0; pointer-events: none; }
 .intro__title {
   position: relative; z-index: 4; margin: 0; text-align: center;
@@ -587,8 +598,6 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
   --ms: 1; /* movement scale — reduced on small screens */
   position: absolute; width: var(--w);
   opacity: calc(var(--o) * (0.7 + 0.3 * var(--inward)));
-  filter: blur(var(--blur));
-  will-change: transform;
   transform:
     translate(
       calc((var(--ox) + (var(--ix) - var(--ox)) * var(--inward)) * var(--ms)),
@@ -596,10 +605,15 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
     )
     rotate(calc(var(--rot) * var(--inward)));
 }
+/* Only the far tiles are blurred; the rest were paying for filter: blur(0px).
+   will-change is scoped to the element that actually animates its transform,
+   rather than pinned on all ~40 nodes for the life of the page. */
+.itile--far { filter: blur(var(--blur)); }
 .itile__inner {
   will-change: transform;
   animation: itileFloat var(--fdur) ease-in-out var(--fdelay) infinite alternate;
 }
+.intro__stage.is-paused .itile__inner { will-change: auto; }
 .itile__media {
   display: block; width: 100%; height: auto; aspect-ratio: 3 / 4;
   object-fit: cover; border-radius: 2px;
@@ -622,6 +636,7 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 @media (prefers-reduced-motion: reduce) {
   .intro__stage { --inward: 0.42; animation: none; }
   .intro__title { animation: none; }
+  .intro__pause { display: none; }
   .itile__inner { animation: none; }
   .itile__media { animation: introFadeOnly 0.6s ease-out both; }
   @keyframes introFadeOnly { from { opacity: 0; } to { opacity: 1; } }

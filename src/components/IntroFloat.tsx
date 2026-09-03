@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from 'react';
+
 // Campus photos, cycled across the tile slots. Drop more files in /public/intro
 // and add their paths here to vary the field further.
 //
@@ -62,13 +64,56 @@ const TILES: Tile[] = [
   { x: 85, y: 76, w: 130, img: 1, depth: 'near', o: 1, rot: 4, vis: 'mobile' },
 ];
 
+// Remembered for the session so the choice survives navigation without
+// following the student across visits.
+const PAUSE_KEY = 'ap.intro.paused';
+
+const readPaused = () => {
+  try {
+    return sessionStorage.getItem(PAUSE_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
 export function IntroFloat() {
+  // WCAG 2.2.2: ~20 photo tiles drift forever behind the headline. Honouring
+  // prefers-reduced-motion is not enough on its own — an on-page control is
+  // required, and this audience is often on school or library machines where
+  // the OS flag cannot be set.
+  const [paused, setPaused] = useState(readPaused);
+  // Nothing to animate while the hero is scrolled past; --inward is a
+  // registered custom property, so each frame invalidates style for every tile
+  // on the main thread and cannot be composited.
+  const [inView, setInView] = useState(true);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver((entries) => setInView(entries[0]?.isIntersecting ?? true));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const togglePaused = () => {
+    const next = !paused;
+    setPaused(next);
+    try {
+      sessionStorage.setItem(PAUSE_KEY, next ? '1' : '0');
+    } catch {
+      // Storage blocked: the toggle still works for this page view.
+    }
+  };
+
   // The inward → outward drift is driven entirely by the CSS animation on
   // `.intro__stage` (animating the registered `--inward` custom property), so
   // it plays automatically without any scroll wiring.
+  const stopped = paused || !inView;
+
   return (
-    <section className="intro" aria-label="Intro">
-      <div className="intro__stage">
+    <section className="intro" aria-label="Intro" ref={sectionRef}>
+      <div className={'intro__stage' + (stopped ? ' is-paused' : '')}>
         <div className="intro__field" aria-hidden="true">
           {TILES.map((t, i) => {
             const d = DEPTH[t.depth];
@@ -90,7 +135,11 @@ export function IntroFloat() {
                   {
                     left: `${t.x}%`,
                     top: `${t.y}%`,
-                    width: `${t.w}px`,
+                    // Set --w, not width: the 82%/60% shrink rules in
+                    // global.css read this property, and an inline width
+                    // overrode them, so tiles rendered at full desktop size on
+                    // phones and crowded the headline.
+                    '--w': `${t.w}px`,
                     zIndex: d.z,
                     '--ox': `${(ux * outDist).toFixed(1)}px`,
                     '--oy': `${(uy * outDist).toFixed(1)}px`,
@@ -138,6 +187,10 @@ export function IntroFloat() {
           <span>Impossible becomes</span>
           <span>Possible</span>
         </h1>
+
+        <button type="button" className="intro__pause" onClick={togglePaused} aria-pressed={paused}>
+          {paused ? 'Play motion' : 'Pause motion'}
+        </button>
       </div>
     </section>
   );
