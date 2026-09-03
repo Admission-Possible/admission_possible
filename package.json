@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "(Ad)mission Possible \u2014 the college application, demystified.",
+  "description": "(Ad)mission Possible — the college application, demystified.",
   "engines": {
     "node": ">=24"
   },
@@ -19,6 +19,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router": "^8.3.0"

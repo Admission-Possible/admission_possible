@@ -36,4 +36,14 @@ describe('Privacy', () => {
     // Minors are addressed explicitly.
     expect(text).toMatch(/under 18/i);
   });
+
+  // #51 requires whatever is added to be disclosed here.
+  it('discloses the analytics and its limits', () => {
+    renderWithRouter(<App />, { route: '/privacy' });
+    const text = document.body.textContent ?? '';
+    expect(text).toMatch(/Vercel Web Analytics/i);
+    expect(text).toMatch(/no cookies|sets no cookies/i);
+    // The load-bearing promise: steps are measured, answers are not.
+    expect(text).toMatch(/never what you answered/i);
+  });
 });

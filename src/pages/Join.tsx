@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Circle } from '../components/Circle';
 import { Crumbs } from '../components/Crumbs';
+import { trackEvent } from '../data/analytics';
 import { navCrumbs } from '../data/nav';
 import { loadIntake } from '../data/storage';
 
@@ -114,6 +115,7 @@ export default function Join() {
       if (!res.ok) throw new Error(`Request failed with ${res.status}`);
 
       // Celebrate only once the payload has actually been delivered.
+      trackEvent({ name: 'join_submitted' });
       formRef.current?.reset();
       setLabel('Thanks');
       window.clearTimeout(labelTimer.current);
@@ -121,6 +123,7 @@ export default function Join() {
     } catch {
       // Delivery failed. Keep every typed answer and hand the student something
       // they can actually use, rather than asking them to retype it into email.
+      trackEvent({ name: 'join_failed' });
       setLabel('Try again');
       setError("We couldn't send that just now — here's your message so nothing is lost.");
       setErrorField(null);

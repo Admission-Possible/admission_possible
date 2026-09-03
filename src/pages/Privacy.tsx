@@ -50,8 +50,14 @@ export default function Privacy() {
       <section className="legal__sec">
         <h2 className="legal__h">Tracking</h2>
         <p>
-          There is no analytics on this site, no advertising pixels, and no tracking cookies. We do not know who visits
-          or what you click.
+          We count page views and a handful of steps — reaching a question in the intake, generating a plan, sending the
+          Join form — using Vercel Web Analytics. It sets no cookies, builds no profile, and cannot follow you to other
+          sites. We see totals, not people.
+        </p>
+        <p>
+          Your intake answers are never part of that. We record which step you reached, never what you answered, so
+          nothing about your family's income or background is measured. There are no advertising pixels and no tracking
+          cookies.
         </p>
         <p>
           The site loads nothing from anyone else's servers. Our fonts used to come from Google Fonts, which meant
