@@ -5,9 +5,9 @@ import { Slash } from './Slash';
 
 // The inline-slash nav band: items spread full width with tall leaning
 // slashes between, plus leading and trailing slashes.
-export function Crumbs({ crumbs }: { crumbs: Crumb[] }) {
+export function Crumbs({ crumbs, label = 'Breadcrumb' }: { crumbs: Crumb[]; label?: string }) {
   return (
-    <div className="crumbs">
+    <nav className="crumbs" aria-label={label}>
       <Slash variant="nav" />
       {crumbs.map((c, i) => (
         <Fragment key={i}>
@@ -16,11 +16,13 @@ export function Crumbs({ crumbs }: { crumbs: Crumb[] }) {
               {c.label}
             </Link>
           ) : (
-            <span className="crumbs__current">{c.label}</span>
+            <span className="crumbs__current" aria-current="page">
+              {c.label}
+            </span>
           )}
           <Slash variant="nav" />
         </Fragment>
       ))}
-    </div>
+    </nav>
   );
 }

@@ -22,13 +22,13 @@ export function Footer({ hasPlan = false }: FooterProps) {
         <div className="vrule vrule--center" />
         <div className="footer__menu">
           <div className="label">Menu</div>
-          <div className="footer__links">
+          <nav className="footer__links" aria-label="Footer">
             {navLinks(hasPlan).map((n) => (
               <Link key={n.id} to={n.path}>
                 {n.label}
               </Link>
             ))}
-          </div>
+          </nav>
         </div>
       </div>
       <div className="rule" />

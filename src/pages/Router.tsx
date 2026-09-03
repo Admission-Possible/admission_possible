@@ -122,6 +122,8 @@ export default function Router() {
         ))}
       </div>
       <div className="ov-router">
+        {/* The only heading was the h2 question, so the intake had no h1. */}
+        <h1 className="visually-hidden">Your 2-minute intake</h1>
         <div className="ov-router__meta">
           {step + 1} / {total}
           {q.multi && <span className="ov-router__hint">Select all that apply</span>}
