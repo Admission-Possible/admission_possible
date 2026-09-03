@@ -442,7 +442,15 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
 .ov-plan__track { border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 34px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
 .ov-plan__trackname { font-family: var(--mono); font-weight: 700; text-transform: uppercase; font-size: clamp(22px, 3vw, 38px); margin-top: 14px; }
 .ov-plan__switch { font-size: 14px; color: var(--accent); cursor: pointer; text-decoration: underline; }
+/* The plan is stored on this device only — these give it a way out of the tab. */
+.ov-plan__export { display: flex; gap: 28px; flex-wrap: wrap; padding: 26px 0 0; }
 .ov-plan__cta { display: flex; justify-content: center; padding: 70px 0 0; }
+
+/* ---- missing plan interstitial ---- */
+.ov-noplan { padding: 90px var(--pad-x) 120px; max-width: 720px; }
+.ov-noplan__title { margin: 0 0 20px; font-family: var(--display); font-weight: 600; letter-spacing: -0.02em; font-size: clamp(30px, 4vw, 48px); line-height: 1.05; }
+.ov-noplan__body { margin: 0; font-size: 18px; line-height: 1.6; color: var(--muted); }
+.ov-noplan__cta { display: flex; padding: 48px 0 0; }
 
 /* ---- dashboard ---- */
 .ov-dash { max-width: 1000px; margin: 0 auto; padding: 6vh var(--pad-x) 120px; }

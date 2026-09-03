@@ -1,9 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { saveIntake, loadIntake } from './storage';
+import { saveIntake, loadIntake, clearIntake, saveDraft, loadDraft, clearDraft } from './storage';
 import { computePlan } from './plan';
 
 describe('intake storage', () => {
-  beforeEach(() => sessionStorage.clear());
+  // The intake is durable now, so both stores must be reset between cases.
+  beforeEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+  });
   afterEach(() => vi.restoreAllMocks());
 
   it('returns null when nothing is stored', () => {
@@ -15,7 +19,7 @@ describe('intake storage', () => {
     expect(saveIntake(intake)).toBe(true);
   });
 
-  it('reports failure when sessionStorage is unavailable', () => {
+  it('reports failure when storage is unavailable', () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('storage blocked');
     });
@@ -32,29 +36,79 @@ describe('intake storage', () => {
   });
 
   it('returns null on malformed JSON', () => {
-    sessionStorage.setItem('ap.intake', '{not json');
+    localStorage.setItem('ap.intake', '{not json');
     expect(loadIntake()).toBeNull();
   });
 
   it('returns null when the plan is an empty object', () => {
-    sessionStorage.setItem('ap.intake', '{"plan":{}}');
+    localStorage.setItem('ap.intake', '{"plan":{}}');
     expect(loadIntake()).toBeNull();
   });
 
   it('returns null when plan arrays are missing or the wrong type', () => {
-    sessionStorage.setItem('ap.intake', '{"plan":{"pathway":"x","why":"y","reach":"nope","target":[],"likely":[]}}');
+    localStorage.setItem('ap.intake', '{"plan":{"pathway":"x","why":"y","reach":"nope","target":[],"likely":[]}}');
     expect(loadIntake()).toBeNull();
   });
 
   it('returns null when pathway/why are not strings', () => {
-    sessionStorage.setItem('ap.intake', '{"plan":{"pathway":1,"why":2,"reach":[],"target":[],"likely":[]}}');
+    localStorage.setItem('ap.intake', '{"plan":{"pathway":1,"why":2,"reach":[],"target":[],"likely":[]}}');
     expect(loadIntake()).toBeNull();
   });
 
   it('returns null when the top-level value is not an object', () => {
-    sessionStorage.setItem('ap.intake', '"just a string"');
+    localStorage.setItem('ap.intake', '"just a string"');
     expect(loadIntake()).toBeNull();
-    sessionStorage.setItem('ap.intake', 'null');
+    localStorage.setItem('ap.intake', 'null');
     expect(loadIntake()).toBeNull();
+  });
+
+  it('persists the intake durably so it survives a new tab', () => {
+    saveIntake({ answers: {}, plan: computePlan({}) });
+    // A new tab gets a fresh sessionStorage but keeps localStorage.
+    sessionStorage.clear();
+    expect(loadIntake()).not.toBeNull();
+  });
+
+  it('still reads an intake left in sessionStorage by an older build', () => {
+    const intake = { answers: {}, plan: computePlan({}) };
+    sessionStorage.setItem('ap.intake', JSON.stringify(intake));
+    expect(loadIntake()).not.toBeNull();
+  });
+
+  it('clears the intake from both stores', () => {
+    saveIntake({ answers: {}, plan: computePlan({}) });
+    clearIntake();
+    expect(loadIntake()).toBeNull();
+  });
+
+  it('still saves when localStorage is unavailable', () => {
+    vi.spyOn(window.localStorage, 'setItem').mockImplementation(() => {
+      throw new Error('storage blocked');
+    });
+    expect(saveIntake({ answers: {}, plan: computePlan({}) })).toBe(true);
+  });
+});
+
+describe('intake draft', () => {
+  beforeEach(() => sessionStorage.clear());
+
+  it('round-trips mid-quiz progress', () => {
+    saveDraft(3, { grade: '11th' });
+    expect(loadDraft()).toEqual({ step: 3, answers: { grade: '11th' } });
+  });
+
+  it('returns null when nothing is drafted', () => {
+    expect(loadDraft()).toBeNull();
+  });
+
+  it('returns null on a malformed draft', () => {
+    sessionStorage.setItem('ap.intake.draft', '{"step":"nope"}');
+    expect(loadDraft()).toBeNull();
+  });
+
+  it('clears the draft', () => {
+    saveDraft(2, {});
+    clearDraft();
+    expect(loadDraft()).toBeNull();
   });
 });

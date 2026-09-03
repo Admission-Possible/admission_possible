@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { NAV } from '../data/nav';
+import { hasIntake } from '../data/storage';
 import { useReveal } from '../hooks/useReveal';
 import { Header } from './Header';
 import { Menu } from './Menu';
@@ -13,11 +14,16 @@ export function Chrome() {
   const { pathname } = useLocation();
   const current = NAV.find((n) => n.path === pathname)?.id ?? '';
 
+  // Re-checked per navigation rather than once on mount: finishing the intake
+  // navigates here, and the "My plan" link has to appear on that same trip.
+  const [hasPlan, setHasPlan] = useState(hasIntake);
+
   // On navigation: close the menu (state adjusted during render, per React docs).
   const [prevPathname, setPrevPathname] = useState(pathname);
   if (prevPathname !== pathname) {
     setPrevPathname(pathname);
     setMenuOpen(false);
+    setHasPlan(hasIntake());
   }
 
   useReveal();
@@ -50,8 +56,8 @@ export function Chrome() {
       <div id="main-content">
         <Outlet />
       </div>
-      <Footer />
-      <Menu open={menuOpen} current={current} onClose={() => setMenuOpen(false)} />
+      <Footer hasPlan={hasPlan} />
+      <Menu open={menuOpen} current={current} hasPlan={hasPlan} onClose={() => setMenuOpen(false)} />
     </>
   );
 }

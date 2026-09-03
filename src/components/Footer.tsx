@@ -1,8 +1,13 @@
 import { Link } from 'react-router';
-import { NAV } from '../data/nav';
+import { navLinks } from '../data/nav';
 import { Wordmark } from './Wordmark';
 
-export function Footer() {
+interface FooterProps {
+  /** Adds the "My plan" entry once the student has completed the intake. */
+  hasPlan?: boolean;
+}
+
+export function Footer({ hasPlan = false }: FooterProps) {
   return (
     <footer className="footer">
       <div className="rule" />
@@ -18,7 +23,7 @@ export function Footer() {
         <div className="footer__menu">
           <div className="label">Menu</div>
           <div className="footer__links">
-            {NAV.map((n) => (
+            {navLinks(hasPlan).map((n) => (
               <Link key={n.id} to={n.path}>
                 {n.label}
               </Link>

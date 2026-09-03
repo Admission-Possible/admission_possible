@@ -1,17 +1,19 @@
 import { Fragment, useEffect, useRef } from 'react';
 import type { KeyboardEvent } from 'react';
 import { Link } from 'react-router';
-import { NAV } from '../data/nav';
+import { navLinks } from '../data/nav';
 import { Wordmark } from './Wordmark';
 
 interface MenuProps {
   open: boolean;
   current: string;
+  /** Adds the "My plan" entry once the student has completed the intake. */
+  hasPlan?: boolean;
   onClose: () => void;
 }
 
 // Full-screen overlay menu: huge mono-caps links separated by backslashes.
-export function Menu({ open, current, onClose }: MenuProps) {
+export function Menu({ open, current, hasPlan = false, onClose }: MenuProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -58,7 +60,7 @@ export function Menu({ open, current, onClose }: MenuProps) {
         <Wordmark white />
       </div>
       <nav className="ov-menu__links">
-        {NAV.map((n, i) => (
+        {navLinks(hasPlan).map((n, i) => (
           <Fragment key={n.id}>
             {i > 0 && <span className="ov-menu__sep"> \ </span>}
             <Link className={'ov-menu__link' + (n.id === current ? ' is-current' : '')} to={n.path} onClick={onClose}>

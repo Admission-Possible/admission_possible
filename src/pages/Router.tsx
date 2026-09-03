@@ -1,18 +1,31 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Circle } from '../components/Circle';
 import { Slash } from '../components/Slash';
 import { QUESTIONS } from '../data/questions';
 import { computePlan } from '../data/plan';
-import { saveIntake } from '../data/storage';
+import { clearDraft, loadDraft, saveDraft, saveIntake } from '../data/storage';
 import type { Answers } from '../types';
 
-// The 7-step intake. Computes the plan and hands off via sessionStorage.
+// The 7-step intake. Computes the plan and hands off via storage.
 export default function Router() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<Answers>({});
+  // Rehydrate from the per-tab draft so pull-to-refresh or a gesture-back on
+  // steps 2-7 doesn't silently discard every answer.
+  const [draft] = useState(loadDraft);
+  const [step, setStep] = useState(() => {
+    const restored = draft?.step ?? 0;
+    // Clamp: a stale draft from a shorter/longer question set must not index out.
+    return Math.min(Math.max(restored, 0), QUESTIONS.length - 1);
+  });
+  const [answers, setAnswers] = useState<Answers>(() => draft?.answers ?? {});
   const [saveError, setSaveError] = useState(false);
+
+  // Persist progress on every change, so there is no window where an answer is
+  // only in React state.
+  useEffect(() => {
+    saveDraft(step, answers);
+  }, [step, answers]);
 
   const total = QUESTIONS.length;
   const q = QUESTIONS[step];
@@ -49,7 +62,10 @@ export default function Router() {
         setSaveError(true);
         return;
       }
-      navigate('/plan');
+      clearDraft();
+      // `replace`, so Back from the freshly generated plan doesn't remount a
+      // blank question 1 — which reads as though the plan was deleted.
+      navigate('/plan', { replace: true });
     }
   };
 
@@ -58,6 +74,8 @@ export default function Router() {
       setStep(step - 1);
       window.scrollTo({ top: 0 });
     } else {
+      // Leaving the intake from step 1 abandons it; don't resurrect the draft.
+      clearDraft();
       navigate('/');
     }
   };
