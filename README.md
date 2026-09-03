@@ -265,8 +265,10 @@ fallback (e.g. a `404.html` copy of `index.html` for GitHub Pages).
 `vercel.json` also sets response headers, including a Content-Security-Policy.
 The default `connect-src 'self'` allows same-origin requests only.
 
-**Wiring up the Join form:** if you set `VITE_JOIN_ENDPOINT` (see
-`src/pages/Join.tsx`) to a **cross-origin** backend such as Formspree or
+**Wiring up the Join form:** Join POSTs to the same-origin `/api/join`
+Vercel Function (`api/join.ts`) by default, which `connect-src 'self'` already
+allows — no CSP change needed. If you override `VITE_JOIN_ENDPOINT` (see
+`src/pages/Join.tsx`) with a **cross-origin** backend such as Formspree or
 Getform, that `fetch` is a `connect-src` and will be **blocked** by the CSP
 until you add the endpoint's origin. Update the `connect-src` slot in
 `vercel.json`:
@@ -279,3 +281,24 @@ until you add the endpoint's origin. Update the `connect-src` slot in
 A same-origin endpoint (e.g. a `/api/join` Vercel Function) needs no CSP change.
 `vercel.json` is strict JSON and can't hold comments, so this is the canonical
 note for that edit.
+
+### Environment variables
+
+Copy `.env.example` to `.env.local` for local development, and set the same
+keys in the Vercel project settings for deploys. See that file for the full
+list; the ones that matter for Join are:
+
+| Variable             | Where  | Purpose                                                                                                                                        |
+| -------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RESEND_API_KEY`     | server | Required for `/api/join` to deliver mail. Unset ⇒ the endpoint returns 503 and the form shows a copyable fallback instead of claiming success. |
+| `JOIN_NOTIFY_EMAIL`  | server | The inbox that receives submissions.                                                                                                           |
+| `JOIN_FROM_EMAIL`    | server | Optional sender, on a Resend-verified domain.                                                                                                  |
+| `VITE_CONTACT_EMAIL` | client | A public address to show as a manual fallback. **Leave unset until you verifiably control the mailbox** — see below.                           |
+| `VITE_JOIN_ENDPOINT` | client | Override the POST target. Defaults to `/api/join`.                                                                                             |
+
+> **Contact address:** `VITE_CONTACT_EMAIL` ships in the client bundle and is
+> shown to students. It previously pointed at `hello@admissionpossible.org`, a
+> domain owned by College Possible — an unrelated nonprofit — so submissions
+> were being directed to a third party. Only set this to a mailbox whose domain
+> ownership and inbox delivery you have verified end to end. When it is unset,
+> the form shows the composed message for copying and names no address at all.

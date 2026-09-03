@@ -3,6 +3,11 @@ node_modules
 .pnp
 .pnp.js
 
+# local env files (.env.example is committed on purpose)
+.env
+.env.*
+!.env.example
+
 # build output
 dist
 dist-ssr

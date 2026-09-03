@@ -15,17 +15,56 @@ type JoinPayload = {
 // valid-but-unusual addresses.
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
+// Submissions POST to a same-origin Vercel Function by default (see api/join.ts),
+// which the existing `connect-src 'self'` CSP already allows. Override only to
+// point at a different backend; a CROSS-ORIGIN value must also be added to
+// `connect-src` in vercel.json or the browser will block the POST.
+const endpoint = () => (import.meta.env.VITE_JOIN_ENDPOINT ?? '').trim() || '/api/join';
+
+// The address shown as a manual fallback. Deliberately unset by default: it must
+// be a mailbox the project verifiably controls, so when it is unset we show the
+// copyable message rather than inventing an address on someone else's domain.
+const contactEmail = () => (import.meta.env.VITE_CONTACT_EMAIL ?? '').trim();
+
+/** Abandon a hung endpoint rather than leaving the student on a dead spinner. */
+const TIMEOUT_MS = 15000;
+
+/** The submission rendered as plain text, for the copy-and-paste fallback. */
+function composeMessage(p: JoinPayload): string {
+  return [
+    `First name: ${p.first}`,
+    `Last name: ${p.last}`,
+    `Email: ${p.email}`,
+    `Grade level: ${p.grade}`,
+    '',
+    'What I need help with:',
+    p.needs || '(not provided)',
+  ].join('\n');
+}
+
 export default function Join() {
   const [label, setLabel] = useState('Join');
   const [error, setError] = useState<string | null>(null);
-  const [mailtoOpened, setMailtoOpened] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [fallback, setFallback] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const labelTimer = useRef<number | undefined>(undefined);
+  const copyTimer = useRef<number | undefined>(undefined);
 
-  useEffect(() => () => window.clearTimeout(labelTimer.current), []);
+  useEffect(
+    () => () => {
+      window.clearTimeout(labelTimer.current);
+      window.clearTimeout(copyTimer.current);
+    },
+    [],
+  );
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // Guard re-entry: a double-click must not send two submissions.
+    if (submitting) return;
+
     const data = new FormData(e.currentTarget);
     const payload: JoinPayload = {
       first: String(data.get('first') ?? '').trim(),
@@ -45,54 +84,54 @@ export default function Join() {
       return;
     }
     setError(null);
-    setMailtoOpened(false);
+    setFallback(null);
+    setCopied(false);
+    setSubmitting(true);
 
-    // Celebrate only once the payload has actually been delivered.
-    const succeed = () => {
-      formRef.current?.reset();
-      setError(null);
-      setLabel('Thanks');
-      window.clearTimeout(labelTimer.current);
-      labelTimer.current = window.setTimeout(() => setLabel('Join'), 1800);
-    };
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-    // Set VITE_JOIN_ENDPOINT to POST submissions to a backend; unset uses the mailto fallback below.
-    // ⚠️ CSP: if this endpoint is CROSS-ORIGIN (e.g. a Formspree/Getform URL), you MUST add its origin
-    // to `connect-src` in vercel.json's Content-Security-Policy or the browser will block this POST.
-    // A same-origin endpoint (e.g. /api/join) works as-is. See README → Deployment → Security headers.
-    const endpoint = import.meta.env.VITE_JOIN_ENDPOINT as string | undefined;
-
-    // No backend configured? Hand the payload to the visitor's mail client.
-    // We can't confirm delivery (or that a mail app even exists), so keep the
-    // form intact and explain the handoff instead of claiming success.
-    if (!endpoint) {
-      const subject = `Join request — ${payload.first} ${payload.last}`.trim();
-      const body = [
-        `First name: ${payload.first}`,
-        `Last name: ${payload.last}`,
-        `Email: ${payload.email}`,
-        `Grade level: ${payload.grade}`,
-        `What they need help with: ${payload.needs}`,
-      ].join('\n');
-      window.location.href = `mailto:hello@admissionpossible.org?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      setMailtoOpened(true);
-      return;
-    }
-
-    // Backend configured: POST the payload and only say "Thanks" on a real 2xx.
     try {
-      const res = await fetch(endpoint, {
+      const res = await fetch(endpoint(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        signal: controller.signal,
       });
       if (!res.ok) throw new Error(`Request failed with ${res.status}`);
-      succeed();
+
+      // Celebrate only once the payload has actually been delivered.
+      formRef.current?.reset();
+      setLabel('Thanks');
+      window.clearTimeout(labelTimer.current);
+      labelTimer.current = window.setTimeout(() => setLabel('Join'), 1800);
     } catch {
+      // Delivery failed. Keep every typed answer and hand the student something
+      // they can actually use, rather than asking them to retype it into email.
       setLabel('Try again');
-      setError("We couldn't send that just now. Please try again.");
+      setError("We couldn't send that just now — here's your message so nothing is lost.");
+      setFallback(composeMessage(payload));
+    } finally {
+      window.clearTimeout(timer);
+      setSubmitting(false);
     }
   };
+
+  const copyFallback = async () => {
+    if (!fallback) return;
+    try {
+      await navigator.clipboard.writeText(fallback);
+      setCopied(true);
+      window.clearTimeout(copyTimer.current);
+      copyTimer.current = window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // Clipboard blocked (insecure context, or permission denied): the text is
+      // already on screen and selectable, so there is nothing further to do.
+      setCopied(false);
+    }
+  };
+
+  const contact = contactEmail();
 
   return (
     <main className="interior">
@@ -131,20 +170,28 @@ export default function Join() {
               {error}
             </p>
           )}
-          {mailtoOpened && (
-            <p className="join__note" role="status">
-              We started a draft in your email app — your message isn't sent until you hit Send there. Nothing opened?
-              Email us directly at <a href="mailto:hello@admissionpossible.org">hello@admissionpossible.org</a>.
-            </p>
+          {fallback && (
+            <div className="join__fallback" role="status">
+              <label htmlFor="join-fallback">Copy this and send it to us:</label>
+              <textarea id="join-fallback" className="join__fallback-text" readOnly rows={8} value={fallback} />
+              <div className="join__fallback-actions">
+                <button type="button" className="ov-back" onClick={copyFallback}>
+                  {copied ? 'Copied' : 'Copy message'}
+                </button>
+                {contact && <a href={`mailto:${contact}?subject=${encodeURIComponent('Join request')}`}>{contact}</a>}
+              </div>
+            </div>
           )}
-          <Circle size="join" type="submit">
-            {label}
+          <Circle size="join" type="submit" disabled={submitting}>
+            {submitting ? 'Sending' : label}
           </Circle>
         </form>
       </div>
-      <div className="join__email">
-        <a href="mailto:hello@admissionpossible.org">hello@admissionpossible.org</a>
-      </div>
+      {contact && (
+        <div className="join__email">
+          <a href={`mailto:${contact}`}>{contact}</a>
+        </div>
+      )}
     </main>
   );
 }

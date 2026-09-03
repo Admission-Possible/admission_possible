@@ -16,7 +16,8 @@ describe('App routing', () => {
 
   it('renders the Join form at /join', () => {
     renderWithRouter(<App />, { route: '/join' });
-    expect(screen.getByText('hello@admissionpossible.org')).toBeInTheDocument();
+    expect(screen.getByLabelText('First name')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Join' })).toBeInTheDocument();
   });
 
   it('renders the NotFound page for unknown routes', () => {
