@@ -14,7 +14,7 @@ export default function Home() {
           <div className="label">Start here</div>
           <p className="hero__blurb">
             The college application, demystified. Where to apply, how to apply, and how to write the essays that get you
-            in. Free, and built for the first in their family. Para todos.
+            in. Free, and built for the first in their family.
           </p>
         </div>
       </section>
