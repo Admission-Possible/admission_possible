@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { useState } from 'react';
+import { Link } from 'react-router';
 import { Circle } from '../components/Circle';
 import { Icon } from '../components/Icon';
+import { NoPlan } from '../components/NoPlan';
 import { loadIntake } from '../data/storage';
 import type { Intake } from '../types';
 
@@ -17,14 +18,10 @@ const DEADLINES: { sys: string; date: string; match: string }[] = [
 ];
 
 export default function Dashboard() {
-  const navigate = useNavigate();
   const [intake] = useState<Intake | null>(() => loadIntake());
 
-  useEffect(() => {
-    if (!intake || !intake.plan) navigate('/router', { replace: true });
-  }, [intake, navigate]);
-
-  if (!intake || !intake.plan) return null;
+  // No silent redirect: say what happened and offer the way back.
+  if (!intake || !intake.plan) return <NoPlan />;
 
   const plan = intake.plan;
   const track = intake.trackOverride ?? plan.trackName ?? 'Self-paced course';

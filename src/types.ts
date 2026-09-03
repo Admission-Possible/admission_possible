@@ -45,6 +45,12 @@ export interface Intake {
   trackOverride?: TrackName;
 }
 
+/** In-progress intake, persisted per tab so a refresh doesn't discard answers. */
+export interface Draft {
+  step: number;
+  answers: Answers;
+}
+
 export interface Crumb {
   label: string;
   /** A link target; omit for the current page (rendered large). */

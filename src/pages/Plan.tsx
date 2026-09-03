@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { useRef, useState } from 'react';
+import { Link } from 'react-router';
 import { Circle } from '../components/Circle';
+import { NoPlan } from '../components/NoPlan';
+import { planToText } from '../data/planText';
 import { loadIntake, saveIntake } from '../data/storage';
 import type { Intake, School, TrackName } from '../types';
 
@@ -19,25 +21,47 @@ function SchoolCol({ title, list }: { title: string; list: School[] }) {
 }
 
 export default function Plan() {
-  const navigate = useNavigate();
   const [intake, setIntake] = useState<Intake | null>(() => loadIntake());
+  const [copied, setCopied] = useState(false);
+  const copyTimer = useRef<number | undefined>(undefined);
 
-  useEffect(() => {
-    if (!intake || !intake.plan) navigate('/router', { replace: true });
-  }, [intake, navigate]);
-
-  if (!intake || !intake.plan) return null;
+  // No silent redirect: say what happened and offer the way back.
+  if (!intake || !intake.plan) return <NoPlan />;
 
   const p = intake.plan;
   const activeTrack: TrackName = intake.trackOverride ?? p.trackName ?? 'Self-paced course';
   const other = activeTrack === 'Self-paced course' ? 'Switch to 1:1 coaching' : 'Switch to self-paced course';
-  const cta = activeTrack === 'Self-paced course' ? 'Start my course' : 'Match me with a coach';
 
   const toggleTrack = () => {
     const nextTrack: TrackName = activeTrack === 'Self-paced course' ? '1:1 Coaching' : 'Self-paced course';
     const updated: Intake = { ...intake, trackOverride: nextTrack };
     saveIntake(updated);
     setIntake(updated);
+  };
+
+  const copyPlan = async () => {
+    try {
+      await navigator.clipboard.writeText(planToText(p, activeTrack));
+      setCopied(true);
+      window.clearTimeout(copyTimer.current);
+      copyTimer.current = window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // Clipboard blocked (insecure context or denied permission) — the
+      // download button below is the fallback, so fail quietly.
+      setCopied(false);
+    }
+  };
+
+  const downloadPlan = () => {
+    const blob = new Blob([planToText(p, activeTrack)], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'admission-possible-plan.txt';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -73,9 +97,19 @@ export default function Plan() {
         </button>
       </div>
 
+      {/* The plan is saved on this device only, so give it a way out of the tab. */}
+      <div className="ov-plan__export">
+        <button className="ov-plan__switch" onClick={copyPlan}>
+          {copied ? 'Copied' : 'Copy my plan'}
+        </button>
+        <button className="ov-plan__switch" onClick={downloadPlan}>
+          Download as text
+        </button>
+      </div>
+
       <div className="ov-plan__cta">
         <Circle size="plan" to="/dashboard">
-          {cta}
+          See my dashboard
         </Circle>
       </div>
     </main>

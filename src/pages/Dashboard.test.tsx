@@ -6,17 +6,24 @@ import { saveIntake } from '../data/storage';
 import { renderWithRouter } from '../test/utils';
 
 describe('Dashboard', () => {
-  beforeEach(() => sessionStorage.clear());
-
-  it('redirects to the router when there is no intake', async () => {
-    renderWithRouter(<App />, { route: '/dashboard' });
-    expect(await screen.findByText('What grade are you in?')).toBeInTheDocument();
+  beforeEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
   });
 
-  it('redirects to the router when the stored intake is malformed', async () => {
-    sessionStorage.setItem('ap.intake', '{"plan":{}}');
+  // #32: this used to silently redirect to a blank question 1, which read as
+  // though the student's plan had been deleted.
+  it('explains the missing plan instead of silently restarting the intake', async () => {
     renderWithRouter(<App />, { route: '/dashboard' });
-    expect(await screen.findByText('What grade are you in?')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: "We couldn't find your plan" })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Take the intake' })).toHaveAttribute('href', '/router');
+    expect(screen.queryByText('What grade are you in?')).not.toBeInTheDocument();
+  });
+
+  it('explains the missing plan when the stored intake is malformed', async () => {
+    localStorage.setItem('ap.intake', '{"plan":{}}');
+    renderWithRouter(<App />, { route: '/dashboard' });
+    expect(await screen.findByRole('heading', { name: "We couldn't find your plan" })).toBeInTheDocument();
   });
 
   it('links to the contact form instead of promising outreach on the 1:1 coaching track', () => {
