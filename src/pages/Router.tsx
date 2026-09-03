@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Circle } from '../components/Circle';
 import { Slash } from '../components/Slash';
 import { QUESTIONS } from '../data/questions';
 import { computePlan } from '../data/plan';
-import { clearDraft, loadDraft, saveDraft, saveIntake } from '../data/storage';
-import type { Answers } from '../types';
+import { clearDraft, loadDraft, loadIntake, saveDraft, saveIntake } from '../data/storage';
+import type { Answers, Intake } from '../types';
 
 // The 7-step intake. Computes the plan and hands off via storage.
 export default function Router() {
@@ -13,12 +13,18 @@ export default function Router() {
   // Rehydrate from the per-tab draft so pull-to-refresh or a gesture-back on
   // steps 2-7 doesn't silently discard every answer.
   const [draft] = useState(loadDraft);
+  // A completed intake seeds the questions so re-entry isn't seven questions
+  // from memory. The answers were already persisted; nothing read them.
+  const [prior] = useState<Intake | null>(loadIntake);
   const [step, setStep] = useState(() => {
     const restored = draft?.step ?? 0;
     // Clamp: a stale draft from a shorter/longer question set must not index out.
     return Math.min(Math.max(restored, 0), QUESTIONS.length - 1);
   });
-  const [answers, setAnswers] = useState<Answers>(() => draft?.answers ?? {});
+  const [answers, setAnswers] = useState<Answers>(() => draft?.answers ?? prior?.answers ?? {});
+  // Only announce the reseed when it actually happened — an in-progress draft
+  // takes precedence, and there is nothing to say on a first run.
+  const resumed = !draft && !!prior;
   const [saveError, setSaveError] = useState(false);
 
   // Persist progress on every change, so there is no window where an answer is
@@ -58,7 +64,12 @@ export default function Router() {
       window.scrollTo({ top: 0 });
     } else {
       const plan = computePlan(answers);
-      if (!saveIntake({ answers, plan })) {
+      // Redoing the intake used to discard the track the student had switched
+      // to on the plan page. Carry it forward when they didn't change their
+      // answer to the track question.
+      const keepOverride = prior?.trackOverride && prior.answers.track === answers.track;
+      const next: Intake = keepOverride ? { answers, plan, trackOverride: prior.trackOverride } : { answers, plan };
+      if (!saveIntake(next)) {
         setSaveError(true);
         return;
       }
@@ -99,6 +110,12 @@ export default function Router() {
           {step + 1} / {total}
           {q.multi && <span className="ov-router__hint">Select all that apply</span>}
         </div>
+        {resumed && step === 0 && (
+          <p className="ov-router__resume">
+            You already have a plan — your answers are filled in below. Change anything and we'll rebuild it, or{' '}
+            <Link to="/plan">go back to your plan</Link>.
+          </p>
+        )}
         <h2 className="ov-router__q" id="router-question">
           {q.q}
         </h2>
