@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Circle } from '../components/Circle';
 import { Slash } from '../components/Slash';
@@ -26,12 +26,28 @@ export default function Router() {
   // takes precedence, and there is nothing to say on a first run.
   const resumed = !draft && !!prior;
   const [saveError, setSaveError] = useState(false);
+  const questionRef = useRef<HTMLHeadingElement>(null);
+  const firstRender = useRef(true);
 
   // Persist progress on every change, so there is no window where an answer is
   // only in React state.
   useEffect(() => {
     saveDraft(step, answers);
   }, [step, answers]);
+
+  // Move focus to the new question on each step. The question, hint and options
+  // re-render in place with no live region, so the change was silent to a
+  // screen reader — and worse, the focused Next button becomes disabled when
+  // the unanswered question renders, which drops focus to <body> outright.
+  // Focusing the heading announces the question and resets reading position;
+  // the adjacent "n / 7" meta line supplies the progress context.
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    questionRef.current?.focus();
+  }, [step]);
 
   const total = QUESTIONS.length;
   const q = QUESTIONS[step];
@@ -116,7 +132,7 @@ export default function Router() {
             <Link to="/plan">go back to your plan</Link>.
           </p>
         )}
-        <h2 className="ov-router__q" id="router-question">
+        <h2 className="ov-router__q" id="router-question" ref={questionRef} tabIndex={-1}>
           {q.q}
         </h2>
         <div className="ov-ans__list" role="group" aria-labelledby="router-question">

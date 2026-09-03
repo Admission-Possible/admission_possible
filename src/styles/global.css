@@ -43,6 +43,10 @@ a:focus-visible, button:focus-visible, [role='button']:focus-visible { outline: 
   font-family: var(--mono); font-weight: 700; text-transform: uppercase; font-size: 13px;
 }
 .skip-link:focus { left: 8px; top: 8px; }
+/* Programmatic focus targets (route change, intake step): focusable for
+   announcement, but no visible ring — the user didn't tab to them. */
+#main-content:focus, #main-content:focus-visible,
+.ov-router__q:focus, .ov-router__q:focus-visible { outline: none; }
 
 /* ---- shared atoms ---- */
 .rule { height: 1px; background: var(--ink); }
