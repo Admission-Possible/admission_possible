@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router';
 import { Circle } from '../components/Circle';
 import { Slash } from '../components/Slash';
 import { QUESTIONS } from '../data/questions';
+import { trackEvent } from '../data/analytics';
 import { computePlan } from '../data/plan';
 import { clearDraft, loadDraft, loadIntake, saveDraft, saveIntake } from '../data/storage';
 import type { Answers, Intake } from '../types';
@@ -34,6 +35,11 @@ export default function Router() {
   useEffect(() => {
     saveDraft(step, answers);
   }, [step, answers]);
+
+  // One event per step reached, so the funnel's drop-off point is visible.
+  useEffect(() => {
+    trackEvent({ name: 'intake_step', step: step + 1 });
+  }, [step]);
 
   // Move focus to the new question on each step. The question, hint and options
   // re-render in place with no live region, so the change was silent to a
@@ -90,6 +96,7 @@ export default function Router() {
         return;
       }
       clearDraft();
+      trackEvent({ name: 'plan_generated', pathway: plan.pathway });
       // `replace`, so Back from the freshly generated plan doesn't remount a
       // blank question 1 — which reads as though the plan was deleted.
       navigate('/plan', { replace: true });
