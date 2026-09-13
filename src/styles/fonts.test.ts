@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import css from './global.css?raw';
+import baseCss from './global.css?raw';
+import editorialCss from './editorial.css?raw';
+const css = baseCss + editorialCss;
 import html from '../../index.html?raw';
 import vercel from '../../vercel.json';
 
@@ -18,17 +20,17 @@ describe('fonts are self-hosted', () => {
   });
 
   it('declares every family from a local file', () => {
-    const families = ['Geist', 'Geist Mono', 'Inter'];
+    const families = ['Geist', 'Geist Mono', 'Inter', 'Beausite'];
     for (const family of families) {
       expect(css).toMatch(new RegExp(`font-family:\\s*'${family}';`));
     }
     const localSrc = css.match(/src: url\('\/fonts\/[^']+\.woff2'\)/g) ?? [];
-    expect(localSrc.length).toBe(6);
+    expect(localSrc.length).toBe(9);
   });
 
   it('preloads the faces the first screen paints with', () => {
     expect(html).toContain('rel="preload" href="/fonts/geist-mono-latin.woff2"');
-    expect(html).toContain('rel="preload" href="/fonts/inter-latin.woff2"');
+    expect(html).toContain('rel="preload" href="/fonts/beausite-medium.woff2"');
   });
 });
 

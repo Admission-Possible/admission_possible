@@ -1,7 +1,6 @@
-import { Fragment, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import { navLinks } from '../data/nav';
-import { Wordmark } from './Wordmark';
 
 interface MenuProps {
   open: boolean;
@@ -62,31 +61,25 @@ export function Menu({ open, current, hasPlan = false, onClose }: MenuProps) {
   if (!open) return null;
   return (
     <div className="ov-menu" role="dialog" aria-modal="true" aria-label="Site menu" ref={dialogRef}>
-      <div className="ov-menu__top">
-        <Wordmark white />
-      </div>
+      <div className="ov-menu__backdrop" onClick={onClose} aria-hidden="true" />
+      <div className="ov-menu__top">Your next chapter</div>
       <nav className="ov-menu__links">
         {navLinks(hasPlan).map((n, i) => (
-          <Fragment key={n.id}>
-            {i > 0 && (
-              <span className="ov-menu__sep" aria-hidden="true">
-                {' \\ '}
-              </span>
-            )}
-            <Link
-              className={'ov-menu__link' + (n.id === current ? ' is-current' : '')}
-              to={n.path}
-              onClick={onClose}
-              aria-current={n.id === current ? 'page' : undefined}
-            >
-              {n.label}
-            </Link>
-          </Fragment>
+          <Link
+            key={n.id}
+            className={'ov-menu__link' + (n.id === current ? ' is-current' : '')}
+            to={n.path}
+            onClick={onClose}
+            aria-current={n.id === current ? 'page' : undefined}
+          >
+            <span>{n.label}</span>
+            <sup aria-hidden="true">{String(i + 1).padStart(2, '0')}</sup>
+          </Link>
         ))}
+        <div className="ov-menu__caption">Free guidance. First-gen futures.</div>
       </nav>
       <button className="ov-menu__close" aria-label="Close menu" onClick={onClose} ref={closeRef}>
-        <span />
-        <span />
+        <span aria-hidden="true">×</span>
       </button>
       <div className="ov-menu__rule" />
     </div>

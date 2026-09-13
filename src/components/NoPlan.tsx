@@ -1,4 +1,5 @@
 import { Circle } from './Circle';
+import '../styles/application.css';
 
 // Shown when /plan or /dashboard is opened without a stored intake.
 //
@@ -9,6 +10,7 @@ import { Circle } from './Circle';
 export function NoPlan() {
   return (
     <main className="ov-noplan">
+      <span className="label">Your next chapter starts here</span>
       <h1 className="ov-noplan__title">We couldn't find your plan</h1>
       <p className="ov-noplan__body">
         Your plan is saved on this device. If you're on a different browser or device — or you cleared your browsing

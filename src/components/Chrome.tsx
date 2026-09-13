@@ -5,6 +5,8 @@ import { hasIntake } from '../data/storage';
 import { titleForPath } from '../data/titles';
 import { useHydrated } from '../hooks/useHydrated';
 import { useReveal } from '../hooks/useReveal';
+import { useOpeningIntro } from '../hooks/useOpeningIntro';
+import { OpeningIntro } from './OpeningIntro';
 import { Header } from './Header';
 import { Menu } from './Menu';
 import { Footer } from './Footer';
@@ -14,10 +16,11 @@ import { Footer } from './Footer';
 export function Chrome() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
+  const { opening, finish } = useOpeningIntro(pathname);
   const current = NAV.find((n) => n.path === pathname)?.id ?? '';
   const mainRef = useRef<HTMLDivElement>(null);
   // A route change should move focus; the first paint should not steal it.
-  const firstRender = useRef(true);
+  const focusedPath = useRef(pathname);
 
   // Derived per render, so finishing the intake reveals the "My plan" link on
   // that same navigation. False until hydrated, so the first client paint
@@ -68,12 +71,10 @@ export function Chrome() {
   // activates a nav link gets no signal that anything changed and has to
   // re-explore from scratch.
   useEffect(() => {
-    window.scrollTo({ top: 0 });
-    if (firstRender.current) {
-      firstRender.current = false;
-      return;
-    }
-    mainRef.current?.focus();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    if (focusedPath.current === pathname) return;
+    focusedPath.current = pathname;
+    mainRef.current?.focus({ preventScroll: true });
   }, [pathname]);
 
   // While the overlay menu is open the page behind it is inert: not focusable,
@@ -87,15 +88,21 @@ export function Chrome() {
       <a className="skip-link" href="#main-content" inert={behind}>
         Skip to content
       </a>
-      <div inert={behind}>
+      <div
+        className="site-chrome"
+        data-opening={opening ? 'playing' : 'complete'}
+        inert={behind}
+        onFocusCapture={opening ? finish : undefined}
+      >
         <Header onMenu={() => setMenuOpen(true)} />
         {/* tabIndex -1 so it can receive focus on route change without
             entering the tab order. */}
         <div id="main-content" ref={mainRef} tabIndex={-1}>
-          <Outlet />
+          <Outlet context={{ opening }} />
         </div>
         <Footer hasPlan={hasPlan} />
       </div>
+      {opening && <OpeningIntro onSkip={finish} />}
       <Menu open={menuOpen} current={current} hasPlan={hasPlan} onClose={() => setMenuOpen(false)} />
     </>
   );

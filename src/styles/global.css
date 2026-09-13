@@ -62,20 +62,25 @@
    ============================================================ */
 
 :root {
-  --bg: #F5F2E0;
-  --ink: #3A3A36;
-  --muted: #6F6E68;
-  --accent: #E8491D;            /* decoration only: 3.45:1 on --bg */
-  --accent-text: #C0380F;       /* text + CTAs: 4.89:1 on --bg, 5.51:1 with white */
-  --accent-soft: #F26B43;       /* decoration only */
-  --hairline-strong: #8A877F;   /* non-text UI borders: 3.19:1 on --bg */
-  --card: #FBFAF1;
-  --hairline: #C9C6BE;
-  --menu-bg: #4C4B46;
+  --bg: #FFFFFF;
+  --ink: #111111;
+  --muted: #555555;
+  --accent: #B388EB;
+  --accent-text: #111111;
+  --accent-soft: #F7AEF8;
+  --hairline-strong: #666666;
+  --card: #FFFFFF;
+  --hairline: #C9C9C9;
+  --menu-bg: #111111;
+  --pink: #FDC5F5;
+  --plum: #F7AEF8;
+  --lavender: #B388EB;
+  --blue: #8093F1;
+  --sky: #72DDF7;
   --mono: 'Geist Mono', ui-monospace, monospace;
-  --sans: Inter, system-ui, sans-serif;
-  --display: 'Geist', Inter, system-ui, sans-serif;
-  --pad-x: 6vw;
+  --sans: 'Beausite', Inter, system-ui, sans-serif;
+  --display: 'Beausite', Inter, system-ui, sans-serif;
+  --pad-x: 16px;
 }
 
 * { box-sizing: border-box; }

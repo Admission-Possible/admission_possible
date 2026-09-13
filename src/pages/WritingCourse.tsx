@@ -1,6 +1,7 @@
 import { Circle } from '../components/Circle';
 import { Crumbs } from '../components/Crumbs';
 import { navCrumb } from '../data/nav';
+import { EditorialHero } from '../components/EditorialHero';
 
 const MODULES: [string, string, string][] = [
   ['01', 'Essay topics', 'Values + Bullseye → three candidate topics'],
@@ -16,20 +17,21 @@ const MODULES: [string, string, string][] = [
 export default function WritingCourse() {
   return (
     <main className="interior">
-      <div className="rule" />
+      <EditorialHero
+        kicker="The writing course / Eight modules"
+        title={
+          <>
+            Show me you can write.
+            <br />
+            Don't just tell me.
+          </>
+        }
+        tone="plum"
+        art="writing"
+        note="From picking a topic to the final draft"
+        description="This is the path we take you through, module by module — from picking a topic to the last short answer. The syllabus below is real; the in-browser lessons are still being built. Ask for a coach and we'll work through it with you over email in the meantime."
+      />
       <Crumbs crumbs={[navCrumb('offer'), { label: 'The writing course' }]} />
-      <div className="rule" />
-
-      <div className="page-intro">
-        <h1 className="subhead" data-reveal="">
-          Show me you can write. Don't just tell me.
-        </h1>
-        <p className="page-intro__lede" data-reveal="">
-          This is the path we take you through, module by module — from picking a topic to the last short answer. The
-          syllabus below is real; the in-browser lessons are still being built. Ask for a coach and we'll work through
-          it with you over email in the meantime.
-        </p>
-      </div>
 
       <div className="feature-rows">
         {MODULES.map(([num, title, note]) => (

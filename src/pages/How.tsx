@@ -1,9 +1,8 @@
-import { Fragment } from 'react';
 import { Circle } from '../components/Circle';
 import { Crumbs } from '../components/Crumbs';
 import { navCrumbs } from '../data/nav';
 import { Icon } from '../components/Icon';
-import { Slash } from '../components/Slash';
+import { EditorialHero } from '../components/EditorialHero';
 import type { IconName } from '../types';
 
 // The five phases of the admissions process, in the order a student moves
@@ -56,40 +55,24 @@ const STEPS: { icon: IconName; title: string; desc: string; details: string[] }[
 export default function How() {
   return (
     <main className="interior">
-      <div className="rule" />
+      <EditorialHero
+        kicker="01 / The admissions process"
+        title="How admissions works"
+        tone="pink"
+        description="The same five phases every school expects — demystified. Answer a few questions, and we map the rest with you."
+      />
       <Crumbs crumbs={navCrumbs('how')} />
-      <div className="rule" />
-
-      <div className="page-intro">
-        <h1 className="page-intro__title" data-reveal="">
-          How admissions works
-        </h1>
-        <p className="page-intro__lede" data-reveal="">
-          The same five phases every school expects — demystified. Answer a few questions, and we map the rest with you.
-        </p>
-      </div>
-
-      {/* Each step is preceded by a slash divider (5 slashes, no trailing). */}
       <div className="how__track">
         {STEPS.map((s) => (
-          <Fragment key={s.title}>
-            <Slash variant="how" animated />
-            <div className="how__step">
-              <Icon name={s.icon} className="step-icon" />
-              <div data-reveal="" className="how__step-title">
-                {s.title}
-              </div>
-              <div className="how__step-desc">{s.desc}</div>
+          <div className="how__step" key={s.title}>
+            <Icon name={s.icon} className="step-icon" />
+            <div data-reveal="" className="how__step-title">
+              {s.title}
             </div>
-          </Fragment>
+            <div className="how__step-desc">{s.desc}</div>
+          </div>
         ))}
       </div>
-
-      <div className="how__foot">
-        <div className="label">The process</div>
-        <div />
-      </div>
-      <div className="rule rule--mt-sm" />
 
       {/* WHAT EACH PHASE ENTAILS — scroll-down detail for every step above. */}
       <section className="phases">

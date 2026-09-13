@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Circle } from '../components/Circle';
-import { Slash } from '../components/Slash';
 import { QUESTIONS } from '../data/questions';
 import { trackEvent } from '../data/analytics';
 import { computePlan } from '../data/plan';
 import { useHydrated } from '../hooks/useHydrated';
 import { clearDraft, loadDraft, loadIntake, saveDraft, saveIntake } from '../data/storage';
 import type { Answers, Intake } from '../types';
+import '../styles/application.css';
 
 // The 7-step intake. Computes the plan and hands off via storage.
 export default function Router() {
@@ -137,7 +137,7 @@ export default function Router() {
   };
 
   return (
-    <main>
+    <main className="ov-intake">
       <div
         className="ov-progress"
         role="progressbar"
@@ -147,12 +147,11 @@ export default function Router() {
         aria-valuenow={step + 1}
       >
         {QUESTIONS.map((_, i) => (
-          <div key={i} className="ov-seg" style={{ background: i <= step ? 'var(--accent)' : 'var(--hairline)' }} />
+          <div key={i} className={`ov-seg${i <= step ? ' is-reached' : ''}`} />
         ))}
       </div>
       <div className="ov-router">
-        {/* The only heading was the h2 question, so the intake had no h1. */}
-        <h1 className="visually-hidden">Your 2-minute intake</h1>
+        <h1 className="ov-router__eyebrow">Your 2-minute intake</h1>
         <div className="ov-router__meta">
           {step + 1} / {total}
           {q.multi && <span className="ov-router__hint">Select all that apply</span>}
@@ -163,10 +162,10 @@ export default function Router() {
             <Link to="/plan">go back to your plan</Link>.
           </p>
         )}
-        <h2 className="ov-router__q" id="router-question" ref={questionRef} tabIndex={-1}>
+        <h2 className="ov-router__q" id="router-question" key={q.key} ref={questionRef} tabIndex={-1}>
           {q.q}
         </h2>
-        <div className="ov-ans__list" role="group" aria-labelledby="router-question">
+        <div className="ov-ans__list" key={`answers-${q.key}`} role="group" aria-labelledby="router-question">
           {q.options.map((opt) => {
             const on = isSelected(opt);
             return (
@@ -194,7 +193,9 @@ export default function Router() {
           ) : (
             <button className="ov-next" onClick={next} disabled={!canNext} style={{ opacity: canNext ? 1 : 0.35 }}>
               Next
-              <Slash variant="inline" />
+              <svg className="ov-next__arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M3 12h17M13 5l7 7-7 7" stroke="currentColor" strokeWidth="1.5" />
+              </svg>
             </button>
           )}
         </div>

@@ -80,13 +80,18 @@ export default function Plan() {
 
   return (
     <main className="ov-plan">
-      <h1 className="ov-plan__title">Your plan</h1>
-      <p className="ov-plan__lede">Here's where to start.</p>
+      <header className="ov-plan__head">
+        <span className="label">Made for your next chapter</span>
+        <h1 className="ov-plan__title">Your plan</h1>
+        <p className="ov-plan__lede">Here's where to start.</p>
+      </header>
 
-      <div className="ov-plan__sec">
+      <div className="ov-plan__sec ov-plan__sec--pathway">
         <div className="label">A — Your pathway</div>
-        <div className="ov-plan__pathway">{p.pathway}</div>
-        <p className="ov-plan__why">{p.why}</p>
+        <div className="ov-plan__summary">
+          <div className="ov-plan__pathway">{p.pathway}</div>
+          <p className="ov-plan__why">{p.why}</p>
+        </div>
       </div>
 
       <div className="ov-plan__sec">
@@ -135,6 +140,7 @@ export default function Plan() {
       </div>
 
       <div className="ov-plan__cta">
+        <p>Ready for your next step?</p>
         <Circle size="plan" to="/dashboard">
           See my dashboard
         </Circle>

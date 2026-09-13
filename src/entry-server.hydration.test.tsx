@@ -46,6 +46,12 @@ describe('prerendered routes hydrate cleanly', () => {
 
       const container = document.createElement('div');
       container.innerHTML = html;
+      // Browsers initialize playback muting from parsed muted markup; jsdom
+      // leaves this media property false. Model that browser initialization
+      // without changing the server attributes or suppressing hydration errors.
+      container.querySelectorAll('video').forEach((video) => {
+        video.muted = video.defaultMuted;
+      });
       document.body.appendChild(container);
 
       await act(async () => {

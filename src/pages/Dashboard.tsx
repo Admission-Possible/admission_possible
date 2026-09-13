@@ -43,17 +43,19 @@ export default function Dashboard() {
 
   return (
     <main className="ov-dash">
-      <div className="label">Your dashboard</div>
-      <h1 className="ov-dash__title">Let's keep moving.</h1>
-      <p className="ov-dash__sample" role="note">
-        This is a preview with sample progress data. Deadlines are typical fall dates — confirm each on the official
-        site.
-      </p>
-      {plan.timeline && <p className="ov-dash__timeline">{plan.timeline}</p>}
+      <header className="ov-dash__head">
+        <div className="label">Your dashboard</div>
+        <h1 className="ov-dash__title">Let's keep moving.</h1>
+        <p className="ov-dash__sample" role="note">
+          This is a preview with sample progress data. Deadlines are typical fall dates — confirm each on the official
+          site.
+        </p>
+        {plan.timeline && <p className="ov-dash__timeline">{plan.timeline}</p>}
+      </header>
 
       <div className="ov-dash__next">
         <div>
-          <div className="label">Next step</div>
+          <div className="label">Next step · Sample progress</div>
           <div className="ov-dash__step">Finish Lesson 2</div>
         </div>
         <Circle size="dash" to="/writing-course">

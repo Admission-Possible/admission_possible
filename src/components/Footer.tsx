@@ -3,14 +3,23 @@ import { navLinks } from '../data/nav';
 import { Wordmark } from './Wordmark';
 
 interface FooterProps {
-  /** Adds the "My plan" entry once the student has completed the intake. */
   hasPlan?: boolean;
 }
 
 export function Footer({ hasPlan = false }: FooterProps) {
   return (
     <footer className="footer">
-      <div className="rule" />
+      <div className="footer__contact">
+        <span className="eyebrow">Keep the conversation going</span>
+        <h2>
+          A question.
+          <br />A draft. A fresh start.
+        </h2>
+        <Link className="bar-link" to="/join">
+          <span>Let’s talk</span>
+          <span aria-hidden="true">↗</span>
+        </Link>
+      </div>
       <div className="footer__grid">
         <div className="footer__col--left">
           <Wordmark />
@@ -19,29 +28,31 @@ export function Footer({ hasPlan = false }: FooterProps) {
             to write the essays that get you in. Free.
           </p>
         </div>
-        <div className="vrule vrule--center" />
-        <div className="footer__menu">
-          <div className="label">Menu</div>
-          <nav className="footer__links" aria-label="Footer">
-            {navLinks(hasPlan).map((n) => (
-              <Link key={n.id} to={n.path}>
-                {n.label}
-              </Link>
-            ))}
-          </nav>
+        <nav className="footer__links" aria-label="Footer">
+          <span className="eyebrow">Explore</span>
+          {navLinks(hasPlan).map((n) => (
+            <Link key={n.id} to={n.path}>
+              {n.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="footer__resources">
+          <span className="eyebrow">Your next step</span>
+          <Link to="/router">Get your plan ↗</Link>
+          <Link to="/writing-course">The writing course ↗</Link>
+          <Link to="/list-builder">College list builder ↗</Link>
+          <span className="footer__tag">● First-gen access</span>
         </div>
       </div>
-      <div className="rule" />
       <div className="footer__legal">
-        <div>
-          {/* Was "A nonprofit." — the project is not incorporated, and the one
-              line meant to build trust was a misrepresentation on every page. */}
-          © (Ad)mission Possible {new Date().getFullYear()}. A student-run project.{' '}
-          <Link className="footer__legal-link" to="/privacy">
-            Privacy
-          </Link>
-        </div>
-        <div className="footer__tag">● First-gen access</div>
+        <span>© (Ad)mission Possible {new Date().getFullYear()}. A student-run project.</span>
+        <Link className="footer__legal-link" to="/privacy">
+          Privacy
+        </Link>
+        <span>Made for what comes next.</span>
+      </div>
+      <div className="footer__endmark" aria-hidden="true">
+        Possible.
       </div>
     </footer>
   );

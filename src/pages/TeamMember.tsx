@@ -1,10 +1,11 @@
 import { Link, Navigate, useParams } from 'react-router';
 import { getMember, hasStory } from '../data/team';
+import { EditorialHero } from '../components/EditorialHero';
 
 // Pastel palette cycled across the skill pills. Pills carry ink text, not
 // white — white ran 1.84-2.93:1 on these fills. Ink clears 4.9:1 on all of
 // them; the coral was lightened from #E07A6B (ink 3.90:1) to reach that.
-const TAG_COLORS = ['#E8968A', '#E8B84B', '#8FCB9B', '#7FB2DD', '#D69CC4', '#E8968A'];
+const TAG_COLORS = ['#FDC5F5', '#F7AEF8', '#B388EB', '#8093F1', '#72DDF7', '#FDC5F5'];
 
 export default function TeamMember() {
   const { slug } = useParams();
@@ -22,8 +23,13 @@ export default function TeamMember() {
   if (!hasStory(member)) {
     return (
       <main className="interior story">
+        <EditorialHero
+          kicker="About us / Founding team"
+          title={member.fullName}
+          tone="lavender"
+          note="The people behind the project"
+        />
         {back}
-        <h1 className="story__title">{member.fullName}</h1>
         <p className="story__bio story__bio--placeholder">
           {member.name} is on the founding team. Their profile isn't written yet — we'd rather leave this blank than put
           words in their mouth.
@@ -41,11 +47,13 @@ export default function TeamMember() {
 
   return (
     <main className="interior story">
+      <EditorialHero
+        kicker={`About us / ${member.fullName}`}
+        title="My story"
+        tone="lavender"
+        note="The people behind the project"
+      />
       {back}
-
-      <h1 className="story__title" data-reveal="">
-        My story
-      </h1>
 
       <div className="story__grid">
         <p className="story__path">{member.path}</p>

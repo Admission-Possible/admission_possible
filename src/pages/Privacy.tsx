@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { EditorialHero } from '../components/EditorialHero';
 
 // Written to match what the code actually does today, not a template. If the
 // data flow changes — a new endpoint, analytics, a cookie — this page changes
@@ -9,15 +10,18 @@ const UPDATED = 'September 2026';
 export default function Privacy() {
   return (
     <main className="interior legal">
-      <div className="rule" />
-
-      <div className="page-intro">
-        <h1 className="subhead">Privacy</h1>
-        <p className="page-intro__lede">
-          Plain version: the answers you give in the intake stay on your own device, and the only thing you ever send us
-          is the Join form — because you filled it in and pressed the button. Last updated {UPDATED}.
-        </p>
-      </div>
+      <EditorialHero
+        kicker="The details / Plain language"
+        title="Privacy"
+        tone="lavender"
+        note={`Last updated ${UPDATED}`}
+        description={
+          <>
+            Plain version: the answers you give in the intake stay on your own device, and the only thing you ever send
+            us is the Join form — because you filled it in and pressed the button.
+          </>
+        }
+      />
 
       <section className="legal__sec">
         <h2 className="legal__h">What we collect</h2>

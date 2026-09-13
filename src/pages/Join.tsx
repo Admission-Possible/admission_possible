@@ -5,6 +5,7 @@ import { useHydrated } from '../hooks/useHydrated';
 import { trackEvent } from '../data/analytics';
 import { navCrumbs } from '../data/nav';
 import { loadIntake } from '../data/storage';
+import { EditorialHero } from '../components/EditorialHero';
 
 type JoinPayload = {
   first: string;
@@ -159,14 +160,23 @@ export default function Join() {
 
   return (
     <main className="interior">
-      <div className="rule" />
+      <EditorialHero
+        kicker="Join / Let's make admission possible"
+        title="Join"
+        tone="pink"
+        note="The next step starts here"
+      />
       <Crumbs crumbs={navCrumbs('join')} />
-      <div className="rule rule--mb" />
-
-      {/* Also missing an h1 — not listed in #42, found by the sweep's own test. */}
-      <h1 className="visually-hidden">Join</h1>
 
       <div className="join__wrap">
+        <div className="join__intro">
+          <h2>
+            Tell us where
+            <br />
+            you are.
+          </h2>
+          <p>Tell us about yourself and what you need help with. We'll email you back.</p>
+        </div>
         <form className="join__card" onSubmit={onSubmit} noValidate ref={formRef}>
           <div className="join__row3">
             <div className="field">

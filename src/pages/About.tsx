@@ -4,16 +4,17 @@ import { Crumbs } from '../components/Crumbs';
 import { TeamCard } from '../components/TeamCard';
 import { navCrumbs } from '../data/nav';
 import { TEAM, getMember, hasStory } from '../data/team';
+import { EditorialHero } from '../components/EditorialHero';
 
 // Directory chip palette (mirrors the planning doc's tag colors).
 // Dark chips get cream text; light chips inherit ink.
 const ROLE_STYLES: Record<string, { background: string; color?: string }> = {
-  'Founding Team': { background: '#D9C8F0' },
-  Operational: { background: '#BBD9F2' },
-  Technical: { background: '#BFE3C0' },
-  Counseling: { background: '#6E5F26', color: '#FBFAF1' },
-  Marketing: { background: '#A93529', color: '#FBFAF1' },
-  Outreach: { background: '#2E64A8', color: '#FBFAF1' },
+  'Founding Team': { background: '#B388EB' },
+  Operational: { background: '#72DDF7' },
+  Technical: { background: '#8093F1' },
+  Counseling: { background: '#FDC5F5' },
+  Marketing: { background: '#F7AEF8' },
+  Outreach: { background: '#111111', color: '#FFFFFF' },
 };
 
 export default function About() {
@@ -33,31 +34,17 @@ export default function About() {
 
   return (
     <main className="interior about">
-      <div className="rule" />
+      <EditorialHero
+        kicker="About us / The people behind the project"
+        title="Who we are"
+        tone="lavender"
+        note="Built by first-gen students"
+        description="We're first-gen students who walked this road without a map — the forms, the essays, the deadlines nobody at home could explain. We built (Ad)mission Possible so the next student doesn't have to figure it out alone: every pathway, every list, every essay, demystified and free."
+      />
       <Crumbs crumbs={navCrumbs('about')} />
-      <div className="rule rule--mb" />
-
-      {/* WHO WE ARE */}
-      <section className="about__intro">
-        <div className="about__grid">
-          <div className="label">About us</div>
-          <div className="vrule" />
-          <div>
-            <h1 className="about__title" data-reveal="">
-              Who we are
-            </h1>
-            <p className="about__lede" data-reveal="">
-              We're first-gen students who walked this road without a map — the forms, the essays, the deadlines nobody
-              at home could explain. We built (Ad)mission Possible so the next student doesn't have to figure it out
-              alone: every pathway, every list, every essay, demystified and free.
-            </p>
-          </div>
-        </div>
-      </section>
 
       {/* FOUNDING TEAM — click a card to open an intro */}
       <section className="about__team">
-        <div className="rule" />
         <div className="team__head">
           <div className="label">Founding team</div>
           <p className="team__intro">Built by first-gen students who walked this road. Click a card to meet us.</p>

@@ -3,21 +3,23 @@ import { Circle } from '../components/Circle';
 import { Crumbs } from '../components/Crumbs';
 import { navCrumbs } from '../data/nav';
 import { Icon } from '../components/Icon';
+import { EditorialHero } from '../components/EditorialHero';
 
 export default function Offer() {
   return (
     <main className="interior">
-      <div className="rule" />
+      <EditorialHero
+        kicker="02 / The support"
+        title="What we offer"
+        tone="plum"
+        note="Two ways forward. Always free."
+        description="Work independently, not alone. An eight-module path through the essays, or a near-peer coach to work through it with you. Free."
+      />
       <Crumbs crumbs={navCrumbs('offer')} />
-      <div className="rule" />
-
-      {/* The page's two tracks are h3s under no h1, so the outline started at
-          level 3. Visually hidden: the crumb band already names the page. */}
-      <h1 className="visually-hidden">What we offer</h1>
 
       {/* Block A: headline left, ruled list right */}
       <div className="offer__block">
-        <div data-reveal="">
+        <div data-reveal="" className="offer__summary">
           <Icon name="course" className="offer__head-icon" />
           <h2 className="offer__head">Self-paced course</h2>
           <p className="offer__body">
@@ -40,13 +42,7 @@ export default function Offer() {
 
       {/* Block B: ruled list left, headline right */}
       <div className="offer__block offer__block--alt">
-        <div data-reveal="" className="ruled-list">
-          <div>Near-peer coach match</div>
-          <div>1:1 draft review</div>
-          <div>Accountability + check-ins</div>
-          <div>Ask for a coach and we'll email you back</div>
-        </div>
-        <div data-reveal="">
+        <div data-reveal="" className="offer__summary">
           <Icon name="coaching" className="offer__head-icon" />
           <h2 className="offer__head">1:1 Coaching</h2>
           <p className="offer__body">
@@ -58,6 +54,12 @@ export default function Offer() {
               More on coaching →
             </Link>
           </p>
+        </div>
+        <div data-reveal="" className="ruled-list">
+          <div>Near-peer coach match</div>
+          <div>1:1 draft review</div>
+          <div>Accountability + check-ins</div>
+          <div>Ask for a coach and we'll email you back</div>
         </div>
       </div>
 

@@ -10,11 +10,11 @@ describe('Icon', () => {
     expect(wrapper?.querySelector('svg')).not.toBeNull();
   });
 
-  it('renders the supplied PNG for the write icon', () => {
+  it('renders the writing symbol as a decorative vector', () => {
     const { container } = render(<Icon name="write" />);
-    const img = container.querySelector('img');
-    expect(img?.getAttribute('src')).toBe('/icons/learn-write.png');
-    expect(container.querySelector('svg')).toBeNull();
+    expect(container.querySelector('svg')).not.toBeNull();
+    expect(container.querySelector('.icon')).toHaveAttribute('aria-hidden', 'true');
+    expect(container.querySelector('img')).toBeNull();
   });
 
   it('passes the wrapper className through', () => {

@@ -6,6 +6,7 @@ import { navCrumb } from '../data/nav';
 import { useHydrated } from '../hooks/useHydrated';
 import { loadIntake } from '../data/storage';
 import type { School } from '../types';
+import { EditorialHero } from '../components/EditorialHero';
 
 const FACTORS: [string, string][] = [
   ['Academic', 'Programs, rigor, admit range vs your profile'],
@@ -81,19 +82,14 @@ export default function ListBuilder() {
 
   return (
     <main className="interior">
-      <div className="rule" />
+      <EditorialHero
+        kicker="Build your list / Fit and finances"
+        title="A list built on fit and finances, not luck."
+        tone="sky"
+        note="Reach. Target. Likely."
+        description="Balance is the whole game. We help you spread your list so an acceptance is likely and an affordable acceptance is likely too."
+      />
       <Crumbs crumbs={[navCrumb('how'), { label: 'College list builder' }]} />
-      <div className="rule" />
-
-      <div className="page-intro">
-        <h1 className="subhead" data-reveal="">
-          A list built on fit and finances, not luck.
-        </h1>
-        <p className="page-intro__lede" data-reveal="">
-          Balance is the whole game. We help you spread your list so an acceptance is likely and an affordable
-          acceptance is likely too.
-        </p>
-      </div>
 
       {plan && <YourList reach={plan.reach} target={plan.target} likely={plan.likely} />}
 

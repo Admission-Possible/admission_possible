@@ -9,7 +9,7 @@ import { renderWithRouter } from './test/utils';
 // Offer, WritingCourse, ListBuilder, Coaching and TeamMember appeared in none,
 // so a regression on five pages would have shipped with a green suite.
 const ROUTES: [string, RegExp][] = [
-  ['/', /Impossible becomes/],
+  ['/', /Admission Possible/],
   ['/about', /who we are/i],
   ['/how', /How admissions works/],
   ['/offer', /What we offer/],
@@ -54,6 +54,6 @@ describe('every route renders', () => {
   // TeamMember's only branch: an unknown slug redirects home.
   it('redirects an unknown team slug to the home page', () => {
     renderWithRouter(<App />, { route: '/team/not-a-person' });
-    expect(screen.getByRole('heading', { level: 1, name: /Impossible becomes/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: /Admission Possible/ })).toBeInTheDocument();
   });
 });
