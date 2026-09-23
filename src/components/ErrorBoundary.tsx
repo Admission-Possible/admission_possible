@@ -1,5 +1,4 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-import { clearIntake } from '../data/storage';
 
 interface Props {
   children: ReactNode;
@@ -10,8 +9,7 @@ interface State {
 }
 
 // Catches render-time errors anywhere below it and shows an on-brand
-// fallback instead of a blank screen. "Start over" clears the intake
-// state so a corrupt session can't wedge the app on reload.
+// fallback instead of a blank screen, with a way back to the start.
 export class ErrorBoundary extends Component<Props, State> {
   state: State = { hasError: false };
 
@@ -23,12 +21,6 @@ export class ErrorBoundary extends Component<Props, State> {
     // Surface the error for debugging; keep the UI graceful.
     console.error('ErrorBoundary caught an error', error, info);
   }
-
-  private handleStartOver = (): void => {
-    // Was a hardcoded 'ap.intake', which silently stopped clearing the plan the
-    // moment storage moved to localStorage. One exported source of truth now.
-    clearIntake();
-  };
 
   render(): ReactNode {
     if (this.state.hasError) {
@@ -57,11 +49,10 @@ export class ErrorBoundary extends Component<Props, State> {
             We hit a snag on our end.
           </h1>
           <p style={{ fontSize: '16px', color: 'var(--muted)', margin: 0, maxWidth: '42ch' }}>
-            Your progress may not have saved. Let's start fresh — it only takes a moment.
+            Something on this page didn't load. Head back to the start and try again.
           </p>
           <a
             href="/"
-            onClick={this.handleStartOver}
             style={{
               fontFamily: 'var(--mono)',
               fontWeight: 700,

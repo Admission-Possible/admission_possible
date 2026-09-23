@@ -74,7 +74,7 @@ describe('useOpeningIntro lifecycle', () => {
 
   it('does not start an intro when entering home through an in-app navigation', () => {
     const { result, rerender } = renderHook(({ path }) => useOpeningIntro(path), {
-      initialProps: { path: '/coaching' },
+      initialProps: { path: '/about' },
     });
     expect(result.current.opening).toBe(false);
     rerender({ path: '/' });
@@ -103,20 +103,20 @@ describe('useOpeningIntro lifecycle', () => {
     expect(media.addEventListener).not.toHaveBeenCalled();
   });
 
-  it.each(['paused artwork', 'anchor link'])('skips an initial visit with %s', (condition) => {
-    if (condition === 'paused artwork') sessionStorage.setItem('admission-art-motion-paused', 'true');
-    else history.replaceState(null, '', '/#start-here');
+  it('skips an initial visit to an anchor link', () => {
+    history.replaceState(null, '', '/#about');
     const { result } = renderHook(() => useOpeningIntro('/'));
     expect(document.body.style.overflow).toBe('');
     act(() => vi.advanceTimersToNextFrame());
     expect(result.current.opening).toBe(false);
   });
 
-  it('still completes when browser storage is unavailable', () => {
-    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+  it('reads no stored preference and completes even when browser storage is unavailable', () => {
+    const getItem = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('Storage unavailable');
     });
     const { result } = renderHook(() => useOpeningIntro('/'));
+    expect(getItem).not.toHaveBeenCalled();
     expect(result.current.opening).toBe(true);
     act(() => vi.runOnlyPendingTimers());
     expect(result.current.opening).toBe(false);
@@ -209,6 +209,24 @@ describe('opening intro with the shared layout', () => {
     expect(document.body.style.overflow).toBe('');
     fireEvent.click(screen.getByRole('link', { name: 'Return home' }));
     expect(container.querySelector('.site-chrome')).toHaveAttribute('data-opening', 'complete');
+  });
+
+  it('turns "Impossible Becomes" into "Admission", keeping "Possible", then skips on request', () => {
+    const { container } = renderChrome();
+    const intro = container.ownerDocument.querySelector('.opening-intro')!;
+    expect(intro).toHaveAttribute('aria-hidden', 'true');
+    expect(intro.querySelector('.opening-intro__from')?.textContent).toBe('Impossible Becomes');
+    expect(intro.querySelector('.opening-intro__to')?.textContent).toBe('Admission');
+    expect(intro.querySelector('.opening-intro__possible')?.textContent).toBe('Possible');
+
+    // jsdom does not evaluate the no-preference CSS media query that displays this button.
+    fireEvent.click(container.querySelector('.opening-intro__skip')!);
+    expect(container.querySelector('.site-chrome')).toHaveAttribute('data-opening', 'complete');
+    expect(document.querySelector('.opening-intro')).toBeNull();
+  });
+
+  it('runs for 5.2 seconds', () => {
+    expect(OPENING_DURATION_MS).toBe(5200);
   });
 
   it('reveals controls on focus without leaving an intro scroll lock underneath the menu', () => {

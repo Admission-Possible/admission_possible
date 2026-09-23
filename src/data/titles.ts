@@ -1,16 +1,11 @@
 import { NAV } from './nav';
-import { getMember } from './team';
+import { getMember, hasStory } from './team';
 
 const SITE = '(Ad)mission Possible';
 
 // Routes outside NAV. NAV supplies the rest so a renamed menu item can't drift
 // from its page title.
 const EXTRA: Record<string, string> = {
-  '/writing-course': 'The writing course',
-  '/list-builder': 'College list builder',
-  '/router': 'Your 2-minute intake',
-  '/plan': 'Your plan',
-  '/dashboard': 'Your dashboard',
   '/privacy': 'Privacy',
 };
 
@@ -23,7 +18,7 @@ const EXTRA: Record<string, string> = {
  * signals. Fails WCAG 2.4.2 (Page Titled).
  */
 export function titleForPath(pathname: string): string {
-  if (pathname === '/') return `${SITE} — The college application, demystified`;
+  if (pathname === '/') return `${SITE} — Impossible becomes possible`;
 
   const nav = NAV.find((n) => n.path === pathname);
   if (nav) return `${nav.label} — ${SITE}`;
@@ -34,7 +29,7 @@ export function titleForPath(pathname: string): string {
   const teamMatch = /^\/team\/([^/]+)$/.exec(pathname);
   if (teamMatch) {
     const member = getMember(teamMatch[1]);
-    if (member) return `${member.name} — ${SITE}`;
+    if (member && hasStory(member)) return `${member.name} — ${SITE}`;
   }
 
   return `Page not found — ${SITE}`;

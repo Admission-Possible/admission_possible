@@ -1,103 +1,38 @@
-import { Circle } from '../components/Circle';
-import { Crumbs } from '../components/Crumbs';
-import { navCrumbs } from '../data/nav';
-import { Icon } from '../components/Icon';
+import type { CSSProperties } from 'react';
 import { EditorialHero } from '../components/EditorialHero';
-import type { IconName } from '../types';
+import { HOW_STEPS } from '../data/content';
 
-// The five phases of the admissions process, in the order a student moves
-// through them: the list comes before the essays, and the portals you apply
-// through follow from the list — not from us.
-const STEPS: { icon: IconName; title: string; desc: string; details: string[] }[] = [
-  {
-    icon: 'route',
-    title: 'Route',
-    desc: 'Answer a few questions. We map your situation and your path.',
-    details: [
-      'Answer a few questions and provide details about your background.',
-      'We map your situation and your path — where you are, and where you can go.',
-    ],
-  },
-  {
-    icon: 'list',
-    title: 'Build your list',
-    desc: 'A balanced college list across fit and finances.',
-    details: [
-      'A college list selection designed just for you.',
-      'Balanced across preference and financials — reach, target, and likely.',
-    ],
-  },
-  {
-    icon: 'write',
-    title: 'Learn & write',
-    desc: 'Produce-as-you-learn modules turn your story into essays.',
-    details: [
-      'Produce-as-you-learn modules to turn your story into essays.',
-      'One-on-one peer coaching, with an online coach that tracks your progress.',
-    ],
-  },
-  {
-    icon: 'apply',
-    title: 'Apply',
-    desc: 'Your list decides the portals — and we walk you through each one.',
-    details: [
-      'Through your college selection, we route you to the specific application portals: QuestBridge, UC, Common App, etc.',
-    ],
-  },
-  {
-    icon: 'submit',
-    title: 'Submit',
-    desc: 'Deadlines, drafts, and next steps in one calm place.',
-    details: ['An organized list with deadlines, drafts, preparations, and the next step — all in one calm place.'],
-  },
-];
-
+// Only the provided How It Works content: five steps and their points. The
+// spacing and motion carry the structure, not extra explanation.
 export default function How() {
   return (
-    <main className="interior">
+    <main className="interior how">
       <EditorialHero
-        kicker="01 / The admissions process"
-        title="How admissions works"
+        kicker="(Ad)mission Possible"
+        title="How it works"
         tone="pink"
-        description="The same five phases every school expects — demystified. Answer a few questions, and we map the rest with you."
+        description="Five steps from where you are to where you’re going."
       />
-      <Crumbs crumbs={navCrumbs('how')} />
-      <div className="how__track">
-        {STEPS.map((s) => (
-          <div className="how__step" key={s.title}>
-            <Icon name={s.icon} className="step-icon" />
-            <div data-reveal="" className="how__step-title">
-              {s.title}
-            </div>
-            <div className="how__step-desc">{s.desc}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* WHAT EACH PHASE ENTAILS — scroll-down detail for every step above. */}
-      <section className="phases">
-        <div className="team__head">
-          <div className="label">Step by step</div>
-          <p className="team__intro">What each phase entails, from the first question to the final submission.</p>
-        </div>
-        {STEPS.map((s, i) => (
-          <div className="phase" key={s.title} data-reveal="">
-            <div className="phase__num">{String(i + 1).padStart(2, '0')}</div>
-            <h2 className="phase__title">{s.title}</h2>
-            <div className="phase__body">
-              {s.details.map((line) => (
-                <p className="phase__line" key={line}>
-                  {line}
-                </p>
+      <ol className="how-steps">
+        {HOW_STEPS.map((step, n) => (
+          <li key={step.title} className="how-step" data-reveal="group">
+            <span className="divider" />
+            <span className="how-step__num" style={{ '--i': 0 } as CSSProperties}>
+              {String(n + 1).padStart(2, '0')}
+            </span>
+            <h2 className="how-step__title" style={{ '--i': 1 } as CSSProperties}>
+              {step.title}
+            </h2>
+            <ul className="how-step__points">
+              {step.points.map((point, p) => (
+                <li key={point} style={{ '--i': p + 2 } as CSSProperties}>
+                  {point}
+                </li>
               ))}
-            </div>
-          </div>
+            </ul>
+          </li>
         ))}
-      </section>
-
-      <div className="section-cta">
-        <Circle to="/router">Get my plan</Circle>
-      </div>
+      </ol>
     </main>
   );
 }

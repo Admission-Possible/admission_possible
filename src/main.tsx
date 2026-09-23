@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router';
 import { Analytics } from '@vercel/analytics/react';
 import './styles/global.css';
 import './styles/editorial.css';
+import './styles/site.css';
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 

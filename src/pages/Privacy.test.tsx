@@ -3,9 +3,8 @@ import { screen, within } from '@testing-library/react';
 import App from '../App';
 import { renderWithRouter } from '../test/utils';
 
-// #50: the site collects PII from students as young as 9th grade, and shipped
-// no privacy disclosure at all. School counselors and districts vet for exactly
-// this before recommending a tool.
+// #50: the site collects PII from students as young as 9th grade. School
+// counselors and districts vet for exactly this before recommending a tool.
 describe('Privacy', () => {
   it('renders at /privacy', () => {
     renderWithRouter(<App />, { route: '/privacy' });
@@ -24,26 +23,37 @@ describe('Privacy', () => {
     expect(screen.getByRole('contentinfo').textContent).not.toMatch(/a nonprofit/i);
   });
 
-  it('discloses the data the code actually handles', () => {
+  it('discloses every field the Join us form sends', () => {
     renderWithRouter(<App />, { route: '/privacy' });
-    const text = document.body.textContent ?? '';
-    // Join fields that reach the operator.
-    expect(text).toMatch(/grade level/i);
-    // Intake stays on-device — the single most load-bearing claim on the page.
-    expect(text).toMatch(/on your device/i);
+    const text = document.querySelector('main')!.textContent ?? '';
+    expect(text).toMatch(/Join us form/);
+    for (const field of [/first name/i, /last name/i, /email address/i, /grade level/i, /first in your family/i]) {
+      expect(text).toMatch(field);
+    }
+    expect(text).toMatch(/topics you tick/i);
+    expect(text).toMatch(/anything else we should know/i);
     // Third parties are named honestly; #49 removed the last one.
     expect(text).toMatch(/nothing from anyone else's servers/i);
     // Minors are addressed explicitly.
     expect(text).toMatch(/under 18/i);
   });
 
+  it('no longer describes the removed intake or plan', () => {
+    renderWithRouter(<App />, { route: '/privacy' });
+    const text = document.querySelector('main')!.textContent ?? '';
+    expect(text).not.toMatch(/intake/i);
+    expect(text).not.toMatch(/\bplan\b/i);
+    expect(text).not.toMatch(/on your device/i);
+  });
+
   // #51 requires whatever is added to be disclosed here.
   it('discloses the analytics and its limits', () => {
     renderWithRouter(<App />, { route: '/privacy' });
-    const text = document.body.textContent ?? '';
+    const text = document.querySelector('main')!.textContent ?? '';
     expect(text).toMatch(/Vercel Web Analytics/i);
-    expect(text).toMatch(/no cookies|sets no cookies/i);
-    // The load-bearing promise: steps are measured, answers are not.
-    expect(text).toMatch(/never what you answered/i);
+    expect(text).toMatch(/sets no cookies/i);
+    expect(text).toMatch(/page views and whether a Join us form was sent/i);
+    // The load-bearing promise: submissions are counted, their contents are not.
+    expect(text).toMatch(/What you type into the form is never part of that/i);
   });
 });

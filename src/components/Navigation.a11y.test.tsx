@@ -1,31 +1,39 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from '../App';
+import { ALL_ROUTES } from '../data/routes';
 import { titleForPath } from '../data/titles';
 import { renderWithRouter } from '../test/utils';
 
 describe('document titles', () => {
-  // #38: all 14 routes shared the one static marketing title (WCAG 2.4.2).
+  // #38: every route shared the one static marketing title (WCAG 2.4.2).
   it('gives every route a distinct title', () => {
-    const paths = [
-      '/',
-      '/about',
-      '/how',
-      '/offer',
-      '/writing-course',
-      '/list-builder',
+    const paths = [...ALL_ROUTES, '/does-not-exist'];
+    const titles = paths.map(titleForPath);
+    expect(new Set(titles).size).toBe(paths.length);
+  });
+
+  it('titles the pages after their navigation labels', () => {
+    expect(titleForPath('/about')).toMatch(/^About us —/);
+    expect(titleForPath('/how')).toMatch(/^How it works —/);
+    expect(titleForPath('/offer')).toMatch(/^What we offer —/);
+    expect(titleForPath('/join')).toMatch(/^Join us —/);
+    expect(titleForPath('/privacy')).toMatch(/^Privacy —/);
+  });
+
+  it('treats removed routes as not found', () => {
+    for (const path of [
       '/pathways',
       '/coaching',
-      '/join',
       '/router',
       '/plan',
       '/dashboard',
-      '/privacy',
-      '/team/jose',
-    ];
-    const titles = paths.map(titleForPath);
-    expect(new Set(titles).size).toBe(paths.length);
+      '/list-builder',
+      '/writing-course',
+    ]) {
+      expect(titleForPath(path), path).toMatch(/page not found/i);
+    }
   });
 
   it('gives the 404 its own title rather than the marketing one', () => {
@@ -53,27 +61,6 @@ describe('route change focus', () => {
 
     await user.click(screen.getByRole('contentinfo').querySelector('a[href="/about"]')!);
     await waitFor(() => expect(main).toHaveFocus());
-  });
-});
-
-describe('intake step focus', () => {
-  beforeEach(() => {
-    localStorage.clear();
-    sessionStorage.clear();
-  });
-
-  // #38: the focused Next button becomes disabled when the new unanswered
-  // question renders, so focus silently dropped to <body> on every step.
-  it('moves focus to the new question instead of losing it to the body', async () => {
-    const user = userEvent.setup();
-    renderWithRouter(<App />, { route: '/router' });
-
-    await user.click(screen.getByText('11th grade'));
-    await user.click(screen.getByRole('button', { name: /^next/i }));
-
-    const question = await screen.findByRole('heading', { name: 'First in your family to go?' });
-    await waitFor(() => expect(question).toHaveFocus());
-    expect(document.body).not.toHaveFocus();
   });
 });
 

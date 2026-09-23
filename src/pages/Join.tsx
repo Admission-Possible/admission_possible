@@ -1,19 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { Circle } from '../components/Circle';
-import { Crumbs } from '../components/Crumbs';
-import { useHydrated } from '../hooks/useHydrated';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { Link } from 'react-router';
 import { trackEvent } from '../data/analytics';
-import { navCrumbs } from '../data/nav';
-import { loadIntake } from '../data/storage';
 import { EditorialHero } from '../components/EditorialHero';
-
-type JoinPayload = {
-  first: string;
-  last: string;
-  email: string;
-  grade: string;
-  needs: string;
-};
+import { Plus } from '../components/Plus';
+import { FIRST_GEN_OPTIONS, GRADES, INTERESTS, type JoinPayload } from '../data/join';
 
 // A pragmatic "looks like an email" check — catches typos without rejecting
 // valid-but-unusual addresses.
@@ -40,14 +30,21 @@ function composeMessage(p: JoinPayload): string {
     `Last name: ${p.last}`,
     `Email: ${p.email}`,
     `Grade level: ${p.grade}`,
+    `First in family to go to college: ${p.firstGen}`,
+    `Looking for help with: ${p.interests.join(', ') || '(not provided)'}`,
     '',
-    'What I need help with:',
+    'Anything else:',
     p.needs || '(not provided)',
   ].join('\n');
 }
 
+const stagger = (n: number) => ({ '--i': n }) as CSSProperties;
+
+// Join us is the student sign-up: one form, grouped so what arrives is
+// organized — who you are, where you're starting from, and what you want help
+// with. It replaces the separate seven-question "Start" flow.
 export default function Join() {
-  const [label, setLabel] = useState('Join');
+  const [label, setLabel] = useState('Join us');
   const [error, setError] = useState<string | null>(null);
   // Which field the error belongs to, so it can be announced on that input
   // rather than as a loose paragraph the user has to hunt for.
@@ -55,11 +52,6 @@ export default function Join() {
   const [submitting, setSubmitting] = useState(false);
   const [fallback, setFallback] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  // The intake already asked for grade; don't make the student answer twice.
-  // Derived so the prerendered field (empty) matches the first client render,
-  // then fills in; typing overlays it (#45).
-  const [gradeEdit, setGradeEdit] = useState<string | null>(null);
-  const hydrated = useHydrated();
   const formRef = useRef<HTMLFormElement>(null);
   const labelTimer = useRef<number | undefined>(undefined);
   const copyTimer = useRef<number | undefined>(undefined);
@@ -78,12 +70,15 @@ export default function Join() {
     if (submitting) return;
 
     const data = new FormData(e.currentTarget);
+    const text = (name: string) => String(data.get(name) ?? '').trim();
     const payload: JoinPayload = {
-      first: String(data.get('first') ?? '').trim(),
-      last: String(data.get('last') ?? '').trim(),
-      email: String(data.get('email') ?? '').trim(),
-      grade: String(data.get('grade') ?? '').trim(),
-      needs: String(data.get('needs') ?? '').trim(),
+      first: text('first'),
+      last: text('last'),
+      email: text('email'),
+      grade: text('grade'),
+      firstGen: text('firstGen'),
+      interests: data.getAll('interests').map(String),
+      needs: text('needs'),
     };
 
     // Validate before we celebrate: we need a name to greet you by and an email to reach you at.
@@ -91,7 +86,7 @@ export default function Join() {
       setError(message);
       setErrorField(field);
       // Move to the offending input: a screen-reader user otherwise hears a
-      // generic error and has to hunt across five fields for the one to fix.
+      // generic error and has to hunt across the form for the one to fix.
       formRef.current?.querySelector<HTMLInputElement>(`#${field}`)?.focus();
     };
     if (!payload.first) {
@@ -125,7 +120,7 @@ export default function Join() {
       formRef.current?.reset();
       setLabel('Thanks');
       window.clearTimeout(labelTimer.current);
-      labelTimer.current = window.setTimeout(() => setLabel('Join'), 1800);
+      labelTimer.current = window.setTimeout(() => setLabel('Join us'), 1800);
     } catch {
       // Delivery failed. Keep every typed answer and hand the student something
       // they can actually use, rather than asking them to retype it into email.
@@ -155,52 +150,47 @@ export default function Join() {
   };
 
   const contact = contactEmail();
-  const storedGrade = hydrated ? (loadIntake()?.plan.grade ?? '') : '';
-  const grade = gradeEdit ?? storedGrade;
 
   return (
-    <main className="interior">
-      <EditorialHero
-        kicker="Join / Let's make admission possible"
-        title="Join"
-        tone="pink"
-        note="The next step starts here"
-      />
-      <Crumbs crumbs={navCrumbs('join')} />
+    <main className="interior join">
+      <EditorialHero kicker="Let’s make admission possible" title="Join us" tone="lavender" />
 
       <div className="join__wrap">
-        <div className="join__intro">
-          <h2>
+        <div className="join__intro" data-reveal="group">
+          <h2 style={stagger(0)}>
             Tell us where
             <br />
             you are.
           </h2>
-          <p>Tell us about yourself and what you need help with. We'll email you back.</p>
+          <p style={stagger(1)}>Tell us about yourself and what you need help with. We’ll email you back.</p>
         </div>
-        <form className="join__card" onSubmit={onSubmit} noValidate ref={formRef}>
-          <div className="join__row3">
-            <div className="field">
-              <label htmlFor="first">
-                First name <span className="field__req">(required)</span>
-              </label>
-              <input
-                id="first"
-                type="text"
-                name="first"
-                autoComplete="given-name"
-                required
-                aria-required="true"
-                aria-invalid={errorField === 'first' || undefined}
-                aria-describedby={errorField === 'first' ? 'join-error' : undefined}
-              />
+
+        <form className="join__form" onSubmit={onSubmit} noValidate ref={formRef}>
+          <fieldset className="join__group" data-reveal="group">
+            <span className="divider" />
+            <legend className="eyebrow">01 · About you</legend>
+            <div className="join__row">
+              <div className="field" style={stagger(0)}>
+                <label htmlFor="first">
+                  First name <span className="field__req">(required)</span>
+                </label>
+                <input
+                  id="first"
+                  type="text"
+                  name="first"
+                  autoComplete="given-name"
+                  required
+                  aria-required="true"
+                  aria-invalid={errorField === 'first' || undefined}
+                  aria-describedby={errorField === 'first' ? 'join-error' : undefined}
+                />
+              </div>
+              <div className="field" style={stagger(1)}>
+                <label htmlFor="last">Last name</label>
+                <input id="last" type="text" name="last" autoComplete="family-name" />
+              </div>
             </div>
-            <div className="vrule" />
-            <div className="field">
-              <label htmlFor="last">Last name</label>
-              <input id="last" type="text" name="last" autoComplete="family-name" />
-            </div>
-            <div className="vrule" />
-            <div className="field">
+            <div className="field" style={stagger(2)}>
               <label htmlFor="email">
                 Email <span className="field__req">(required)</span>
               </label>
@@ -215,23 +205,57 @@ export default function Join() {
                 aria-describedby={errorField === 'email' ? 'join-error' : undefined}
               />
             </div>
-          </div>
-          <div className="field field--mt">
-            <label htmlFor="grade">Grade level</label>
-            <input
-              id="grade"
-              type="text"
-              name="grade"
-              placeholder="e.g. 11th grade"
-              value={grade}
-              onChange={(e) => setGradeEdit(e.target.value)}
-              autoComplete="off"
-            />
-          </div>
-          <div className="field field--mt">
-            <label htmlFor="needs">What do you need help with?</label>
-            <textarea id="needs" name="needs" rows={3} />
-          </div>
+          </fieldset>
+
+          <fieldset className="join__group" data-reveal="group">
+            <span className="divider" />
+            <legend className="eyebrow">02 · Where you’re starting</legend>
+            <div className="field" style={stagger(0)}>
+              <label htmlFor="grade">Grade level</label>
+              <select id="grade" name="grade" defaultValue="">
+                <option value="">Choose one</option>
+                {GRADES.map((g) => (
+                  <option key={g}>{g}</option>
+                ))}
+              </select>
+            </div>
+            <div className="choice-group" role="radiogroup" aria-labelledby="firstgen-label" style={stagger(1)}>
+              <span id="firstgen-label" className="choice-group__label">
+                First in your family to go to college?
+              </span>
+              <div className="choice-group__options">
+                {FIRST_GEN_OPTIONS.map((option) => (
+                  <label key={option} className="choice">
+                    <input type="radio" name="firstGen" value={option} />
+                    <span>{option}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset className="join__group" data-reveal="group">
+            <span className="divider" />
+            <legend className="eyebrow">03 · What you want help with</legend>
+            <div className="choice-group" style={stagger(0)}>
+              <span className="choice-group__label" id="interests-label">
+                Choose any that fit
+              </span>
+              <div className="choice-group__options" role="group" aria-labelledby="interests-label">
+                {INTERESTS.map((option) => (
+                  <label key={option} className="choice">
+                    <input type="checkbox" name="interests" value={option} />
+                    <span>{option}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="field" style={stagger(1)}>
+              <label htmlFor="needs">Anything else we should know?</label>
+              <textarea id="needs" name="needs" rows={4} />
+            </div>
+          </fieldset>
+
           {error && (
             <p className="join__error" id="join-error" role="alert" aria-live="polite">
               {error}
@@ -240,25 +264,24 @@ export default function Join() {
           {fallback && (
             <div className="join__fallback" role="status">
               <label htmlFor="join-fallback">Copy this and send it to us:</label>
-              <textarea id="join-fallback" className="join__fallback-text" readOnly rows={8} value={fallback} />
+              <textarea id="join-fallback" className="join__fallback-text" readOnly rows={10} value={fallback} />
               <div className="join__fallback-actions">
-                <button type="button" className="ov-back" onClick={copyFallback}>
+                <button type="button" className="join__copy" onClick={copyFallback}>
                   {copied ? 'Copied' : 'Copy message'}
                 </button>
                 {contact && <a href={`mailto:${contact}?subject=${encodeURIComponent('Join request')}`}>{contact}</a>}
               </div>
             </div>
           )}
-          <Circle size="join" type="submit" disabled={submitting}>
-            {submitting ? 'Sending' : label}
-          </Circle>
+          <button className="join__submit" type="submit" disabled={submitting} aria-disabled={submitting}>
+            <span>{submitting ? 'Sending' : label}</span>
+            <Plus />
+          </button>
+          <p className="join__privacy">
+            We only use this to write back to you. <Link to="/privacy">How we handle it</Link>.
+          </p>
         </form>
       </div>
-      {contact && (
-        <div className="join__email">
-          <a href={`mailto:${contact}`}>{contact}</a>
-        </div>
-      )}
     </main>
   );
 }

@@ -4,15 +4,12 @@ import { hydrateRoot } from 'react-dom/client';
 import { act } from 'react';
 import { StaticRouter, BrowserRouter } from 'react-router';
 import App from './App';
-import { computePlan } from './data/plan';
-import { saveIntake } from './data/storage';
 import { ALL_ROUTES } from './data/routes';
 
-// #45: routes are prerendered in Node, where there is no localStorage. Anything
-// reading storage during render would produce different markup on a returning
-// student's first paint — a mismatch that makes React discard the prerendered
-// tree, losing the whole point of prerendering. This hydrates the real server
-// output and fails on any hydration complaint.
+// #45: routes are prerendered in Node and hydrated in the browser. Any render
+// that differs between the two (browser-only state, storage, dates) makes React
+// discard the prerendered tree. This hydrates the real server output and fails
+// on any hydration complaint.
 describe('prerendered routes hydrate cleanly', () => {
   let errors: string[];
 
@@ -27,13 +24,7 @@ describe('prerendered routes hydrate cleanly', () => {
   afterEach(() => vi.restoreAllMocks());
 
   for (const route of ALL_ROUTES) {
-    it(`hydrates ${route} with a stored plan`, async () => {
-      // Simulate production faithfully: the prerender runs in Node with NO
-      // storage, then a returning student's browser hydrates it WITH storage.
-      // jsdom gives both sides localStorage, so without clearing here the test
-      // would be vacuous — it would never reproduce the divergence.
-      localStorage.clear();
-      sessionStorage.clear();
+    it(`hydrates ${route} without a mismatch`, async () => {
       window.history.pushState({}, '', route);
 
       const html = renderToString(
@@ -41,8 +32,6 @@ describe('prerendered routes hydrate cleanly', () => {
           <App />
         </StaticRouter>,
       );
-
-      saveIntake({ answers: { grade: '11th grade' }, plan: computePlan({ grade: '11th grade' }) });
 
       const container = document.createElement('div');
       container.innerHTML = html;
@@ -53,6 +42,10 @@ describe('prerendered routes hydrate cleanly', () => {
         video.muted = video.defaultMuted;
       });
       document.body.appendChild(container);
+
+      // Nothing on the site reads browser storage any more; a render that did
+      // would be the likeliest source of a server/client divergence.
+      const getItem = vi.spyOn(Storage.prototype, 'getItem');
 
       await act(async () => {
         hydrateRoot(
@@ -65,6 +58,7 @@ describe('prerendered routes hydrate cleanly', () => {
 
       const hydrationErrors = errors.filter((e) => /hydrat|did not match|server (?:HTML|rendered)/i.test(e));
       expect(hydrationErrors, hydrationErrors[0]).toHaveLength(0);
+      expect(getItem).not.toHaveBeenCalled();
       container.remove();
     });
   }

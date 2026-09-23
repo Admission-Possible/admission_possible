@@ -47,7 +47,7 @@
       ]
     },
     {
-      "source": "/(intro|team|icons)/(.*)",
+      "source": "/(colleges|team|brand|art)/(.*)",
       "headers": [
         {
           "key": "Cache-Control",

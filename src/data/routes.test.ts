@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import appSource from '../App.tsx?raw';
 import vercel from '../../vercel.json';
 import { ALL_ROUTES, MARKETING_ROUTES, ROUTE_DESCRIPTIONS, SITE_ORIGIN } from './routes';
-import { TEAM } from './team';
+import { TEAM, hasStory } from './team';
 
 // #45: with the SPA catch-all removed, a route missing from this manifest is
 // not prerendered and 404s in production. These keep the two in step.
@@ -10,7 +10,13 @@ describe('the prerender manifest matches App.tsx', () => {
   const declared = [...appSource.matchAll(/<Route path="([^"]+)"/g)].map((m) => m[1]);
 
   it('finds the routes declared in App', () => {
-    expect(declared.length).toBeGreaterThan(10);
+    expect(declared).toEqual(['/', '/about', '/how', '/offer', '/join', '/team/:slug', '/privacy', '*']);
+  });
+
+  it('prerenders nothing App does not declare', () => {
+    for (const route of MARKETING_ROUTES) {
+      expect(declared).toContain(route);
+    }
   });
 
   it('prerenders every static route App declares', () => {
@@ -20,10 +26,11 @@ describe('the prerender manifest matches App.tsx', () => {
     }
   });
 
-  it('expands the dynamic team route to one path per member', () => {
+  it('expands the dynamic team route to one path per member with an approved story', () => {
     expect(declared).toContain('/team/:slug');
     for (const member of TEAM) {
-      expect(ALL_ROUTES).toContain(`/team/${member.slug}`);
+      if (hasStory(member)) expect(ALL_ROUTES).toContain(`/team/${member.slug}`);
+      else expect(ALL_ROUTES).not.toContain(`/team/${member.slug}`);
     }
   });
 

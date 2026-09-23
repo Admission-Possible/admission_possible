@@ -1,19 +1,20 @@
-import { Circle } from '../components/Circle';
+import { Link } from 'react-router';
 import { EditorialHero } from '../components/EditorialHero';
+import { Plus } from '../components/Plus';
 
 export default function NotFound() {
   return (
     <main className="interior">
       <EditorialHero
         kicker="404 / Page not found"
-        title="This page didn't make the cut."
+        title="This page doesn’t exist."
         tone="pink"
-        note="Let's find your way back"
-        description="The link you followed leads nowhere — but the path to college still does. Let's get you back on it."
+        description="The link you followed leads nowhere. Let’s get you back on your path."
       />
-
-      <div className="section-cta">
-        <Circle to="/">Back to the start</Circle>
+      <div className="page-end">
+        <Link className="text-link" to="/">
+          Back to the start <Plus />
+        </Link>
       </div>
     </main>
   );

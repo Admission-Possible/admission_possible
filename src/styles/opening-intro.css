@@ -1,79 +1,120 @@
-/* Source-matched timing: 1s expand, .5s hold, 1s compress, .5s hold, 1s dock.
-   The independent header slides in at 3.4s and settles at 4.1s. */
+/* Opening sequence, 5.1s:
+   0.0–0.6  the black title card opens from a hairline
+   0.4–1.3  "Impossible / Becomes / Possible" rise in, word by word
+   1.6–2.3  "Possible" turns purple and its underline draws
+   2.6–3.3  "Impossible Becomes" rolls out as "Admission" rolls in
+   3.9–4.9  the card docks into the header brand block; the hero opens
+   Every stage uses the reference's slow-in/slow-out curve. */
 .opening-intro,
 .opening-intro__skip {
   display: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .site-chrome[data-opening='playing'] {
-    --opening-ease: cubic-bezier(0.68, 0, 0.36, 1);
-    --opening-art-height: clamp(340px, 52svh, 700px);
+  .site-chrome[data-opening='playing'] .home {
+    animation: opening-page-in 1s var(--ease-in-out) 3.9s both;
   }
-  .site-chrome[data-opening='playing'] .report-home {
-    animation: opening-page-in 1s var(--opening-ease) 3s both;
+  .site-chrome[data-opening='playing'] .home-hero__art {
+    animation: opening-art-in 1s var(--ease-in-out) 3.9s both;
   }
-  .site-chrome[data-opening='playing'] .report-art {
-    min-height: 0;
-    max-height: none;
-    animation: opening-art-in 1s var(--opening-ease) 3s both;
+  .site-chrome[data-opening='playing'] .home-hero__copy > * {
+    animation: opening-copy-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(4.3s + var(--i, 0) * 90ms);
   }
   .site-chrome[data-opening='playing'] .header {
     overflow: hidden;
     background: transparent;
   }
   .site-chrome[data-opening='playing'] .header__bar {
-    animation: opening-header-in 0.7s var(--opening-ease) 3.4s both;
+    animation: opening-header-in 0.7s var(--ease-in-out) 4.3s both;
   }
   .site-chrome[data-opening='playing'] .header .wordmark {
-    animation: opening-header-brand 4s linear both;
+    animation: opening-header-brand 5s linear both;
   }
-  .site-chrome[data-opening='playing'] .report-art .admission-art__motion-toggle,
-  .site-chrome[data-opening='playing'] .report-art .admission-art__coordinate {
-    animation: opening-controls-in 0.2s ease 3.8s both;
-  }
+
   .opening-intro {
-    --opening-card-width: min(639px, calc(100vw - 32px));
-    --opening-card-height: min(658px, 82svh, calc((100vw - 32px) * 1.029734));
-    --opening-wide-width: min(668px, calc(100vw - 32px));
-    --opening-wide-height: min(260px, calc((100vw - 32px) * 0.3892));
-    --opening-brand-width: 176px;
-    --opening-small-type: clamp(28px, 4.24vw, 61px);
-    --opening-large-type: clamp(52px, 8.06vw, 116px);
+    --card-width: min(920px, calc(100vw - 32px));
+    --card-height: min(560px, 76svh, calc((100vw - 32px) * 0.9));
+    /* One line of "Impossible Becomes" is about 9.4em wide: fit it to the card. */
+    --title-size: min(112px, calc((var(--card-width) - 56px) / 9.6));
     display: block;
     position: fixed;
     inset: 0;
-    pointer-events: none;
     z-index: 120;
-    animation: opening-overlay-out 4.1s linear both;
+    pointer-events: none;
+    background: var(--bg);
+    animation: opening-backdrop 5.1s linear both;
   }
   .opening-intro__card {
     position: absolute;
-    background: #111;
-    color: white;
     overflow: hidden;
-    animation: opening-card 4s cubic-bezier(0.68, 0, 0.36, 1) both;
+    background: #111;
+    color: #fff;
+    animation: opening-card 5s var(--ease-in-out) both;
     will-change: width, height, transform;
   }
-  .opening-intro__first,
-  .opening-intro__last {
+  .opening-intro__title {
     position: absolute;
-    display: block;
+    left: 28px;
+    right: 28px;
+    bottom: 26px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
     font-family: var(--sans);
+    font-size: var(--title-size);
     font-weight: 500;
-    line-height: 0.95;
+    line-height: 0.98;
     letter-spacing: -0.06em;
     white-space: nowrap;
+    animation: opening-title-out 5s linear both;
   }
-  .opening-intro__first {
-    animation:
-      opening-first 4s cubic-bezier(0.68, 0, 0.36, 1) both,
-      opening-title-out 4s linear both;
+  .opening-intro__line {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.08em;
   }
-  .opening-intro__last {
+  .opening-intro__from,
+  .opening-intro__to {
+    display: block;
+  }
+  .opening-intro__from > span {
+    display: inline-block;
+    animation: opening-word-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.4s both;
+  }
+  .opening-intro__from > span + span {
+    animation-delay: 0.55s;
+  }
+  /* The roll: both phrases travel together, so the swap reads as one move. */
+  .opening-intro__from {
+    animation: opening-roll-out 0.75s var(--ease-in-out) 2.6s both;
+  }
+  .opening-intro__to {
+    position: absolute;
+    top: 0;
+    left: 0;
+    animation: opening-roll-in 0.75s var(--ease-in-out) 2.6s both;
+  }
+  .opening-intro__possible {
+    position: relative;
+    display: inline-block;
+    padding-right: 0.06em;
     animation:
-      opening-last 4s cubic-bezier(0.68, 0, 0.36, 1) both,
-      opening-title-out 4s linear both;
+      opening-word-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.7s both,
+      opening-possible 0.7s ease 1.6s both;
+  }
+  .opening-intro__possible::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0.06em;
+    bottom: 0.02em;
+    height: max(3px, 0.045em);
+    background: var(--lavender);
+    transform: scaleX(0);
+    transform-origin: left center;
+    animation: opening-underline 0.7s var(--ease-in-out) 1.7s both;
   }
   .opening-intro__brand {
     position: absolute;
@@ -81,7 +122,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    animation: opening-brand-in 4s linear both;
+    animation: opening-brand-in 5s linear both;
   }
   .opening-intro__skip {
     display: flex;
@@ -98,8 +139,9 @@
     color: #111;
     font-family: var(--mono);
     font-size: 10px;
+    text-transform: uppercase;
     cursor: pointer;
-    animation: opening-overlay-out 4.1s linear both;
+    animation: opening-overlay-out 5.1s linear both;
   }
 }
 
@@ -108,111 +150,122 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: var(--opening-card-width);
+    width: var(--card-width);
     height: 1px;
   }
-  25%,
-  37.5% {
+  12%,
+  78% {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: var(--opening-card-width);
-    height: var(--opening-card-height);
+    width: var(--card-width);
+    height: var(--card-height);
   }
-  62.5%,
-  75% {
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: var(--opening-wide-width);
-    height: var(--opening-wide-height);
-  }
+  98%,
   100% {
     left: 0;
     top: 0;
     transform: translate(0, 0);
-    width: var(--opening-brand-width);
-    height: 56px;
+    width: var(--brand-width);
+    height: var(--header-h);
   }
 }
-@keyframes opening-first {
-  0% {
-    top: 12px;
-    left: 12px;
-    font-size: var(--opening-small-type);
-    transform: translateX(-115%);
+@keyframes opening-word-in {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes opening-roll-out {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-110%);
+  }
+}
+@keyframes opening-roll-in {
+  from {
+    transform: translateY(110%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes opening-possible {
+  from {
+    color: #fff;
+  }
+  to {
+    color: var(--lavender);
+  }
+}
+@keyframes opening-underline {
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes opening-title-out {
+  0%,
+  80% {
     opacity: 1;
   }
-  25%,
-  37.5% {
-    top: 12px;
-    left: 12px;
-    font-size: var(--opening-small-type);
-    transform: translateX(0);
-    opacity: 1;
-  }
-  62.5%,
-  75% {
-    top: 18px;
-    left: 24px;
-    font-size: var(--opening-large-type);
-    transform: translateX(0);
-    opacity: 1;
-  }
+  90%,
   100% {
-    top: 18px;
-    left: 97px;
-    font-size: 12px;
-    transform: translateX(0);
     opacity: 0;
   }
 }
-@keyframes opening-last {
-  0% {
-    bottom: 12px;
-    right: 12px;
-    font-size: var(--opening-small-type);
-    transform: translateX(115%);
-    opacity: 1;
-  }
-  25%,
-  37.5% {
-    bottom: 12px;
-    right: 12px;
-    font-size: var(--opening-small-type);
-    transform: translateX(0);
-    opacity: 1;
-  }
-  62.5%,
-  75% {
-    bottom: 18px;
-    right: 24px;
-    font-size: var(--opening-large-type);
-    transform: translateX(0);
-    opacity: 1;
+@keyframes opening-brand-in {
+  0%,
+  94% {
+    opacity: 0;
   }
   100% {
-    bottom: 18px;
-    right: 30px;
-    font-size: 12px;
-    transform: translateX(0);
-    opacity: 0;
+    opacity: 1;
+  }
+}
+@keyframes opening-backdrop {
+  0%,
+  78% {
+    background-color: var(--bg);
+    visibility: visible;
+  }
+  90%,
+  99.9% {
+    background-color: transparent;
+    visibility: visible;
+  }
+  100% {
+    background-color: transparent;
+    visibility: hidden;
   }
 }
 @keyframes opening-art-in {
   from {
-    height: 100svh;
+    clip-path: inset(0 0 100% 0);
   }
   to {
-    height: var(--opening-art-height);
+    clip-path: inset(0);
   }
 }
 @keyframes opening-page-in {
   from {
-    padding-top: 0;
+    transform: translateY(40px);
   }
   to {
-    padding-top: 56px;
+    transform: translateY(0);
+  }
+}
+@keyframes opening-copy-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 @keyframes opening-header-in {
@@ -225,36 +278,10 @@
 }
 @keyframes opening-header-brand {
   0%,
-  95.4% {
+  97% {
     opacity: 0;
   }
   100% {
-    opacity: 1;
-  }
-}
-@keyframes opening-brand-in {
-  0%,
-  95% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-@keyframes opening-title-out {
-  0%,
-  95% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-@keyframes opening-controls-in {
-  from {
-    opacity: 0;
-  }
-  to {
     opacity: 1;
   }
 }
@@ -269,14 +296,14 @@
 }
 
 @media (max-width: 700px) and (prefers-reduced-motion: no-preference) {
-  .site-chrome[data-opening='playing'] {
-    --opening-art-height: clamp(270px, 39svh, 400px);
-  }
   .opening-intro {
-    --opening-brand-width: 160px;
-    --opening-wide-height: calc((100vw - 32px) / 2.4861111);
-    --opening-small-type: 32px;
-    --opening-large-type: clamp(44px, 13.4vw, 84px);
+    --card-height: min(420px, 62svh);
+    --title-size: calc((var(--card-width) - 36px) / 9.6);
+  }
+  .opening-intro__title {
+    left: 18px;
+    right: 18px;
+    bottom: 18px;
   }
 }
 @media print {

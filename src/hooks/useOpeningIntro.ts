@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export const OPENING_DURATION_MS = 4100;
+export const OPENING_DURATION_MS = 5200;
 
 /** Play only on an initial homepage visit, never while navigating within the app. */
 export function useOpeningIntro(pathname: string) {
@@ -16,13 +16,7 @@ export function useOpeningIntro(pathname: string) {
   useEffect(() => {
     if (!opening) return;
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let paused = false;
-    try {
-      paused = window.sessionStorage.getItem('admission-art-motion-paused') === 'true';
-    } catch {
-      // An unavailable storage API must never block access to the page.
-    }
-    if (motion.matches || paused || window.location.hash) {
+    if (motion.matches || window.location.hash) {
       const frame = window.requestAnimationFrame(() => setEnabled(false));
       return () => window.cancelAnimationFrame(frame);
     }
