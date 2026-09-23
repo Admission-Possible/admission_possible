@@ -15,26 +15,19 @@ describe('analytics', () => {
     expect(track).not.toHaveBeenCalled();
   });
 
-  it('sends the event and its properties in production', () => {
+  // The Join form holds first-gen status; none of it should ever reach an
+  // analytics payload. Events carry a name and nothing else.
+  it('sends the event name and no answers in production', () => {
     vi.stubEnv('PROD', true);
-    trackEvent({ name: 'intake_step', step: 3 });
-    expect(track).toHaveBeenCalledWith('intake_step', { step: 3 });
+    trackEvent({ name: 'join_submitted' });
+    expect(track).toHaveBeenCalledWith('join_submitted', {});
   });
 
-  // The intake holds first-gen status and Pell eligibility; none of it should
-  // ever reach an analytics payload.
-  it('carries a step number, never an answer', () => {
-    vi.stubEnv('PROD', true);
-    trackEvent({ name: 'intake_step', step: 5 });
-    const [, properties] = vi.mocked(track).mock.calls[0];
-    expect(Object.keys(properties as object)).toEqual(['step']);
-  });
-
-  it('never lets a failing beacon break the funnel', () => {
+  it('never lets a failing beacon break the form', () => {
     vi.stubEnv('PROD', true);
     vi.mocked(track).mockImplementation(() => {
       throw new Error('blocked');
     });
-    expect(() => trackEvent({ name: 'plan_generated', pathway: 'Common App' })).not.toThrow();
+    expect(() => trackEvent({ name: 'join_failed' })).not.toThrow();
   });
 });

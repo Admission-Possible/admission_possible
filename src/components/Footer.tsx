@@ -1,47 +1,44 @@
 import { Link } from 'react-router';
-import { navLinks } from '../data/nav';
+import { INFO_NAV, JOIN_NAV } from '../data/nav';
+import { Plus } from './Plus';
 import { Wordmark } from './Wordmark';
 
-interface FooterProps {
-  hasPlan?: boolean;
-}
+// The contact address is only shown when configured, and only if it is a
+// mailbox the project controls (same rule as the Join page fallback).
+const contactEmail = () => (import.meta.env.VITE_CONTACT_EMAIL ?? '').trim();
 
-export function Footer({ hasPlan = false }: FooterProps) {
+/**
+ * Branding, a short description, the core navigation, Join us, approved
+ * contact, and the legal line — then the closing "Admission Possible" statement.
+ * No social links are listed: none have been approved yet.
+ */
+export function Footer() {
+  const contact = contactEmail();
   return (
     <footer className="footer">
-      <div className="footer__contact">
-        <span className="eyebrow">Keep the conversation going</span>
-        <h2>
-          A question.
-          <br />A draft. A fresh start.
-        </h2>
-        <Link className="bar-link" to="/join">
-          <span>Let’s talk</span>
-          <span aria-hidden="true">↗</span>
-        </Link>
-      </div>
       <div className="footer__grid">
-        <div className="footer__col--left">
-          <Wordmark />
+        <div className="footer__brand">
+          <Wordmark white />
           <p className="footer__blurb">
-            Built for the first in their family. The college application, demystified. Where to apply, how to apply, how
-            to write the essays that get you in. Free.
+            Admission Possible provides guided mentorship that can span months or years, helping students discover their
+            direction, carve their own path, and work toward their long-term goals.
           </p>
         </div>
         <nav className="footer__links" aria-label="Footer">
           <span className="eyebrow">Explore</span>
-          {navLinks(hasPlan).map((n) => (
+          {INFO_NAV.map((n) => (
             <Link key={n.id} to={n.path}>
               {n.label}
             </Link>
           ))}
         </nav>
-        <div className="footer__resources">
-          <span className="eyebrow">Your next step</span>
-          <Link to="/router">Get your plan ↗</Link>
-          <Link to="/writing-course">The writing course ↗</Link>
-          <Link to="/list-builder">College list builder ↗</Link>
-          <span className="footer__tag">● First-gen access</span>
+        <div className="footer__join">
+          <span className="eyebrow">Next step</span>
+          <Link className="footer__join-link" to={JOIN_NAV.path}>
+            <span>{JOIN_NAV.label}</span>
+            <Plus />
+          </Link>
+          {contact && <a href={`mailto:${contact}`}>{contact}</a>}
         </div>
       </div>
       <div className="footer__legal">
@@ -49,11 +46,10 @@ export function Footer({ hasPlan = false }: FooterProps) {
         <Link className="footer__legal-link" to="/privacy">
           Privacy
         </Link>
-        <span>Made for what comes next.</span>
       </div>
-      <div className="footer__endmark" aria-hidden="true">
-        Possible.
-      </div>
+      <p className="footer__endmark" aria-hidden="true" data-reveal="rise">
+        <span>Admission</span> <span>Possible</span>
+      </p>
     </footer>
   );
 }

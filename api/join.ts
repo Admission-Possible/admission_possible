@@ -19,9 +19,19 @@
 // copy-and-paste fallback instead of pretending the submission was delivered.
 
 /** Field caps: generous for humans, bounded enough to blunt abusive payloads. */
-const LIMITS = { first: 100, last: 100, email: 254, grade: 60, needs: 4000 } as const;
+const LIMITS = { first: 100, last: 100, email: 254, grade: 60, firstGen: 20, interest: 80, needs: 4000 } as const;
+/** The form offers six interest boxes; anything beyond a few more is abuse. */
+const MAX_INTERESTS = 12;
 
-type JoinPayload = { first: string; last: string; email: string; grade: string; needs: string };
+type JoinPayload = {
+  first: string;
+  last: string;
+  email: string;
+  grade: string;
+  firstGen: string;
+  interests: string[];
+  needs: string;
+};
 
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -58,6 +68,13 @@ export async function handleJoin(request: Request): Promise<Response> {
     last: field(body.last, LIMITS.last),
     email: field(body.email, LIMITS.email),
     grade: field(body.grade, LIMITS.grade),
+    firstGen: field(body.firstGen, LIMITS.firstGen),
+    interests: Array.isArray(body.interests)
+      ? body.interests
+          .slice(0, MAX_INTERESTS)
+          .map((v) => singleLine(field(v, LIMITS.interest)))
+          .filter(Boolean)
+      : [],
     needs: field(body.needs, LIMITS.needs),
   };
 
@@ -77,8 +94,10 @@ export async function handleJoin(request: Request): Promise<Response> {
     `Last name: ${payload.last}`,
     `Email: ${payload.email}`,
     `Grade level: ${payload.grade}`,
+    `First in family to go to college: ${payload.firstGen}`,
+    `Looking for help with: ${payload.interests.join(', ') || '(not provided)'}`,
     '',
-    'What they need help with:',
+    'Anything else:',
     payload.needs || '(not provided)',
   ].join('\n');
 

@@ -1,7 +1,8 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Join from './Join';
+import { FIRST_GEN_OPTIONS, GRADES, INTERESTS } from '../data/join';
 import { renderWithRouter } from '../test/utils';
 
 afterEach(() => {
@@ -15,7 +16,8 @@ const fillValid = async (user: ReturnType<typeof userEvent.setup>) => {
   await user.type(screen.getByLabelText(/^email/i), 'ada@example.com');
 };
 
-const submit = (user: ReturnType<typeof userEvent.setup>) => user.click(screen.getByRole('button', { name: 'Join' }));
+const submit = (user: ReturnType<typeof userEvent.setup>) =>
+  user.click(screen.getByRole('button', { name: 'Join us' }));
 
 describe('Join form', () => {
   it('shows an accessible error and does not submit when the email is invalid', async () => {
@@ -142,28 +144,137 @@ describe('Join form', () => {
     expect(await screen.findByRole('button', { name: 'Thanks' })).toBeInTheDocument();
   });
 
-  it('shows a contact address only when one is configured', async () => {
+  it('offers a configured contact address beside the fallback, and none when unset', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 503 }));
+
+    const { unmount } = renderWithRouter(<Join />);
+    await fillValid(user);
+    await submit(user);
+    await screen.findByRole('button', { name: 'Try again' });
+    expect(document.querySelector('a[href^="mailto:"]')).toBeNull();
+    unmount();
+
     vi.stubEnv('VITE_CONTACT_EMAIL', 'hi@example.test');
     renderWithRouter(<Join />);
-    const link = within(document.body).getByRole('link', { name: 'hi@example.test' });
-    expect(link).toHaveAttribute('href', 'mailto:hi@example.test');
+    await fillValid(user);
+    await submit(user);
+    const link = await screen.findByRole('link', { name: 'hi@example.test' });
+    expect(link.getAttribute('href')).toMatch(/^mailto:hi@example\.test\?subject=/);
   });
 
-  // #36: the intake already captured grade; Join asked for it again, blank.
-  it('prefills grade from the stored intake', async () => {
-    const { computePlan } = await import('../data/plan');
-    const { saveIntake } = await import('../data/storage');
-    saveIntake({ answers: {}, plan: computePlan({ grade: '11th grade' }) });
-
-    renderWithRouter(<Join />);
-    expect(screen.getByLabelText(/^grade level/i)).toHaveValue('11th grade');
-  });
-
-  it('leaves grade blank when there is no intake', () => {
-    localStorage.clear();
-    sessionStorage.clear();
+  it('starts with grade blank and reads nothing from browser storage', () => {
+    const getItem = vi.spyOn(Storage.prototype, 'getItem');
     renderWithRouter(<Join />);
     expect(screen.getByLabelText(/^grade level/i)).toHaveValue('');
+    expect(getItem).not.toHaveBeenCalled();
+  });
+
+  it('asks for grade, first-gen status, interests and needs', () => {
+    renderWithRouter(<Join />);
+    const grade = screen.getByLabelText(/^grade level/i);
+    for (const g of GRADES) expect(within(grade).getByRole('option', { name: g })).toBeInTheDocument();
+
+    const firstGen = screen.getByRole('radiogroup', { name: /first in your family to go to college/i });
+    expect(
+      within(firstGen)
+        .getAllByRole('radio')
+        .map((r) => r.getAttribute('value')),
+    ).toEqual(FIRST_GEN_OPTIONS);
+
+    for (const interest of INTERESTS) {
+      expect(screen.getByRole('checkbox', { name: interest })).toBeInTheDocument();
+    }
+    expect(screen.getByLabelText(/anything else we should know/i).tagName).toBe('TEXTAREA');
+  });
+
+  it('POSTs every field as JSON, with interests as an array', async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal('fetch', fetchMock);
+
+    renderWithRouter(<Join />);
+    await user.type(screen.getByLabelText(/^first name/i), '  Ada ');
+    await user.type(screen.getByLabelText(/^last name/i), 'Lovelace');
+    await user.type(screen.getByLabelText(/^email/i), 'ada@example.com');
+    await user.selectOptions(screen.getByLabelText(/^grade level/i), '11th grade');
+    await user.click(screen.getByRole('radio', { name: 'Not sure' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Writing my essays' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Ongoing mentorship' }));
+    await user.type(screen.getByLabelText(/anything else/i), 'Evenings work best.');
+    await submit(user);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+      first: 'Ada',
+      last: 'Lovelace',
+      email: 'ada@example.com',
+      grade: '11th grade',
+      firstGen: 'Not sure',
+      interests: ['Writing my essays', 'Ongoing mentorship'],
+      needs: 'Evenings work best.',
+    });
+
+    // A delivered submission clears the form for the next student.
+    expect(await screen.findByRole('button', { name: 'Thanks' })).toBeInTheDocument();
+    expect(screen.getByLabelText(/^first name/i)).toHaveValue('');
+    expect(screen.getByRole('checkbox', { name: 'Writing my essays' })).not.toBeChecked();
+  });
+
+  it('sends empty optional fields rather than omitting them', async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal('fetch', fetchMock);
+
+    renderWithRouter(<Join />);
+    await fillValid(user);
+    await submit(user);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+      first: 'Ada',
+      last: '',
+      email: 'ada@example.com',
+      grade: '',
+      firstGen: '',
+      interests: [],
+      needs: '',
+    });
+  });
+
+  it('includes first-gen status and interests in the copyable fallback', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 503 }));
+
+    renderWithRouter(<Join />);
+    await fillValid(user);
+    await user.click(screen.getByRole('radio', { name: 'Yes' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Building my college list' }));
+    await submit(user);
+
+    const fallback = (await screen.findByLabelText('Copy this and send it to us:')) as HTMLTextAreaElement;
+    expect(fallback.value).toContain('First in family to go to college: Yes');
+    expect(fallback.value).toContain('Looking for help with: Building my college list');
+    // The typed answers survive in the form too.
+    expect(screen.getByLabelText(/^first name/i)).toHaveValue('Ada');
+  });
+
+  it('returns the button to "Join us" after thanking the student', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }));
+      renderWithRouter(<Join />);
+      await fillValid(user);
+      await submit(user);
+      expect(await screen.findByRole('button', { name: 'Thanks' })).toBeInTheDocument();
+      await act(async () => {
+        vi.advanceTimersByTime(2000);
+      });
+      expect(screen.getByRole('button', { name: 'Join us' })).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   // #39: browser autofill exists for exactly these fields (WCAG 1.3.5).

@@ -32,9 +32,8 @@ function setMeta(html, attr, key, value) {
 }
 
 const NOSCRIPT = `<noscript><p style="padding:6vw;font:16px/1.6 system-ui,sans-serif">
-(Ad)mission Possible — the college application, demystified. Where to apply, how to apply, and how to write the essays
-that get you in. Free, and built for the first in their family. This site needs JavaScript for the 2-minute intake;
-everything else is readable without it.</p></noscript>`;
+(Ad)mission Possible — guided mentorship, by first-gen students, for the next ones. Everything on this site is readable
+without JavaScript; the Join us form needs it to send.</p></noscript>`;
 
 let written = 0;
 for (const route of ALL_ROUTES) {

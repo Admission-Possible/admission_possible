@@ -1,71 +1,47 @@
-import { Link } from 'react-router';
-import { Circle } from '../components/Circle';
-import { Crumbs } from '../components/Crumbs';
-import { navCrumbs } from '../data/nav';
-import { Icon } from '../components/Icon';
+import type { CSSProperties } from 'react';
 import { EditorialHero } from '../components/EditorialHero';
+import { Possible } from '../components/Possible';
+import { CORE_MESSAGE, MENTORSHIP_GOALS } from '../data/content';
 
+const i = (n: number) => ({ '--i': n }) as CSSProperties;
+
+// Guided mentorship over months or years, not a college-application service.
 export default function Offer() {
   return (
-    <main className="interior">
-      <EditorialHero
-        kicker="02 / The support"
-        title="What we offer"
-        tone="plum"
-        note="Two ways forward. Always free."
-        description="Work independently, not alone. An eight-module path through the essays, or a near-peer coach to work through it with you. Free."
-      />
-      <Crumbs crumbs={navCrumbs('offer')} />
-
-      {/* Block A: headline left, ruled list right */}
-      <div className="offer__block">
-        <div data-reveal="" className="offer__summary">
-          <Icon name="course" className="offer__head-icon" />
-          <h2 className="offer__head">Self-paced course</h2>
-          <p className="offer__body">
-            Work independently, not alone. An eight-module path through the essays, from picking a topic to the last
-            short answer. The modules are written; we're building them out lesson by lesson. Free.
-          </p>
-          <p className="body-right" style={{ marginTop: 24 }}>
-            <Link className="ov-link" to="/writing-course">
-              See the writing course →
-            </Link>
-          </p>
+    <main className="interior offer">
+      <EditorialHero kicker="(Ad)mission Possible" title="What we offer" tone="plum" />
+      <section className="offer-message" aria-label="Our philosophy">
+        <h2 className="offer-message__lead" data-reveal="mask">
+          {CORE_MESSAGE.lead}
+        </h2>
+        <div className="offer-message__body" data-reveal="group">
+          {CORE_MESSAGE.body.map((line, n) => (
+            <p key={line} style={i(n)}>
+              {line}
+            </p>
+          ))}
         </div>
-        <div data-reveal="" className="ruled-list">
-          <div>Eight modules, topic to final draft</div>
-          <div>Prompts you work through on your own</div>
-          <div>A coach reads your draft when you ask</div>
-          <div>In the works: lessons you complete in the browser</div>
-        </div>
-      </div>
-
-      {/* Block B: ruled list left, headline right */}
-      <div className="offer__block offer__block--alt">
-        <div data-reveal="" className="offer__summary">
-          <Icon name="coaching" className="offer__head-icon" />
-          <h2 className="offer__head">1:1 Coaching</h2>
-          <p className="offer__body">
-            Want a person? Get matched with a coach who was a first-gen applicant two years ago. Free — there's nothing
-            to pay for anywhere on this site.
-          </p>
-          <p className="body-right" style={{ marginTop: 24 }}>
-            <Link className="ov-link" to="/coaching">
-              More on coaching →
-            </Link>
-          </p>
-        </div>
-        <div data-reveal="" className="ruled-list">
-          <div>Near-peer coach match</div>
-          <div>1:1 draft review</div>
-          <div>Accountability + check-ins</div>
-          <div>Ask for a coach and we'll email you back</div>
-        </div>
-      </div>
-
-      <div className="section-cta">
-        <Circle to="/router">Get my plan</Circle>
-      </div>
+        <p className="offer-message__close" data-reveal="group">
+          <span style={i(0)}>{CORE_MESSAGE.close[0]}</span>
+          <span style={i(1)}>{CORE_MESSAGE.close[1]}</span>
+          <span style={i(2)}>
+            {CORE_MESSAGE.close[2]} <Possible />.
+          </span>
+        </p>
+      </section>
+      <section className="offer-goals" aria-labelledby="offer-goals-title" data-reveal="group">
+        <span className="divider" />
+        <h2 className="eyebrow" id="offer-goals-title" style={i(0)}>
+          The goal is to help students
+        </h2>
+        <ul>
+          {MENTORSHIP_GOALS.map((goal, n) => (
+            <li key={goal} style={i(n + 1)}>
+              {goal}
+            </li>
+          ))}
+        </ul>
+      </section>
     </main>
   );
 }

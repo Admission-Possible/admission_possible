@@ -8,17 +8,11 @@ import { track } from '@vercel/analytics';
 // decides what is measured — and so a future provider swap touches one file.
 
 /**
- * The funnel, as events.
- *
- * Deliberately narrow: a step number and a route name, never an answer. The
- * intake holds first-gen status and Pell eligibility, and none of that belongs
- * in an analytics payload.
+ * The funnel, as events. Deliberately narrow: whether a Join submission went
+ * through, never anything the student typed. Form answers (first-gen status
+ * included) do not belong in an analytics payload.
  */
-export type FunnelEvent =
-  | { name: 'intake_step'; step: number }
-  | { name: 'plan_generated'; pathway: string }
-  | { name: 'join_submitted' }
-  | { name: 'join_failed' };
+export type FunnelEvent = { name: 'join_submitted' } | { name: 'join_failed' };
 
 export function trackEvent(event: FunnelEvent): void {
   // In dev and under test the SDK would log rather than send; skip it entirely

@@ -14,11 +14,10 @@ export default function Privacy() {
         kicker="The details / Plain language"
         title="Privacy"
         tone="lavender"
-        note={`Last updated ${UPDATED}`}
         description={
           <>
-            Plain version: the answers you give in the intake stay on your own device, and the only thing you ever send
-            us is the Join form — because you filled it in and pressed the button.
+            Plain version: the only thing you ever send us is the Join us form — because you filled it in and pressed
+            the button. Last updated {UPDATED}.
           </>
         }
       />
@@ -26,15 +25,10 @@ export default function Privacy() {
       <section className="legal__sec">
         <h2 className="legal__h">What we collect</h2>
         <p>
-          <strong>The Join form.</strong> When you submit it we receive your first name, last name, email address, grade
-          level, and whatever you write in "what do you need help with". This is the only information that reaches us.
-          We use it to email you back. Nothing else.
-        </p>
-        <p>
-          <strong>The 7-question intake.</strong> Your answers — including whether you're the first in your family to
-          apply and whether you expect a Pell Grant — are saved <strong>in your browser on your device</strong> so your
-          plan is still there when you come back. They are never sent to us, and we cannot see them. Clearing your
-          browsing data deletes them permanently, and we have no copy to restore.
+          <strong>The Join us form.</strong> When you submit it we receive your first name, last name, email address,
+          grade level, whether you are the first in your family to go to college (if you answer), the topics you tick,
+          and whatever you write in "anything else we should know". This is the only information that reaches us. We use
+          it to email you back. Nothing else.
         </p>
       </section>
 
@@ -54,14 +48,12 @@ export default function Privacy() {
       <section className="legal__sec">
         <h2 className="legal__h">Tracking</h2>
         <p>
-          We count page views and a handful of steps — reaching a question in the intake, generating a plan, sending the
-          Join form — using Vercel Web Analytics. It sets no cookies, builds no profile, and cannot follow you to other
-          sites. We see totals, not people.
+          We count page views and whether a Join us form was sent, using Vercel Web Analytics. It sets no cookies,
+          builds no profile, and cannot follow you to other sites. We see totals, not people.
         </p>
         <p>
-          Your intake answers are never part of that. We record which step you reached, never what you answered, so
-          nothing about your family's income or background is measured. There are no advertising pixels and no tracking
-          cookies.
+          What you type into the form is never part of that, so nothing about your family or background is measured.
+          There are no advertising pixels and no tracking cookies.
         </p>
         <p>
           The site loads nothing from anyone else's servers. Our fonts used to come from Google Fonts, which meant
@@ -99,8 +91,8 @@ export default function Privacy() {
           with a similar name.
         </p>
         <p>
-          Questions, or want your information deleted? Use the <Link to="/join">Join form</Link> and say so — it reaches
-          the same inbox.
+          Questions, or want your information deleted? Use the <Link to="/join">Join us form</Link> and say so — it
+          reaches the same inbox.
         </p>
       </section>
     </main>

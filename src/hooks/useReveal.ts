@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router';
 
-const SLASH_ANGLE = 12;
-
-// Scroll-reveal for [data-reveal]/[data-slash], re-scanned on every route
-// change. Ports legacy motion.js. Honours prefers-reduced-motion. Runs from
-// the layout so it covers the active page.
+// Scroll-reveal for [data-reveal], re-scanned on every route change. Marks
+// each node `.shown` once it enters the viewport; site.css decides what that
+// means per variant (group stagger, mask, line, rise). Honours
+// prefers-reduced-motion by never arming the hidden state. Runs from the
+// layout so it covers the active page.
 export function useReveal() {
   const { pathname } = useLocation();
 
@@ -14,9 +14,8 @@ export function useReveal() {
 
     const root = document.documentElement;
     root.classList.add('is-animated');
-    root.style.setProperty('--slash-angle', `${SLASH_ANGLE}deg`);
 
-    const all = Array.from(document.querySelectorAll<HTMLElement>('[data-slash],[data-reveal]'));
+    const all = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
     const show = (n: HTMLElement) => {
       n.classList.add('shown');
       n.dataset.shown = '1';

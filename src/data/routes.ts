@@ -1,4 +1,4 @@
-import { TEAM } from './team';
+import { TEAM, hasStory } from './team';
 
 export const SITE_ORIGIN = 'https://admission-possible.vercel.app';
 
@@ -11,36 +11,20 @@ export const SITE_ORIGIN = 'https://admission-possible.vercel.app';
  * two stay in step — a route missing here would 404 once the catch-all rewrite
  * is narrowed.
  */
-export const MARKETING_ROUTES = [
-  '/',
-  '/about',
-  '/how',
-  '/offer',
-  '/writing-course',
-  '/list-builder',
-  '/pathways',
-  '/coaching',
-  '/join',
-  '/privacy',
-];
+export const MARKETING_ROUTES = ['/', '/about', '/how', '/offer', '/join', '/privacy'];
 
-/** Client-state routes. Prerendered as their empty state, then hydrated. */
-export const APP_ROUTES = ['/router', '/plan', '/dashboard'];
+// Only members with approved copy get a page; the rest are named on About.
+export const TEAM_ROUTES = TEAM.filter(hasStory).map((m) => `/team/${m.slug}`);
 
-export const TEAM_ROUTES = TEAM.map((m) => `/team/${m.slug}`);
-
-export const ALL_ROUTES = [...MARKETING_ROUTES, ...APP_ROUTES, ...TEAM_ROUTES];
+export const ALL_ROUTES = [...MARKETING_ROUTES, ...TEAM_ROUTES];
 
 /** Per-route description; falls back to the site-level one. */
 export const ROUTE_DESCRIPTIONS: Record<string, string> = {
-  '/': 'The college application, demystified. Where to apply, how to apply, and how to write the essays that get you in. Free, and built for the first in their family.',
+  '/': 'Your future is more than a college acceptance letter. Guided mentorship, by first-gen students, for the next ones.',
   '/about': 'The founding team behind (Ad)mission Possible.',
-  '/how': 'How college admissions actually works, phase by phase — from building a list to submitting.',
-  '/offer': 'A self-paced path through the essays, or a coach who was a first-gen applicant two years ago. Free.',
-  '/writing-course': 'Eight modules from picking a topic to the last short answer.',
-  '/list-builder': 'How to build a college list balanced on fit and finances, not luck.',
-  '/pathways': 'Common App, UC, QuestBridge, Coalition, ApplyTexas and CBCA — every application system side by side.',
-  '/coaching': 'Get matched with a coach who was a first-gen applicant two years ago.',
-  '/join': 'Tell us about yourself and we will email you back.',
+  '/how': 'How it works: five steps from where you are to where you’re going.',
+  '/offer':
+    'Guided mentorship that can span months or years, helping students find their direction and carve their path.',
+  '/join': 'Join us. Tell us about yourself and what you need help with, and we’ll email you back.',
   '/privacy': 'What we collect, where it goes, and how long we keep it.',
 };

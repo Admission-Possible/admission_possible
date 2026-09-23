@@ -1,17 +1,16 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router';
-import { navLinks } from '../data/nav';
+import { NAV } from '../data/nav';
+import { Plus } from './Plus';
 
 interface MenuProps {
   open: boolean;
   current: string;
-  /** Adds the "My plan" entry once the student has completed the intake. */
-  hasPlan?: boolean;
   onClose: () => void;
 }
 
-// Full-screen overlay menu: huge mono-caps links separated by backslashes.
-export function Menu({ open, current, hasPlan = false, onClose }: MenuProps) {
+// Full-height navigation drawer. Same destinations as the header and footer.
+export function Menu({ open, current, onClose }: MenuProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -23,13 +22,9 @@ export function Menu({ open, current, hasPlan = false, onClose }: MenuProps) {
     return () => opener?.focus();
   }, [open]);
 
-  // Trap Tab / Shift+Tab within the dialog.
-  //
-  // This listens on the document, not on the dialog. The overlay is full-screen
-  // with large non-focusable areas: clicking one moved activeElement to <body>,
-  // and a handler bound to the dialog then never fired — so Tab walked
-  // invisibly into the obscured page behind. Chrome.tsx additionally marks that
-  // content inert while the menu is open; this is the belt to that's braces.
+  // Trap Tab / Shift+Tab within the dialog. Listens on the document: clicking
+  // a dead area of the overlay moves focus to <body>, where a handler bound to
+  // the dialog would never fire. Chrome.tsx also marks the page behind inert.
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: globalThis.KeyboardEvent) => {
@@ -62,9 +57,9 @@ export function Menu({ open, current, hasPlan = false, onClose }: MenuProps) {
   return (
     <div className="ov-menu" role="dialog" aria-modal="true" aria-label="Site menu" ref={dialogRef}>
       <div className="ov-menu__backdrop" onClick={onClose} aria-hidden="true" />
-      <div className="ov-menu__top">Your next chapter</div>
+      <div className="ov-menu__top">Explore the guide</div>
       <nav className="ov-menu__links">
-        {navLinks(hasPlan).map((n, i) => (
+        {NAV.map((n, i) => (
           <Link
             key={n.id}
             className={'ov-menu__link' + (n.id === current ? ' is-current' : '')}
@@ -76,12 +71,11 @@ export function Menu({ open, current, hasPlan = false, onClose }: MenuProps) {
             <sup aria-hidden="true">{String(i + 1).padStart(2, '0')}</sup>
           </Link>
         ))}
-        <div className="ov-menu__caption">Free guidance. First-gen futures.</div>
+        <div className="ov-menu__caption">By first-gen students. For the next ones.</div>
       </nav>
       <button className="ov-menu__close" aria-label="Close menu" onClick={onClose} ref={closeRef}>
-        <span aria-hidden="true">×</span>
+        <Plus className="plus--close" />
       </button>
-      <div className="ov-menu__rule" />
     </div>
   );
 }

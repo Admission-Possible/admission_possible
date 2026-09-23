@@ -1,94 +1,38 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import App from '../App';
+import { TEAM, hasStory } from '../data/team';
 import { renderWithRouter } from '../test/utils';
 
 describe('About page', () => {
-  it('renders the who-we-are intro at /about', () => {
+  it('renders "About us" at /about', () => {
     renderWithRouter(<App />, { route: '/about' });
-    expect(screen.getByRole('heading', { level: 1, name: /who we are/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'About us' })).toBeInTheDocument();
   });
 
-  it('expands a founder intro when their card is clicked', async () => {
-    const user = userEvent.setup();
+  it('shows every founding team member by name', () => {
     renderWithRouter(<App />, { route: '/about' });
-
-    const joseCard = screen.getByRole('button', { name: /hey, i'm jose/i });
-    expect(joseCard).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByText(/translator in my family/)).not.toBeInTheDocument();
-
-    await user.click(joseCard);
-    expect(joseCard).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByText(/translator in my family/)).toBeInTheDocument();
-
-    // Selecting another founder swaps the intro. Haolin has no approved copy
-    // yet (#46), so the panel says so rather than inventing testimony.
-    await user.click(screen.getByRole('button', { name: /hey, i'm haolin/i }));
-    expect(screen.queryByText(/translator in my family/)).not.toBeInTheDocument();
-    expect(screen.getByText(/profile isn't written yet/i)).toBeInTheDocument();
-  });
-
-  it('links to the full story only for members who have one', async () => {
-    const user = userEvent.setup();
-    renderWithRouter(<App />, { route: '/about' });
-
-    await user.click(screen.getByRole('button', { name: /hey, i'm jose/i }));
-    expect(screen.getByRole('link', { name: /full story/i })).toHaveAttribute('href', '/team/jose');
-
-    // #46: promising a story that does not exist is the thing being fixed.
-    await user.click(screen.getByRole('button', { name: /hey, i'm rehan/i }));
-    expect(screen.queryByRole('link', { name: /full story/i })).not.toBeInTheDocument();
-  });
-
-  it('shows the selected founder roles in the expanded intro', async () => {
-    const user = userEvent.setup();
-    renderWithRouter(<App />, { route: '/about' });
-    await user.click(screen.getByRole('button', { name: /hey, i'm rehan/i }));
-    const panel = screen.getByRole('region', { name: /about rehan/i });
-    expect(within(panel).getByText('Technical')).toBeInTheDocument();
-    expect(within(panel).getByText('Counseling')).toBeInTheDocument();
-    expect(within(panel).queryByText('Marketing')).not.toBeInTheDocument();
-  });
-
-  it('sets aria-controls only on the selected card, and only when its panel exists', async () => {
-    const user = userEvent.setup();
-    renderWithRouter(<App />, { route: '/about' });
-
-    // Collapsed: no card references a panel id, so no dangling aria-controls.
-    const cards = screen.getAllByRole('button', { name: /hey, i'm/i });
-    expect(cards).toHaveLength(4);
-    for (const card of cards) {
-      expect(card).not.toHaveAttribute('aria-controls');
-    }
-
-    const jose = screen.getByRole('button', { name: /hey, i'm jose/i });
-    await user.click(jose);
-
-    // The selected card points at a panel that is really in the document.
-    expect(jose).toHaveAttribute('aria-controls', 'about-member-panel');
-    expect(document.getElementById('about-member-panel')).toBeInTheDocument();
-    // Focus stays on the toggling button (disclosure pattern — not stolen by the panel).
-    expect(jose).toHaveFocus();
-    // The other cards don't claim to control Jose's panel.
-    for (const card of cards.filter((c) => c !== jose)) {
-      expect(card).not.toHaveAttribute('aria-controls');
+    for (const member of TEAM) {
+      expect(screen.getByText(member.fullName)).toBeInTheDocument();
     }
   });
 
-  it('brings the intro panel into view when a card is selected', async () => {
-    // jsdom has no scrollIntoView; install one so we can observe the call.
-    const proto = window.HTMLElement.prototype as { scrollIntoView?: (opts?: ScrollIntoViewOptions) => void };
-    const spy = vi.fn();
-    proto.scrollIntoView = spy;
-    try {
-      const user = userEvent.setup();
-      renderWithRouter(<App />, { route: '/about' });
-      await user.click(screen.getByRole('button', { name: /hey, i'm jose/i }));
-      // The matchMedia stub reports reduced motion, so the scroll must be instant.
-      expect(spy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'auto' }));
-    } finally {
-      delete proto.scrollIntoView;
+  it('links to a story only for members who have one', () => {
+    renderWithRouter(<App />, { route: '/about' });
+    const nav = screen.getByRole('navigation', { name: 'Founding team links' });
+    const hrefs = within(nav)
+      .getAllByRole('link')
+      .map((a) => a.getAttribute('href'));
+    for (const member of TEAM) {
+      if (hasStory(member)) expect(hrefs).toContain(`/team/${member.slug}`);
+      else expect(hrefs).not.toContain(`/team/${member.slug}`);
     }
+  });
+
+  it('has no expandable founder cards or intro panels', () => {
+    renderWithRouter(<App />, { route: '/about' });
+    expect(screen.queryByRole('button', { name: /hey, i'm/i })).not.toBeInTheDocument();
+    expect(document.querySelector('[aria-expanded]')).toBeNull();
+    expect(document.body.textContent).not.toMatch(/hey, i'm/i);
   });
 });

@@ -1,41 +1,30 @@
 # (Ad)mission Possible
 
-> The college application, demystified — and free, built for the first in their family.
+> Your future is more than a college acceptance letter.
 
-A landing experience plus an interactive intake that turns a few questions
-into a concrete plan — a recommended application pathway, a balanced starter
-college list, and a study track — followed by a student dashboard.
+Guided mentorship, by first-gen students, for the next ones. The site tells one
+journey — discover Admission Possible, what we do, how we help, the path, the
+people behind it — and ends at a single action: **Join us**, the student
+sign-up.
+
+The visual and interaction language follows the
+[AI in Design Report 2026](https://stateofaidesign.com/) (proportions, dividers,
+motion); the content and branding are Admission Possible's own.
 
 ---
 
 ## Table of contents
 
-- [Overview](#overview)
 - [Tech stack](#tech-stack)
 - [Getting started](#getting-started)
-- [Available scripts](#available-scripts)
 - [Project structure](#project-structure)
 - [Routes](#routes)
-- [Home intro animation](#home-intro-animation)
-- [About & the founding team](#about--the-founding-team)
-- [The intake flow](#the-intake-flow)
-- [Design system](#design-system)
+- [Content rules](#content-rules)
+- [Motion](#motion)
+- [Supplying assets](#supplying-assets)
 - [Accessibility](#accessibility)
 - [Testing & CI](#testing--ci)
 - [Deployment](#deployment)
-
----
-
-## Overview
-
-(Ad)mission Possible is a single-page app (migrated from a vanilla
-multi-page site) that walks a student from a bold landing page through a
-7-question intake and into a personalized plan and dashboard. The goal is to
-make the application process legible for students who are navigating it
-without a map.
-
-The original vanilla implementation is preserved in git history (see the
-`legacy/` directory before the migration commits).
 
 ---
 
@@ -46,7 +35,7 @@ The original vanilla implementation is preserved in git history (see the
 | UI          | **React 19** + **TypeScript** (strict)                       |
 | Build / dev | **Vite 8**                                                   |
 | Routing     | **React Router 8** (client-side)                             |
-| Styling     | A single hand-authored `global.css`                          |
+| Styling     | Hand-authored CSS in `src/styles/`                           |
 | Tests       | **Vitest 4** + **Testing Library** (jsdom)                   |
 | Hosting     | Prerendered static site on Vercel (client-routed after load) |
 
@@ -61,19 +50,8 @@ npm run build      # type-check (tsc -b) + production build to dist/
 npm run preview    # serve the production build
 ```
 
----
-
-## Available scripts
-
-| Script              | What it does                              |
-| ------------------- | ----------------------------------------- |
-| `npm run dev`       | Start the Vite dev server with HMR        |
-| `npm run build`     | Type-check then build to `dist/`          |
-| `npm run preview`   | Serve the production build locally        |
-| `npm run typecheck` | `tsc`, no emit                            |
-| `npm run lint`      | ESLint (flat config, TS + react-hooks)    |
-| `npm run format`    | Prettier write (`format:check` to verify) |
-| `npm test`          | Vitest + Testing Library (jsdom)          |
+`npm run typecheck`, `npm run lint`, `npm run format` and `npm test` do what
+they say.
 
 ---
 
@@ -81,173 +59,93 @@ npm run preview    # serve the production build
 
 ```
 public/
-  icons/                # PNG icons (menu, route, course, coaching, people,
-                        # list, submit, apply, learn-write)
-  intro/                # campus photos for the Home intro animation
-                        # (harvard, mit, princeton, yale)
+  colleges/             # every provided campus photo (01–32.jpg)
+  art/                  # the botanical hero film + poster
+  brand/                # the graduation-cap logo
   team/                 # founding-team photos + placeholder portraits
 src/
-  main.tsx              # entry; mounts <App/> in <BrowserRouter> + ErrorBoundary
-  App.tsx               # routes, all nested under the Chrome layout
-  types.ts              # shared domain types
-  data/                 # nav, questions, pathways, plan (computePlan),
-                        # storage (sessionStorage), team (founding-team content)
-  hooks/
-    useReveal.ts        # scroll reveal/slash (re-scanned per route)
-    useScrollHideHeader.ts
-  components/
-    Chrome, Header, Menu, Footer, Crumbs, Icon, Circle, Slash, Wordmark,
-    ErrorBoundary
-    IntroFloat.tsx      # the Home floating-image hero (see below)
-    TeamCard.tsx        # expandable founding-team card on the About page
-  pages/                # Home, About, How, Offer, Pathways, Coaching, Join,
-                        # WritingCourse, ListBuilder, Router, Plan, Dashboard,
-                        # TeamMember (the "My story" profile page), NotFound
-  styles/global.css     # the full design system
+  App.tsx               # routes, nested under the Chrome layout
+  data/
+    content.ts          # approved copy: core message, How steps, pathways
+    colleges.ts         # the campus photo list
+    nav.ts              # the one navigation set (header, menu, footer)
+    team.ts             # founding team
+  components/           # Header, Menu, Footer, OpeningIntro, AdmissionArt,
+                        # PathwayMarks, StepRail, CampusCarousel, TeamStrip,
+                        # LetsMake, Plus, Possible, Counter, …
+  pages/                # Home, About, How, Offer, Join, Privacy, TeamMember,
+                        # NotFound
+  styles/               # global (tokens, fonts), editorial (header, menu),
+                        # site (home, motion, footer), interior, opening-intro,
+                        # admission-art
 ```
-
-> Files are grouped by role (data / hooks / components / pages / styles).
-> Imports rely on these locations, so prefer extending a folder over moving
-> files across folders.
 
 ---
 
 ## Routes
 
-| Path                               | Page                               |
-| ---------------------------------- | ---------------------------------- |
-| `/`                                | Home                               |
-| `/about`                           | About us (founding-team directory) |
-| `/how`                             | How admissions works               |
-| `/offer`                           | What we offer                      |
-| `/writing-course`                  | The writing course                 |
-| `/list-builder`                    | College list builder               |
-| `/pathways`                        | Application pathways               |
-| `/coaching`                        | Coaching                           |
-| `/join`                            | Join                               |
-| `/team/:slug`                      | Founding-team profile              |
-| `/router` → `/plan` → `/dashboard` | The intake flow                    |
-| `*`                                | Not found                          |
+| Path          | Page                      |
+| ------------- | ------------------------- |
+| `/`           | Home                      |
+| `/about`      | About us                  |
+| `/how`        | How it works              |
+| `/offer`      | What we offer             |
+| `/join`       | Join us (student sign-up) |
+| `/privacy`    | Privacy                   |
+| `/team/:slug` | Founding-team profile     |
+| `*`           | Not found                 |
+
+Header, menu and footer all read `src/data/nav.ts`, so they can't disagree.
 
 ---
 
-## Home intro animation
+## Content rules
 
-The Home page opens with a full-screen **floating-image hero**
-(`src/components/IntroFloat.tsx`): the headline _"Impossible becomes
-Possible"_ sits centered while ~20 thumbnail images orbit it.
-
-**Behaviour**
-
-- **Scattered, never a grid** — tiles are placed by percentage coordinates
-  across every quadrant, at three depth tiers (`far` / `mid` / `near`) that
-  drive size, opacity, blur, z-index, and movement amount.
-- **Load animation** — each image arrives from an exaggerated outer offset,
-  fading and scaling into place on a staggered `cubic-bezier(0.16, 1, 0.3, 1)`.
-- **Auto-play inward → outward** — a CSS animation drives a registered
-  `@property --inward` custom property (no scrolling required). Tiles
-  interpolate between an inward vector (clustered toward the headline) and an
-  outward vector (dispersed), looping gently so the field breathes on its own.
-- **Continuous drift** — each image has an independent looping float on a
-  separate layer, so idle motion never fights the auto-drift transform.
-
-**Three-layer composition** keeps transforms from colliding:
-
-| Layer           | Owns                          |
-| --------------- | ----------------------------- |
-| `.itile`        | scatter position + auto drift |
-| `.itile__inner` | continuous idle drift         |
-| `.itile__media` | one-shot load arrival         |
-
-**Performance & a11y** — only `transform` / `opacity` animate, `will-change`
-is scoped to animated wrappers, far images lazy-load, and
-`prefers-reduced-motion` disables drift in favour of a static fade-in. The
-headline is always real text.
-
-**Swapping in photos** — the field uses campus photos in `public/intro/`
-(`yale`, `mit`, `harvard`, `princeton`), cycled across the tile slots. Drop
-more files in and update the `IMAGES` array at the top of `IntroFloat.tsx`;
-positions and motion keep working unchanged.
+Only approved content ships. Copy lives in `src/data/content.ts` and
+`src/data/team.ts`; do not invent statistics, testimonials, quotes, student
+stories or organizational claims. Where something is not yet supplied, the
+slot stays empty (e.g. a pathway `logo`) rather than filled with a stand-in.
 
 ---
 
-## About & the founding team
+## Motion
 
-The About page (`/about`) opens with a "Who we are" statement, then a
-**Founding team** directory: four tilted cards (`TeamCard.tsx`) — Jose,
-Haolin, Angeline, and Rehan — each straightening and lifting on hover. Each
-card is an expand **button** (an `aria-expanded` disclosure): clicking it
-toggles a shared inline intro panel below the grid with the member's full
-name, journey line, bio, a bold belief statement, and colored role chips,
-plus a "Read my full story →" link to `/team/:slug`. Content lives in
-`src/data/team.ts` (a single source of truth shared by the directory and the
-profile pages), so a card and its page never drift apart.
-
-`/team/:slug` renders `TeamMember.tsx` — a "My story" profile in Geist: a
-light heading, a three-column row (journey path / narrative / a bold belief
-statement with a muted sub-paragraph), a wide hero image, a row of pastel
-skill pills, and a "Back to About us" pill in the top-left.
-
-**Swapping in real photos** — drop files into `public/team/` and update the
-`photo` (card, 15:11) and `storyPhoto` (wide hero) paths in `team.ts`. The
-`*.svg` files are brand-palette placeholders; real photos override them.
+- **Opening** (`OpeningIntro`, first homepage visit only): "Impossible Becomes
+  Possible" → "Possible" is underlined → "Impossible Becomes" rolls out as
+  "Admission" rolls in → the title card docks into the header logo and the
+  hero opens.
+- **Scroll reveals** (`useReveal` + `site.css`): `data-reveal="group"` staggers
+  a section's children by `--i`; `mask` unmasks headings upward; `line` draws
+  rules; `rise` lifts the closing statement. One shared easing (`--ease`).
+- Hero windows cycle through every campus photo; the carousel loops all of
+  them continuously. There are no pause controls; motion stops when off screen,
+  in a hidden tab, or when the system asks for reduced motion.
 
 ---
 
-## The intake flow
+## Supplying assets
 
-`Get my plan` goes to `/router`, a 7-question intake. On the last step the
-answers and the computed plan are saved to `sessionStorage` and the user is
-sent to `/plan`; the plan's track toggle persists and is reflected on
-`/dashboard`. Visiting `/plan` or `/dashboard` without intake redirects back
-to the router. `computePlan()` maps answers to a pathway, a balanced
-reach/target/likely list, and a track. The plan links to `/list-builder` for
-refining the starter list, and the dashboard's coaching row routes to
-`/join`.
-
----
-
-## Design system
-
-- **Type** — Geist Mono (display) + Geist (`--display`, used on the About
-  page, team cards, and profile pages) + Inter (body).
-- **Palette**
-  | Token           | Value     | Use                         |
-  | --------------- | --------- | --------------------------- |
-  | `--bg`          | `#F5F2E0` | warm cream paper            |
-  | `--ink`         | `#3A3A36` | text                        |
-  | `--muted`       | `#6F6E68` | secondary text              |
-  | `--accent`      | `#E8491D` | orange accent               |
-  | `--accent-soft` | `#F26B43` | lighter orange (team cards) |
-  | `--card`        | `#FBFAF1` | surfaces                    |
-  | `--hairline`    | `#C9C6BE` | rules / borders             |
-  | `--menu-bg`     | `#4C4B46` | full-screen menu overlay    |
-- **Motion** — scroll-triggered reveals and rotating hairline "slashes",
-  re-scanned on each route change (`IntersectionObserver` + scroll/timeout
-  fallback), plus the Home intro animation above. All respect
-  `prefers-reduced-motion`.
-- **Icons** — `Icon.tsx` renders a name to either an inline freehand SVG or a
-  supplied PNG via the `PNG_ICONS` map (route, course, coaching, people, list,
-  submit, apply, write); `bookmark` and `calendar` stay vector. The header's
-  menu button uses `menu.png` directly.
+- **Pathway logos** — add official files to `public/pathways/` and set `logo`
+  on each entry in `APPLICATION_PATHWAYS` (`src/data/content.ts`).
+- **Team photos** — add to `public/team/` and update `photo` / `storyPhoto` in
+  `src/data/team.ts`. The `*.svg` files are placeholders.
+- **Campus photos** — add to `public/colleges/` and list them in
+  `src/data/colleges.ts`; they join the hero and carousel automatically.
 
 ---
 
 ## Accessibility
 
-- Skip link, `main` landmark, and visible focus styles.
-- The menu dialog has dialog semantics and moves focus on open.
-- Router options are keyboard-operable.
-- All motion honours `prefers-reduced-motion`; decorative intro thumbnails use
-  empty `alt` text.
+- Skip link, landmarks, visible focus, dialog semantics for the menu.
+- Decorative imagery uses empty `alt`; animated numbers expose their final
+  value to assistive tech.
+- `prefers-reduced-motion` disables the opening, reveals and loops.
 
 ---
 
 ## Testing & CI
 
-Tests live next to the code they cover (`*.test.ts[x]`) and include
-`computePlan` branch coverage, storage round-trips, component unit tests, and
-an end-to-end intake-flow test (router → plan → dashboard). CI
+Tests live next to the code they cover (`*.test.ts[x]`). CI
 (`.github/workflows/ci.yml`) runs typecheck, lint, format check, tests, and
 build on every push and PR to `main`.
 
@@ -268,9 +166,8 @@ Two consequences worth knowing:
   paths into 200-status soft 404s. Unmatched paths now get `404.html` with a
   real 404. **A new route must be added to `src/data/routes.ts` or it will 404
   in production** — a test fails if the manifest drifts from `App.tsx`.
-- **Never read storage during render.** The prerender runs in Node with no
-  `localStorage`, so a component that reads stored intake inline renders
-  differently on a returning student's first paint, and React throws the
+- **Never read browser-only state during render.** The prerender runs in Node,
+  so anything that differs on the first client paint makes React throw the
   prerendered tree away. Go through `useHydrated()` (see `src/hooks/`); a test
   hydrates every route and fails on any mismatch.
 

@@ -25,11 +25,11 @@ describe('team content integrity', () => {
     }
   });
 
-  it('says plainly that a profile is unwritten instead of showing an empty story', () => {
+  it('serves a 404 instead of an empty profile for members without copy', () => {
     const placeholder = TEAM.find((m) => !hasStory(m))!;
     renderWithRouter(<App />, { route: `/team/${placeholder.slug}` });
-    expect(screen.getByRole('heading', { level: 1, name: placeholder.fullName })).toBeInTheDocument();
-    expect(screen.getByText(/put words in their mouth/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'This page doesn’t exist.' })).toBeInTheDocument();
+    expect(screen.queryByText(placeholder.fullName)).not.toBeInTheDocument();
   });
 
   it('still renders the approved profile in full', () => {
@@ -51,8 +51,8 @@ describe('the misspelled slug', () => {
     expect(m.storyPhoto).toContain('haolin');
   });
 
-  it('resolves /team/haolin', () => {
-    renderWithRouter(<App />, { route: '/team/haolin' });
-    expect(screen.getByRole('heading', { level: 1, name: 'Haolin Feng' })).toBeInTheDocument();
+  it('names Haolin on About, where the founding team is listed', () => {
+    renderWithRouter(<App />, { route: '/about' });
+    expect(screen.getByText('Haolin Feng')).toBeInTheDocument();
   });
 });

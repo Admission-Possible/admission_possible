@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { NAV } from '../data/nav';
-import { hasIntake } from '../data/storage';
 import { titleForPath } from '../data/titles';
-import { useHydrated } from '../hooks/useHydrated';
 import { useReveal } from '../hooks/useReveal';
 import { useOpeningIntro } from '../hooks/useOpeningIntro';
 import { OpeningIntro } from './OpeningIntro';
@@ -21,12 +19,6 @@ export function Chrome() {
   const mainRef = useRef<HTMLDivElement>(null);
   // A route change should move focus; the first paint should not steal it.
   const focusedPath = useRef(pathname);
-
-  // Derived per render, so finishing the intake reveals the "My plan" link on
-  // that same navigation. False until hydrated, so the first client paint
-  // matches the prerendered HTML (#45).
-  const hydrated = useHydrated();
-  const hasPlan = hydrated && hasIntake();
 
   // On navigation: close the menu (state adjusted during render, per React docs).
   const [prevPathname, setPrevPathname] = useState(pathname);
@@ -100,10 +92,10 @@ export function Chrome() {
         <div id="main-content" ref={mainRef} tabIndex={-1}>
           <Outlet context={{ opening }} />
         </div>
-        <Footer hasPlan={hasPlan} />
+        <Footer />
       </div>
       {opening && <OpeningIntro onSkip={finish} />}
-      <Menu open={menuOpen} current={current} hasPlan={hasPlan} onClose={() => setMenuOpen(false)} />
+      <Menu open={menuOpen} current={current} onClose={() => setMenuOpen(false)} />
     </>
   );
 }
