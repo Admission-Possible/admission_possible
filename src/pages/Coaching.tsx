@@ -2,19 +2,20 @@ import { Circle } from '../components/Circle';
 import { Crumbs } from '../components/Crumbs';
 import { navCrumbs } from '../data/nav';
 import { Icon } from '../components/Icon';
+import { EditorialHero } from '../components/EditorialHero';
 
 export default function Coaching() {
   return (
     <main className="interior">
-      <div className="rule" />
+      <EditorialHero
+        kicker="03 / A person in your corner"
+        title="A coach who was a first-gen applicant two years ago."
+        tone="sky"
+        art="support"
+        note="Near-peer guidance. Always free."
+      />
       <Crumbs crumbs={navCrumbs('coaching')} />
-      <div className="rule" />
-
-      <h1 className="center-statement" data-reveal="">
-        A coach who was a first-gen applicant two years ago.
-      </h1>
-
-      <div className="triband">
+      <div className="triband coaching-features">
         <div className="triband__col">
           <Icon name="people" className="triband__icon" />
           <div className="triband__k">Near-peer</div>

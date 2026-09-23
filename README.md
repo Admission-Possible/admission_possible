@@ -17,7 +17,7 @@ college list, and a study track — followed by a student dashboard.
 - [Project structure](#project-structure)
 - [Routes](#routes)
 - [Home intro animation](#home-intro-animation)
-- [Founding team](#founding-team)
+- [About & the founding team](#about--the-founding-team)
 - [The intake flow](#the-intake-flow)
 - [Design system](#design-system)
 - [Accessibility](#accessibility)
@@ -41,14 +41,14 @@ The original vanilla implementation is preserved in git history (see the
 
 ## Tech stack
 
-| Concern     | Choice                                     |
-| ----------- | ------------------------------------------ |
-| UI          | **React 18** + **TypeScript** (strict)     |
-| Build / dev | **Vite**                                   |
-| Routing     | **React Router** (client-side)             |
-| Styling     | A single hand-authored `global.css`        |
-| Tests       | **Vitest** + **Testing Library** (jsdom)   |
-| Hosting     | Static SPA (Vercel rewrite / SPA fallback) |
+| Concern     | Choice                                                       |
+| ----------- | ------------------------------------------------------------ |
+| UI          | **React 19** + **TypeScript** (strict)                       |
+| Build / dev | **Vite 8**                                                   |
+| Routing     | **React Router 8** (client-side)                             |
+| Styling     | A single hand-authored `global.css`                          |
+| Tests       | **Vitest 4** + **Testing Library** (jsdom)                   |
+| Hosting     | Prerendered static site on Vercel (client-routed after load) |
 
 ---
 
@@ -83,24 +83,26 @@ npm run preview    # serve the production build
 public/
   icons/                # PNG icons (menu, route, course, coaching, people,
                         # list, submit, apply, learn-write)
-  intro/                # thumbnail art for the Home intro animation (t1–t8.svg)
+  intro/                # campus photos for the Home intro animation
+                        # (harvard, mit, princeton, yale)
   team/                 # founding-team photos + placeholder portraits
 src/
-  main.tsx              # entry; mounts <App/> in <BrowserRouter>
+  main.tsx              # entry; mounts <App/> in <BrowserRouter> + ErrorBoundary
   App.tsx               # routes, all nested under the Chrome layout
   types.ts              # shared domain types
-  data/                 # nav, questions, pathways, computePlan, sessionStorage,
-                        # team (founding-team content)
+  data/                 # nav, questions, pathways, plan (computePlan),
+                        # storage (sessionStorage), team (founding-team content)
   hooks/
-    useReveal.ts        # scroll reveal/slash + hero scramble (per route)
+    useReveal.ts        # scroll reveal/slash (re-scanned per route)
     useScrollHideHeader.ts
   components/
-    Chrome, Header, Menu, Footer, Crumbs, Icon, Circle, Slash, Wordmark
+    Chrome, Header, Menu, Footer, Crumbs, Icon, Circle, Slash, Wordmark,
+    ErrorBoundary
     IntroFloat.tsx      # the Home floating-image hero (see below)
-    TeamCard.tsx        # tilted founding-team card on the Home page
-  pages/                # Home, How, Offer, Pathways, Coaching, Join,
+    TeamCard.tsx        # expandable founding-team card on the About page
+  pages/                # Home, About, How, Offer, Pathways, Coaching, Join,
                         # WritingCourse, ListBuilder, Router, Plan, Dashboard,
-                        # TeamMember (the "My story" profile page)
+                        # TeamMember (the "My story" profile page), NotFound
   styles/global.css     # the full design system
 ```
 
@@ -112,18 +114,20 @@ src/
 
 ## Routes
 
-| Path                               | Page                  |
-| ---------------------------------- | --------------------- |
-| `/`                                | Home                  |
-| `/how`                             | How it works          |
-| `/offer`                           | What we offer         |
-| `/writing-course`                  | The writing course    |
-| `/list-builder`                    | College list builder  |
-| `/pathways`                        | Application pathways  |
-| `/coaching`                        | Coaching              |
-| `/join`                            | Join                  |
-| `/team/:slug`                      | Founding-team profile |
-| `/router` → `/plan` → `/dashboard` | The intake flow       |
+| Path                               | Page                               |
+| ---------------------------------- | ---------------------------------- |
+| `/`                                | Home                               |
+| `/about`                           | About us (founding-team directory) |
+| `/how`                             | How admissions works               |
+| `/offer`                           | What we offer                      |
+| `/writing-course`                  | The writing course                 |
+| `/list-builder`                    | College list builder               |
+| `/pathways`                        | Application pathways               |
+| `/coaching`                        | Coaching                           |
+| `/join`                            | Join                               |
+| `/team/:slug`                      | Founding-team profile              |
+| `/router` → `/plan` → `/dashboard` | The intake flow                    |
+| `*`                                | Not found                          |
 
 ---
 
@@ -167,17 +171,22 @@ positions and motion keep working unchanged.
 
 ---
 
-## Founding team
+## About & the founding team
 
-The Home page has a **Founding team** section: three tilted orange cards
-(`TeamCard.tsx`), each straightening and lifting on hover. Content lives in
-`src/data/team.ts` (a single source of truth shared by the cards and the
+The About page (`/about`) opens with a "Who we are" statement, then a
+**Founding team** directory: four tilted cards (`TeamCard.tsx`) — Jose,
+Haolin, Angeline, and Rehan — each straightening and lifting on hover. Each
+card is an expand **button** (an `aria-expanded` disclosure): clicking it
+toggles a shared inline intro panel below the grid with the member's full
+name, journey line, bio, a bold belief statement, and colored role chips,
+plus a "Read my full story →" link to `/team/:slug`. Content lives in
+`src/data/team.ts` (a single source of truth shared by the directory and the
 profile pages), so a card and its page never drift apart.
 
-Each card links to `/team/:slug`, rendering `TeamMember.tsx` — a "My story"
-profile in Geist: a light heading, a three-column row (journey path /
-narrative / a bold belief statement with a muted sub-paragraph), a wide hero
-image, a row of pastel skill pills, and a "Back to Home" pill in the top-left.
+`/team/:slug` renders `TeamMember.tsx` — a "My story" profile in Geist: a
+light heading, a three-column row (journey path / narrative / a bold belief
+statement with a muted sub-paragraph), a wide hero image, a row of pastel
+skill pills, and a "Back to About us" pill in the top-left.
 
 **Swapping in real photos** — drop files into `public/team/` and update the
 `photo` (card, 15:11) and `storyPhoto` (wide hero) paths in `team.ts`. The
@@ -192,14 +201,16 @@ answers and the computed plan are saved to `sessionStorage` and the user is
 sent to `/plan`; the plan's track toggle persists and is reflected on
 `/dashboard`. Visiting `/plan` or `/dashboard` without intake redirects back
 to the router. `computePlan()` maps answers to a pathway, a balanced
-reach/target/likely list, and a track.
+reach/target/likely list, and a track. The plan links to `/list-builder` for
+refining the starter list, and the dashboard's coaching row routes to
+`/join`.
 
 ---
 
 ## Design system
 
-- **Type** — Geist Mono (display) + Geist (`--display`, used on the team cards
-  and profile pages) + Inter (body).
+- **Type** — Geist Mono (display) + Geist (`--display`, used on the About
+  page, team cards, and profile pages) + Inter (body).
 - **Palette**
   | Token           | Value     | Use                         |
   | --------------- | --------- | --------------------------- |
@@ -208,16 +219,17 @@ reach/target/likely list, and a track.
   | `--muted`       | `#6F6E68` | secondary text              |
   | `--accent`      | `#E8491D` | orange accent               |
   | `--accent-soft` | `#F26B43` | lighter orange (team cards) |
-  | `--mint`        | `#9CE6A8` | mint accent                 |
   | `--card`        | `#FBFAF1` | surfaces                    |
   | `--hairline`    | `#C9C6BE` | rules / borders             |
+  | `--menu-bg`     | `#4C4B46` | full-screen menu overlay    |
 - **Motion** — scroll-triggered reveals and rotating hairline "slashes",
-  re-scanned on each route change (`IntersectionObserver` + visibility/timeout
+  re-scanned on each route change (`IntersectionObserver` + scroll/timeout
   fallback), plus the Home intro animation above. All respect
   `prefers-reduced-motion`.
 - **Icons** — `Icon.tsx` renders a name to either an inline freehand SVG or a
-  supplied PNG via the `PNG_ICONS` map (menu, route, course, coaching, people,
-  list, submit, apply, learn-write); the rest stay vector.
+  supplied PNG via the `PNG_ICONS` map (route, course, coaching, people, list,
+  submit, apply, write); `bookmark` and `calendar` stay vector. The header's
+  menu button uses `menu.png` directly.
 
 ---
 
@@ -243,18 +255,34 @@ build on every push and PR to `main`.
 
 ## Deployment
 
-This is a client-routed SPA, so the host must serve `index.html` for every
-path (preserving the old site's direct-URL behaviour). `vercel.json` does this
-with a catch-all rewrite. On other static hosts, add the equivalent SPA
-fallback (e.g. a `404.html` copy of `index.html` for GitHub Pages).
+Every route is **prerendered to its own HTML file** at build time, so crawlers
+and link-preview bots get real content instead of an empty root div, and each
+page carries its own title, description and canonical. `npm run build` does
+three things: the client bundle, an SSR bundle from `src/entry-server.tsx`, and
+`scripts/prerender.mjs`, which writes `dist/<route>/index.html` for every entry
+in `src/data/routes.ts` plus a `404.html`.
+
+Two consequences worth knowing:
+
+- **There is no SPA catch-all rewrite any more.** It was what turned unknown
+  paths into 200-status soft 404s. Unmatched paths now get `404.html` with a
+  real 404. **A new route must be added to `src/data/routes.ts` or it will 404
+  in production** — a test fails if the manifest drifts from `App.tsx`.
+- **Never read storage during render.** The prerender runs in Node with no
+  `localStorage`, so a component that reads stored intake inline renders
+  differently on a returning student's first paint, and React throws the
+  prerendered tree away. Go through `useHydrated()` (see `src/hooks/`); a test
+  hydrates every route and fails on any mismatch.
 
 ### Security headers
 
 `vercel.json` also sets response headers, including a Content-Security-Policy.
 The default `connect-src 'self'` allows same-origin requests only.
 
-**Wiring up the Join form:** if you set `VITE_JOIN_ENDPOINT` (see
-`src/pages/Join.tsx`) to a **cross-origin** backend such as Formspree or
+**Wiring up the Join form:** Join POSTs to the same-origin `/api/join`
+Vercel Function (`api/join.ts`) by default, which `connect-src 'self'` already
+allows — no CSP change needed. If you override `VITE_JOIN_ENDPOINT` (see
+`src/pages/Join.tsx`) with a **cross-origin** backend such as Formspree or
 Getform, that `fetch` is a `connect-src` and will be **blocked** by the CSP
 until you add the endpoint's origin. Update the `connect-src` slot in
 `vercel.json`:
@@ -267,3 +295,24 @@ until you add the endpoint's origin. Update the `connect-src` slot in
 A same-origin endpoint (e.g. a `/api/join` Vercel Function) needs no CSP change.
 `vercel.json` is strict JSON and can't hold comments, so this is the canonical
 note for that edit.
+
+### Environment variables
+
+Copy `.env.example` to `.env.local` for local development, and set the same
+keys in the Vercel project settings for deploys. See that file for the full
+list; the ones that matter for Join are:
+
+| Variable             | Where  | Purpose                                                                                                                                        |
+| -------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RESEND_API_KEY`     | server | Required for `/api/join` to deliver mail. Unset ⇒ the endpoint returns 503 and the form shows a copyable fallback instead of claiming success. |
+| `JOIN_NOTIFY_EMAIL`  | server | The inbox that receives submissions.                                                                                                           |
+| `JOIN_FROM_EMAIL`    | server | Optional sender, on a Resend-verified domain.                                                                                                  |
+| `VITE_CONTACT_EMAIL` | client | A public address to show as a manual fallback. **Leave unset until you verifiably control the mailbox** — see below.                           |
+| `VITE_JOIN_ENDPOINT` | client | Override the POST target. Defaults to `/api/join`.                                                                                             |
+
+> **Contact address:** `VITE_CONTACT_EMAIL` ships in the client bundle and is
+> shown to students. It previously pointed at `hello@admissionpossible.org`, a
+> domain owned by College Possible — an unrelated nonprofit — so submissions
+> were being directed to a third party. Only set this to a mailbox whose domain
+> ownership and inbox delivery you have verified end to end. When it is unset,
+> the form shows the composed message for copying and names no address at all.

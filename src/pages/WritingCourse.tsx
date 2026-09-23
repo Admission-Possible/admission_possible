@@ -1,5 +1,7 @@
 import { Circle } from '../components/Circle';
 import { Crumbs } from '../components/Crumbs';
+import { navCrumb } from '../data/nav';
+import { EditorialHero } from '../components/EditorialHero';
 
 const MODULES: [string, string, string][] = [
   ['01', 'Essay topics', 'Values + Bullseye → three candidate topics'],
@@ -15,19 +17,21 @@ const MODULES: [string, string, string][] = [
 export default function WritingCourse() {
   return (
     <main className="interior">
-      <div className="rule" />
-      <Crumbs crumbs={[{ label: 'What we offer', to: '/offer' }, { label: 'The writing course' }]} />
-      <div className="rule" />
-
-      <div className="page-intro">
-        <h1 className="subhead" data-reveal="">
-          Show me you can write. Don't just tell me.
-        </h1>
-        <p className="page-intro__lede" data-reveal="">
-          Every lesson ends in production. You write, right there, and a coach pushes you. You leave with a finished
-          personal statement and a stack of supplementals.
-        </p>
-      </div>
+      <EditorialHero
+        kicker="The writing course / Eight modules"
+        title={
+          <>
+            Show me you can write.
+            <br />
+            Don't just tell me.
+          </>
+        }
+        tone="plum"
+        art="writing"
+        note="From picking a topic to the final draft"
+        description="This is the path we take you through, module by module — from picking a topic to the last short answer. The syllabus below is real; the in-browser lessons are still being built. Ask for a coach and we'll work through it with you over email in the meantime."
+      />
+      <Crumbs crumbs={[navCrumb('offer'), { label: 'The writing course' }]} />
 
       <div className="feature-rows">
         {MODULES.map(([num, title, note]) => (
@@ -42,7 +46,9 @@ export default function WritingCourse() {
       </div>
 
       <div className="section-cta">
-        <Circle to="/router">Start writing</Circle>
+        {/* Was /router, which restarted the 7-question intake from scratch —
+            a dead end for anyone who had already finished it. */}
+        <Circle to="/join">Ask for a coach</Circle>
       </div>
     </main>
   );

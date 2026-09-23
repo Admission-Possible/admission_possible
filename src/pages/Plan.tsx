@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useRef, useState } from 'react';
+import { Link } from 'react-router';
 import { Circle } from '../components/Circle';
+import { NoPlan } from '../components/NoPlan';
+import { planToText } from '../data/planText';
+import { useHydrated } from '../hooks/useHydrated';
 import { loadIntake, saveIntake } from '../data/storage';
 import type { Intake, School, TrackName } from '../types';
 
@@ -19,36 +22,76 @@ function SchoolCol({ title, list }: { title: string; list: School[] }) {
 }
 
 export default function Plan() {
-  const navigate = useNavigate();
-  const [intake, setIntake] = useState<Intake | null>(() => loadIntake());
+  // The prerender has no storage; showing NoPlan before hydration would tell a
+  // returning student their plan was lost (#45). Derived rather than synced
+  // into state, with a track switch overlaying it.
+  const hydrated = useHydrated();
+  const [switched, setSwitched] = useState<Intake | null>(null);
+  const intake = switched ?? (hydrated ? loadIntake() : null);
+  const [copied, setCopied] = useState(false);
+  const [saveError, setSaveError] = useState(false);
+  const copyTimer = useRef<number | undefined>(undefined);
 
-  useEffect(() => {
-    if (!intake || !intake.plan) navigate('/router', { replace: true });
-  }, [intake, navigate]);
-
-  if (!intake || !intake.plan) return null;
+  if (!hydrated) return null;
+  // No silent redirect: say what happened and offer the way back.
+  if (!intake || !intake.plan) return <NoPlan />;
 
   const p = intake.plan;
   const activeTrack: TrackName = intake.trackOverride ?? p.trackName ?? 'Self-paced course';
   const other = activeTrack === 'Self-paced course' ? 'Switch to 1:1 coaching' : 'Switch to self-paced course';
-  const cta = activeTrack === 'Self-paced course' ? 'Start my course' : 'Match me with a coach';
 
   const toggleTrack = () => {
     const nextTrack: TrackName = activeTrack === 'Self-paced course' ? '1:1 Coaching' : 'Self-paced course';
     const updated: Intake = { ...intake, trackOverride: nextTrack };
-    saveIntake(updated);
-    setIntake(updated);
+    // Router surfaces this same failure; Plan discarded the boolean, so a
+    // blocked-storage switch looked like it worked and silently didn't persist.
+    if (!saveIntake(updated)) {
+      setSaveError(true);
+      return;
+    }
+    setSaveError(false);
+    setSwitched(updated);
+  };
+
+  const copyPlan = async () => {
+    try {
+      await navigator.clipboard.writeText(planToText(p, activeTrack));
+      setCopied(true);
+      window.clearTimeout(copyTimer.current);
+      copyTimer.current = window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // Clipboard blocked (insecure context or denied permission) — the
+      // download button below is the fallback, so fail quietly.
+      setCopied(false);
+    }
+  };
+
+  const downloadPlan = () => {
+    const blob = new Blob([planToText(p, activeTrack)], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'admission-possible-plan.txt';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   };
 
   return (
     <main className="ov-plan">
-      <h1 className="ov-plan__title">Your plan</h1>
-      <p className="ov-plan__lede">Here's where to start.</p>
+      <header className="ov-plan__head">
+        <span className="label">Made for your next chapter</span>
+        <h1 className="ov-plan__title">Your plan</h1>
+        <p className="ov-plan__lede">Here's where to start.</p>
+      </header>
 
-      <div className="ov-plan__sec">
+      <div className="ov-plan__sec ov-plan__sec--pathway">
         <div className="label">A — Your pathway</div>
-        <div className="ov-plan__pathway">{p.pathway}</div>
-        <p className="ov-plan__why">{p.why}</p>
+        <div className="ov-plan__summary">
+          <div className="ov-plan__pathway">{p.pathway}</div>
+          <p className="ov-plan__why">{p.why}</p>
+        </div>
       </div>
 
       <div className="ov-plan__sec">
@@ -58,7 +101,9 @@ export default function Plan() {
           <SchoolCol title="Target" list={p.target} />
           <SchoolCol title="Likely" list={p.likely} />
         </div>
-        <div className="ov-plan__hint">Refine this in the List Builder.</div>
+        <div className="ov-plan__hint">
+          Refine this in the <Link to="/list-builder">List Builder</Link>.
+        </div>
       </div>
 
       <div className="ov-plan__track">
@@ -70,10 +115,34 @@ export default function Plan() {
           {other}
         </button>
       </div>
+      {saveError && (
+        <p className="ov-router__error" role="alert">
+          We couldn't save that change — your browser is blocking site storage (this can happen in private browsing).
+          Allow storage for this site and try again.
+        </p>
+      )}
+      {/* 'Not sure yet' used to collapse silently into self-paced. Say so. */}
+      {p.trackChosen === false && !intake.trackOverride && (
+        <p className="ov-plan__tracknote">
+          You said you weren't sure yet, so we've started you on the self-paced course. Switch whenever you like —
+          nothing is locked in.
+        </p>
+      )}
+
+      {/* The plan is saved on this device only, so give it a way out of the tab. */}
+      <div className="ov-plan__export">
+        <button className="ov-plan__switch" onClick={copyPlan}>
+          {copied ? 'Copied' : 'Copy my plan'}
+        </button>
+        <button className="ov-plan__switch" onClick={downloadPlan}>
+          Download as text
+        </button>
+      </div>
 
       <div className="ov-plan__cta">
+        <p>Ready for your next step?</p>
         <Circle size="plan" to="/dashboard">
-          {cta}
+          See my dashboard
         </Circle>
       </div>
     </main>

@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# The funnel pages render from per-device intake state and are meaningless
+# (and often empty) to a crawler.
+Disallow: /router
+Disallow: /plan
+Disallow: /dashboard
+
+Sitemap: https://admission-possible.vercel.app/sitemap.xml

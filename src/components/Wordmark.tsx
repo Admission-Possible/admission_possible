@@ -1,15 +1,16 @@
 interface WordmarkProps {
   white?: boolean;
-  large?: boolean;
 }
 
-// Admission Possible logo. The `white` variant (dark backgrounds, e.g. the menu)
-// renders the mark in white via a CSS filter since the artwork has dark text.
-export function Wordmark({ white, large }: WordmarkProps) {
-  const cls = 'wordmark' + (white ? ' wordmark--white' : '') + (large ? ' wordmark--lg' : '');
+export function Wordmark({ white }: WordmarkProps) {
   return (
-    <div className={cls}>
-      <img className="wordmark__img" src="/logo.png" alt="Admission Possible" />
+    <div className={'wordmark' + (white ? ' wordmark--white' : '')} role="img" aria-label="Admission Possible">
+      <img className="wordmark__cap" src="/brand/admission-cap.png" alt="" width="905" height="668" />
+      <span className="wordmark__name" aria-hidden="true">
+        Admission
+        <br />
+        Possible
+      </span>
     </div>
   );
 }

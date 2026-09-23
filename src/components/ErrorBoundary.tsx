@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { clearIntake } from '../data/storage';
 
 interface Props {
   children: ReactNode;
@@ -24,11 +25,9 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleStartOver = (): void => {
-    try {
-      sessionStorage.removeItem('ap.intake');
-    } catch {
-      /* storage unavailable — ignore */
-    }
+    // Was a hardcoded 'ap.intake', which silently stopped clearing the plan the
+    // moment storage moved to localStorage. One exported source of truth now.
+    clearIntake();
   };
 
   render(): ReactNode {

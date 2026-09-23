@@ -1,31 +1,57 @@
 export interface TeamMember {
   slug: string;
   name: string;
+  /** Full name as shown in the team directory. */
+  fullName: string;
+  /** Directory role chips (Founding Team, Technical, …). */
+  roles: string[];
   /** Card portrait (15:11 landscape). */
   photo: string;
   /** Wide hero image on the profile page. */
   storyPhoto: string;
-  /** Resting tilt of the card on the home page. */
+  /** Resting tilt of the directory card on the About page. */
   tilt: number;
-  /** Short journey line, e.g. "Architecture → Brand → Web → AI". */
-  path: string;
+  /**
+   * Short journey line, e.g. "Architecture → Brand → Web → AI".
+   *
+   * Every narrative field below is optional. A member with no approved copy
+   * renders a plain "profile coming soon" state — the alternative was
+   * publishing invented first-person testimony under a real person's name.
+   */
+  path?: string;
   /** Middle-column narrative. */
-  bio: string;
+  bio?: string;
   /** Right-column bold statement. */
-  belief: string;
+  belief?: string;
   /** Muted sub-paragraph under the statement. */
-  beliefSub: string;
+  beliefSub?: string;
   /** Pastel pill tags. */
-  tags: string[];
+  tags?: string[];
 }
 
-// Filler content. Swap for real bios/photos when ready.
+/** True once this member has approved copy to show. */
+export function hasStory(member: TeamMember): boolean {
+  return Boolean(member.bio && member.belief);
+}
+
+// Only Jose has approved copy and real photos.
+//
+// The other three previously shipped detailed first-person life stories and
+// belief statements — including specific claims about their schooling — under
+// their real full names, next to monogram placeholder portraits, on a page
+// styled as personal testimony. None of it was theirs. It has been removed
+// rather than left in place behind a "filler content" comment no visitor sees.
+//
+// To restore a profile: add real photos under public/team/, then fill in path,
+// bio, belief, beliefSub and tags with copy that person has actually approved.
 export const TEAM: TeamMember[] = [
   {
     slug: 'jose',
     name: 'Jose',
-    photo: '/team/jose.png',
-    storyPhoto: '/team/jose-story.png',
+    fullName: 'Jose Cruz',
+    roles: ['Founding Team', 'Technical', 'Outreach', 'Marketing'],
+    photo: '/team/jose.webp',
+    storyPhoto: '/team/jose-story.webp',
     tilt: -6,
     path: 'First-gen → CS → Mentor → Founder',
     bio: "I grew up as the translator in my family, for forms, for phone calls, for the systems nobody explained to us. I taught myself to code, talked my way into rooms I wasn't supposed to be in, and built the map I wish I'd had at seventeen.",
@@ -36,31 +62,31 @@ export const TEAM: TeamMember[] = [
     tags: ['Product', 'Engineering', 'First-gen advocacy', 'Essay strategy', 'Mentorship', 'Systems design'],
   },
   {
-    slug: 'hoalin',
-    name: 'Hoalin',
-    photo: '/team/hoalin.svg',
-    storyPhoto: '/team/hoalin-story.svg',
+    slug: 'haolin',
+    name: 'Haolin',
+    fullName: 'Haolin Feng',
+    roles: ['Founding Team', 'Operational', 'Counseling', 'Marketing'],
+    photo: '/team/haolin.svg',
+    storyPhoto: '/team/haolin-story.svg',
     tilt: 5,
-    path: 'Public school → Berkeley → Builder',
-    bio: "I came up through overcrowded classrooms and a counselor who had four hundred other students. Everything I learned about applying, I learned too late or by accident. I'm here so the next kid learns it on time.",
-    belief:
-      'I believe access is a design problem, not a talent problem. Talent is everywhere. The instructions are not.',
-    beliefSub:
-      'My job is to turn the chaos of deadlines, portals, and fine print into something that feels calm and doable, one clear step at a time.',
-    tags: ['Operations', 'Financial aid', 'Outreach', 'Curriculum', 'Community', 'Coaching'],
   },
   {
     slug: 'angeline',
     name: 'Angeline',
+    fullName: 'Angeline Martinez',
+    roles: ['Founding Team', 'Operational', 'Counseling'],
     photo: '/team/angeline.svg',
     storyPhoto: '/team/angeline-story.svg',
     tilt: -3,
-    path: 'Immigrant household → Art school → Storytelling',
-    bio: "I was the first in my family to write a personal statement, and I had no idea what 'show, don't tell' even meant. I fell in love with helping people find the line in their story that makes an admissions officer lean in.",
-    belief: 'I believe every student already has the essay inside them. They just need someone to help them hear it.',
-    beliefSub:
-      "I care about the small things, the verb, the detail, the ending, because that's where a real voice lives. Your story stays yours. I just help it land.",
-    tags: ['Essays', 'Storytelling', 'Brand & voice', 'Workshops', 'Editing', 'Design'],
+  },
+  {
+    slug: 'rehan',
+    name: 'Rehan',
+    fullName: 'Rehan Sha',
+    photo: '/team/rehan.svg',
+    storyPhoto: '/team/rehan-story.svg',
+    tilt: 4,
+    roles: ['Founding Team', 'Technical', 'Counseling'],
   },
 ];
 

@@ -3,11 +3,11 @@ import { render } from '@testing-library/react';
 import { Wordmark } from './Wordmark';
 
 describe('Wordmark', () => {
-  it('renders the logo image with accessible alt text', () => {
+  it('renders the supplied logo with an accessible brand name', () => {
     const { container } = render(<Wordmark />);
-    const img = container.querySelector('img.wordmark__img');
-    expect(img?.getAttribute('src')).toBe('/logo.png');
-    expect(img?.getAttribute('alt')).toBe('Admission Possible');
+    const mark = container.querySelector('.wordmark');
+    expect(mark).toHaveAttribute('role', 'img');
+    expect(mark).toHaveAttribute('aria-label', 'Admission Possible');
   });
 
   it('applies the white modifier', () => {

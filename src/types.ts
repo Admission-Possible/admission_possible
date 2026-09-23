@@ -34,6 +34,18 @@ export interface Plan {
   target: School[];
   likely: School[];
   trackName: TrackName;
+  /**
+   * Application systems actually present on the student's list, so deadlines
+   * come from the schools rather than the single first-match pathway label.
+   * Optional: plans saved before this field existed are still valid.
+   */
+  systems?: string[];
+  /** False when the student answered 'Not sure yet' — the track is a default, not a choice. */
+  trackChosen?: boolean;
+  /** The intake's grade answer, carried through so later steps needn't re-ask. */
+  grade?: string;
+  /** Grade-appropriate framing for the deadline panel. */
+  timeline?: string;
 }
 
 /** Router answers: single-select stores a string, multi-select stores a string[]. */
@@ -45,6 +57,12 @@ export interface Intake {
   trackOverride?: TrackName;
 }
 
+/** In-progress intake, persisted per tab so a refresh doesn't discard answers. */
+export interface Draft {
+  step: number;
+  answers: Answers;
+}
+
 export interface Crumb {
   label: string;
   /** A link target; omit for the current page (rendered large). */
@@ -52,15 +70,4 @@ export interface Crumb {
 }
 
 export type IconName =
-  | 'route'
-  | 'write'
-  | 'list'
-  | 'apply'
-  | 'submit'
-  | 'course'
-  | 'bookmark'
-  | 'calendar'
-  | 'coaching'
-  | 'next'
-  | 'people'
-  | 'money';
+  'route' | 'write' | 'list' | 'apply' | 'submit' | 'course' | 'bookmark' | 'calendar' | 'coaching' | 'people';

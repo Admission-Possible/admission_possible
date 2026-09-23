@@ -1,49 +1,61 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import { Circle } from '../components/Circle';
 import { Icon } from '../components/Icon';
+import { NoPlan } from '../components/NoPlan';
+import { planSystems } from '../data/plan';
+import { useHydrated } from '../hooks/useHydrated';
 import { loadIntake } from '../data/storage';
-import type { Intake } from '../types';
 
-// Typical fall-cycle dates; `match` keys a row to the recommended pathway
-// (empty = always shown). Exact dates shift every year — the sample-data
-// note tells students to confirm on each system's official site.
-const DEADLINES: { sys: string; date: string; match: string }[] = [
-  { sys: 'QuestBridge', date: 'Sep 26', match: 'QuestBridge' },
-  { sys: 'Common App (EA)', date: 'Nov 1', match: '' },
-  { sys: 'UC Application', date: 'Nov 30', match: 'UC Application' },
-  { sys: 'ApplyTexas (priority)', date: 'Dec 1', match: 'ApplyTexas' },
-  { sys: 'CBCA', date: 'Rolling', match: 'CBCA' },
+// Typical fall-cycle dates. `system` keys a row to an application system that
+// is actually on the student's list (see planSystems) rather than to the
+// pathway label — the label is a single first-match string, so it routinely
+// omitted a system the student had been given schools for. Exact dates shift
+// every year; the sample-data note tells students to confirm each one.
+const DEADLINES: { sys: string; date: string; system: string }[] = [
+  { sys: 'QuestBridge', date: 'Sep 26', system: 'QuestBridge' },
+  { sys: 'Common App (EA)', date: 'Nov 1', system: 'Common App' },
+  { sys: 'UC Application', date: 'Nov 30', system: 'UC App' },
+  { sys: 'Cal State Apply', date: 'Dec 2', system: 'Cal State Apply' },
+  { sys: 'ApplyTexas (priority)', date: 'Dec 1', system: 'ApplyTexas' },
+  { sys: 'CBCA', date: 'Rolling', system: 'CBCA' },
 ];
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-  const [intake] = useState<Intake | null>(() => loadIntake());
+  // Derived, not synced: the prerender has no storage, so the first client
+  // render must agree with it before reading (#45).
+  const hydrated = useHydrated();
+  const intake = hydrated ? loadIntake() : null;
 
-  useEffect(() => {
-    if (!intake || !intake.plan) navigate('/router', { replace: true });
-  }, [intake, navigate]);
-
-  if (!intake || !intake.plan) return null;
+  if (!hydrated) return null;
+  // No silent redirect: say what happened and offer the way back.
+  if (!intake || !intake.plan) return <NoPlan />;
 
   const plan = intake.plan;
   const track = intake.trackOverride ?? plan.trackName ?? 'Self-paced course';
   const coaching =
-    track === '1:1 Coaching' ? "We'll reach out to schedule your first session" : 'Get matched with a coach';
-  const deadlines = DEADLINES.filter((d) => !d.match || plan.pathway.indexOf(d.match) >= 0);
+    track === '1:1 Coaching' ? (
+      <Link to="/join">Share your contact info to schedule your first session</Link>
+    ) : (
+      <Link to="/join">Get matched with a coach</Link>
+    );
+  const systems = planSystems(plan);
+  const deadlines = DEADLINES.filter((d) => systems.indexOf(d.system) >= 0);
 
   return (
     <main className="ov-dash">
-      <div className="label">Your dashboard</div>
-      <h1 className="ov-dash__title">Buenos días. Let's keep moving.</h1>
-      <p className="ov-dash__sample" role="note">
-        This is a preview with sample progress data. Deadlines are typical fall dates — confirm each on the official
-        site.
-      </p>
+      <header className="ov-dash__head">
+        <div className="label">Your dashboard</div>
+        <h1 className="ov-dash__title">Let's keep moving.</h1>
+        <p className="ov-dash__sample" role="note">
+          This is a preview with sample progress data. Deadlines are typical fall dates — confirm each on the official
+          site.
+        </p>
+        {plan.timeline && <p className="ov-dash__timeline">{plan.timeline}</p>}
+      </header>
 
       <div className="ov-dash__next">
         <div>
-          <div className="label">Next step</div>
+          <div className="label">Next step · Sample progress</div>
           <div className="ov-dash__step">Finish Lesson 2</div>
         </div>
         <Circle size="dash" to="/writing-course">

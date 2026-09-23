@@ -4,8 +4,6 @@ import userEvent from '@testing-library/user-event';
 import Join from './Join';
 import { renderWithRouter } from '../test/utils';
 
-const ENDPOINT = 'https://example.test/join';
-
 afterEach(() => {
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
@@ -13,8 +11,8 @@ afterEach(() => {
 });
 
 const fillValid = async (user: ReturnType<typeof userEvent.setup>) => {
-  await user.type(screen.getByLabelText('First name'), 'Ada');
-  await user.type(screen.getByLabelText('Email'), 'ada@example.com');
+  await user.type(screen.getByLabelText(/^first name/i), 'Ada');
+  await user.type(screen.getByLabelText(/^email/i), 'ada@example.com');
 };
 
 const submit = (user: ReturnType<typeof userEvent.setup>) => user.click(screen.getByRole('button', { name: 'Join' }));
@@ -24,11 +22,10 @@ describe('Join form', () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
-    vi.stubEnv('VITE_JOIN_ENDPOINT', ENDPOINT);
 
     renderWithRouter(<Join />);
-    await user.type(screen.getByLabelText('First name'), 'Ada');
-    await user.type(screen.getByLabelText('Email'), 'not-an-email');
+    await user.type(screen.getByLabelText(/^first name/i), 'Ada');
+    await user.type(screen.getByLabelText(/^email/i), 'not-an-email');
     await submit(user);
 
     expect(screen.getByRole('alert')).toHaveTextContent(/valid email/i);
@@ -40,10 +37,9 @@ describe('Join form', () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
-    vi.stubEnv('VITE_JOIN_ENDPOINT', ENDPOINT);
 
     renderWithRouter(<Join />);
-    await user.type(screen.getByLabelText('Email'), 'ada@example.com');
+    await user.type(screen.getByLabelText(/^email/i), 'ada@example.com');
     await submit(user);
 
     expect(screen.getByRole('alert')).toHaveTextContent(/first name/i);
@@ -51,11 +47,12 @@ describe('Join form', () => {
     expect(screen.queryByRole('button', { name: 'Thanks' })).not.toBeInTheDocument();
   });
 
-  it('POSTs the payload to the configured endpoint and shows "Thanks" on success', async () => {
+  // #29/#30: with no endpoint configured the form must still POST same-origin,
+  // never hand student PII to a mail client pointed at someone else's domain.
+  it('POSTs same-origin to /api/join by default and shows "Thanks" on success', async () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn().mockResolvedValue({ ok: true });
     vi.stubGlobal('fetch', fetchMock);
-    vi.stubEnv('VITE_JOIN_ENDPOINT', ENDPOINT);
 
     renderWithRouter(<Join />);
     await fillValid(user);
@@ -63,20 +60,24 @@ describe('Join form', () => {
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe(ENDPOINT);
+    expect(url).toBe('/api/join');
     expect(init.method).toBe('POST');
     expect(init.headers).toEqual({ 'Content-Type': 'application/json' });
+    expect(init.signal).toBeInstanceOf(AbortSignal);
     expect(JSON.parse(init.body)).toMatchObject({ first: 'Ada', email: 'ada@example.com' });
 
     expect(await screen.findByRole('button', { name: 'Thanks' })).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
-  it('shows the retry state when the endpoint responds not-ok', async () => {
+  it('never references a domain the project does not own', () => {
+    renderWithRouter(<Join />);
+    expect(document.body.innerHTML).not.toContain('admissionpossible.org');
+  });
+
+  it('offers the composed message for copying when delivery fails', async () => {
     const user = userEvent.setup();
-    const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 500 });
-    vi.stubGlobal('fetch', fetchMock);
-    vi.stubEnv('VITE_JOIN_ENDPOINT', ENDPOINT);
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 503 }));
 
     renderWithRouter(<Join />);
     await fillValid(user);
@@ -84,13 +85,33 @@ describe('Join form', () => {
 
     expect(await screen.findByRole('button', { name: 'Try again' })).toBeInTheDocument();
     expect(screen.getByRole('alert')).toBeInTheDocument();
+
+    // The typed answers survive, rendered as copyable text.
+    const fallback = screen.getByLabelText('Copy this and send it to us:') as HTMLTextAreaElement;
+    expect(fallback.value).toContain('Ada');
+    expect(fallback.value).toContain('ada@example.com');
+  });
+
+  it('copies the fallback message to the clipboard', async () => {
+    const user = userEvent.setup();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network down')));
+    // jsdom exposes navigator.clipboard as a getter-only property.
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+
+    renderWithRouter(<Join />);
+    await fillValid(user);
+    await submit(user);
+
+    await user.click(await screen.findByRole('button', { name: 'Copy message' }));
+    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(writeText.mock.calls[0][0]).toContain('ada@example.com');
+    expect(await screen.findByRole('button', { name: 'Copied' })).toBeInTheDocument();
   });
 
   it('shows the retry state when the fetch rejects', async () => {
     const user = userEvent.setup();
-    const fetchMock = vi.fn().mockRejectedValue(new Error('network down'));
-    vi.stubGlobal('fetch', fetchMock);
-    vi.stubEnv('VITE_JOIN_ENDPOINT', ENDPOINT);
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network down')));
 
     renderWithRouter(<Join />);
     await fillValid(user);
@@ -100,31 +121,99 @@ describe('Join form', () => {
     expect(screen.getByRole('alert')).toBeInTheDocument();
   });
 
-  it('opens a mail draft without wiping the form or claiming success when no endpoint is configured', async () => {
+  // #30: a double-click must not send two submissions.
+  it('disables the submit button while a request is in flight', async () => {
     const user = userEvent.setup();
-    const fetchMock = vi.fn();
+    let release!: (v: { ok: boolean }) => void;
+    const fetchMock = vi.fn().mockReturnValue(new Promise((resolve) => (release = resolve)));
     vi.stubGlobal('fetch', fetchMock);
-    vi.stubEnv('VITE_JOIN_ENDPOINT', '');
 
     renderWithRouter(<Join />);
     await fillValid(user);
     await submit(user);
 
-    // No backend call, and no false "Thanks": the draft isn't sent until the
-    // visitor hits Send in their mail app (which may not even exist).
-    expect(fetchMock).not.toHaveBeenCalled();
-    expect(screen.queryByRole('button', { name: 'Thanks' })).not.toBeInTheDocument();
+    const sending = await screen.findByRole('button', { name: 'Sending' });
+    expect(sending).toBeDisabled();
 
-    // The typed answers survive so nothing is lost if no mail app opens.
-    expect(screen.getByLabelText('First name')).toHaveValue('Ada');
-    expect(screen.getByLabelText('Email')).toHaveValue('ada@example.com');
+    await user.click(sending);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
 
-    // An honest status explains the handoff and offers the address as a fallback.
-    const status = await screen.findByRole('status');
-    expect(status).toHaveTextContent(/email app/i);
-    expect(within(status).getByRole('link', { name: /hello@admissionpossible\.org/i })).toHaveAttribute(
-      'href',
-      expect.stringContaining('mailto:hello@admissionpossible.org'),
-    );
+    release({ ok: true });
+    expect(await screen.findByRole('button', { name: 'Thanks' })).toBeInTheDocument();
+  });
+
+  it('shows a contact address only when one is configured', async () => {
+    vi.stubEnv('VITE_CONTACT_EMAIL', 'hi@example.test');
+    renderWithRouter(<Join />);
+    const link = within(document.body).getByRole('link', { name: 'hi@example.test' });
+    expect(link).toHaveAttribute('href', 'mailto:hi@example.test');
+  });
+
+  // #36: the intake already captured grade; Join asked for it again, blank.
+  it('prefills grade from the stored intake', async () => {
+    const { computePlan } = await import('../data/plan');
+    const { saveIntake } = await import('../data/storage');
+    saveIntake({ answers: {}, plan: computePlan({ grade: '11th grade' }) });
+
+    renderWithRouter(<Join />);
+    expect(screen.getByLabelText(/^grade level/i)).toHaveValue('11th grade');
+  });
+
+  it('leaves grade blank when there is no intake', () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    renderWithRouter(<Join />);
+    expect(screen.getByLabelText(/^grade level/i)).toHaveValue('');
+  });
+
+  // #39: browser autofill exists for exactly these fields (WCAG 1.3.5).
+  it('carries autocomplete tokens on the identity fields', () => {
+    renderWithRouter(<Join />);
+    expect(screen.getByLabelText(/^first name/i)).toHaveAttribute('autocomplete', 'given-name');
+    expect(screen.getByLabelText(/^last name/i)).toHaveAttribute('autocomplete', 'family-name');
+    expect(screen.getByLabelText(/^email/i)).toHaveAttribute('autocomplete', 'email');
+  });
+
+  it('marks the required fields before submission, visibly and programmatically', () => {
+    renderWithRouter(<Join />);
+    for (const field of [/^first name/i, /^email/i]) {
+      const input = screen.getByLabelText(field);
+      expect(input).toBeRequired();
+      expect(input).toHaveAttribute('aria-required', 'true');
+      // The label itself says so, not colour alone.
+      expect(input).toHaveAccessibleName(/required/i);
+    }
+  });
+
+  it('ties the error to the offending field and moves focus there', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal('fetch', vi.fn());
+    renderWithRouter(<Join />);
+
+    // Empty first name.
+    await user.type(screen.getByLabelText(/^email/i), 'ada@example.com');
+    await submit(user);
+
+    const first = screen.getByLabelText(/^first name/i);
+    expect(first).toHaveAttribute('aria-invalid', 'true');
+    expect(first).toHaveAccessibleDescription(/first name/i);
+    expect(first).toHaveFocus();
+  });
+
+  it('moves focus to the email field when only the email is invalid', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal('fetch', vi.fn());
+    renderWithRouter(<Join />);
+
+    await user.type(screen.getByLabelText(/^first name/i), 'Ada');
+    await user.type(screen.getByLabelText(/^email/i), 'not-an-email');
+    await submit(user);
+
+    const email = screen.getByLabelText(/^email/i);
+    expect(email).toHaveAttribute('aria-invalid', 'true');
+    expect(email).toHaveAccessibleDescription(/valid email/i);
+    expect(email).toHaveFocus();
+    // The name field, which is fine, is not flagged.
+    expect(screen.getByLabelText(/^first name/i)).not.toHaveAttribute('aria-invalid');
   });
 });

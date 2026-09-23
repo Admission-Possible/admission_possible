@@ -218,12 +218,14 @@ function systemAllowed(system: System, picked: RegionName[]): boolean {
   return picked.indexOf('West') >= 0; // UC App, Cal State Apply
 }
 
+// Returns catalog entries, not bare Schools: computePlan needs each pick's
+// application system to build the deadline list.
 function pickSchools(
   bucket: 'reach' | 'target' | 'likely',
   picked: RegionName[],
   kinds: string[],
   gpaTop: boolean,
-): School[] {
+): CatalogSchool[] {
   const pool = CATALOG[bucket].filter((s) => {
     if (bucket === 'reach' && s.top && !gpaTop) return false;
     if (s.system && !systemAllowed(s.system, picked)) return false;
@@ -259,7 +261,46 @@ function pickSchools(
     if (chosen.length >= 3) break;
     if (chosen.indexOf(s) < 0) chosen.push(s);
   }
-  return chosen.map(({ name, tag }) => ({ name, tag }));
+  return chosen;
+}
+
+/** Every school's tag begins with its application system, e.g. "UC App · ...". */
+const systemFromTag = (tag: string) => tag.split('·')[0].trim();
+
+/**
+ * The application systems a student actually has to file, derived from the
+ * schools on their list.
+ *
+ * Plans saved before this field existed fall back to parsing the tags, so a
+ * returning student still gets the right deadlines instead of an empty panel.
+ */
+export function planSystems(plan: Plan): string[] {
+  if (plan.systems?.length) return plan.systems;
+  const all = [...plan.reach, ...plan.target, ...plan.likely].map((s) => systemFromTag(s.tag));
+  return [...new Set(all)];
+}
+
+/**
+ * What this student should actually be doing right now.
+ *
+ * Question 1 asks for grade and nothing consumed it: a 9th grader was handed
+ * the same "apply this fall" deadline pressure as a senior. This is the answer
+ * finally reaching the output.
+ */
+export function timelineFor(grade: string): string {
+  switch (grade) {
+    case '9th grade':
+    case '10th grade':
+      return "You're early, and that's an advantage. These deadlines aren't yours yet — use the time to build the grades, rigor and activities the application will ask about.";
+    case '11th grade':
+      return "This is the build year. The deadlines below are next fall's, so treat them as your target: draft essays over the summer and you will not be scrambling.";
+    case 'Gap year':
+      return "Applying during a gap year is common and works. These are this cycle's deadlines, and what you are doing with the year is legitimate material for the essays.";
+    case '12th grade':
+      return 'This is your cycle. The deadlines below are the real ones — work backwards from the earliest.';
+    default:
+      return 'Deadlines shift every year, so confirm each one on the official site.';
+  }
 }
 
 export function computePlan(answers: Answers): Plan {
@@ -269,6 +310,8 @@ export function computePlan(answers: Answers): Plan {
   const gpaTop = typeof a.gpa === 'string' && a.gpa.indexOf('3.8') === 0;
   const regions = (a.regions as string[]) ?? [];
   const colleges = (a.colleges as string[]) ?? [];
+  const grade = typeof a.grade === 'string' ? a.grade : '';
+  const wantsHbcu = colleges.indexOf('HBCU / HSI') >= 0;
 
   let pathway: string;
   let why: string;
@@ -280,7 +323,7 @@ export function computePlan(answers: Answers): Plan {
   } else if (regions.indexOf('West') >= 0) {
     pathway = 'UC Application + Common App';
     why = 'The UC system needs its own application and essays. Common App covers everything else in one place.';
-  } else if (colleges.indexOf('HBCU / HSI') >= 0) {
+  } else if (wantsHbcu) {
     pathway = 'CBCA + Common App';
     why = 'One CBCA application reaches dozens of HBCUs. Common App opens up the rest of your list.';
   } else if (regions.indexOf('South') >= 0 && colleges.indexOf('Large public') >= 0) {
@@ -291,11 +334,44 @@ export function computePlan(answers: Answers): Plan {
     why = 'One essay, a thousand-plus schools. The widest, simplest front door for the list you described.';
   }
 
+  // The branch chain is first-match, so QuestBridge and UC used to shadow the
+  // HBCU/HSI answer entirely: a student who said they were drawn to HBCUs got a
+  // plan that never mentioned it, and never heard about CBCA — the single-app,
+  // low-fee route built for exactly them. Make the signal additive instead.
+  if (wantsHbcu && pathway.indexOf('CBCA') < 0) {
+    pathway = `${pathway} + CBCA`;
+    why += ' You said HBCUs and HSIs draw you, so add CBCA — one application reaches dozens of them for a low fee.';
+  }
+
   const picked = regions.filter(isRegionName);
   const reach = pickSchools('reach', picked, colleges, gpaTop);
   const target = pickSchools('target', picked, colleges, gpaTop);
   const likely = pickSchools('likely', picked, colleges, gpaTop);
+
+  // Systems the student actually has to file, taken from the schools they were
+  // given rather than from the pathway label. The label is one first-match
+  // string and routinely omits a system sitting on the list.
+  const systems = [...new Set([...reach, ...target, ...likely].map((s) => systemFromTag(s.tag)))];
+  if (pathway.indexOf('QuestBridge') >= 0) systems.push('QuestBridge');
+  if (pathway.indexOf('CBCA') >= 0) systems.push('CBCA');
+
+  // 'Not sure yet' is a real answer, not self-paced. We still have to start
+  // somewhere, so record that the choice was not made and let the plan say so.
+  const trackChosen = a.track === 'With a coach' || a.track === 'Self-paced';
   const trackName: TrackName = a.track === 'With a coach' ? '1:1 Coaching' : 'Self-paced course';
 
-  return { pathway, why, reach, target, likely, trackName };
+  const strip = (s: School[]) => s.map(({ name, tag }) => ({ name, tag }));
+
+  return {
+    pathway,
+    why,
+    reach: strip(reach),
+    target: strip(target),
+    likely: strip(likely),
+    trackName,
+    trackChosen,
+    systems: [...new Set(systems)],
+    grade,
+    timeline: timelineFor(grade),
+  };
 }

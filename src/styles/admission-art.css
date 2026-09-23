@@ -1,0 +1,555 @@
+.admission-art {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+  overflow: hidden;
+  background: #b388eb;
+}
+
+.admission-art__opening-field,
+.admission-art__field,
+.admission-art__canvas,
+.admission-art__windows,
+.admission-art__print-grain {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.admission-art__field {
+  transform: scale(1.06);
+  animation: admission-field-drift 28s ease-in-out infinite alternate;
+}
+
+.admission-art[data-opening='true'] .admission-art__opening-field {
+  animation: admission-field-opening 3.5s cubic-bezier(0.22, 0.68, 0.26, 1) both;
+  will-change: transform;
+}
+
+.admission-art__photograph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  --flower-position: 50% 53%;
+}
+
+.decorative-video {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.decorative-video__poster,
+.decorative-video__media {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--flower-position, 50% 50%);
+}
+
+.decorative-video__media {
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+.decorative-video__media[data-ready='true'] {
+  opacity: 1;
+}
+
+.admission-art--writing .admission-art__field {
+  animation-duration: 35s;
+  animation-delay: -10s;
+}
+
+.admission-art--writing .admission-art__photograph {
+  --flower-position: 62% 48%;
+}
+
+.admission-art--mission .admission-art__field {
+  animation-duration: 38s;
+  animation-delay: -7s;
+}
+
+.admission-art--mission .admission-art__photograph {
+  --flower-position: 29% 43%;
+}
+
+.admission-art__windows {
+  pointer-events: none;
+}
+
+.admission-art__window {
+  --window-duration: 8.5s;
+  --window-delay: 0s;
+  position: absolute;
+  width: var(--window-width);
+  height: var(--window-height);
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 85%);
+  background: #b388eb;
+  animation: admission-window-drift var(--window-duration) cubic-bezier(0.45, 0, 0.3, 1) infinite;
+}
+
+/* The one-shot entrance uses translate and dimensions, leaving the ambient
+   transform animation uninterrupted when the opening sequence finishes. */
+.admission-art[data-opening='true'] .admission-art__window {
+  animation-name: admission-window-drift, admission-window-opening;
+  animation-duration: var(--window-duration), 4s;
+  animation-timing-function: ease-in-out, cubic-bezier(0.22, 0.68, 0.26, 1);
+  animation-delay: 0s, 0s;
+  animation-iteration-count: infinite, 1;
+  animation-direction: normal, normal;
+  animation-fill-mode: none, both;
+}
+
+.admission-art__window > img,
+.admission-art__window > .decorative-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(var(--crop-scale, 1.5));
+  animation: admission-crop-drift 25s ease-in-out infinite alternate;
+  animation-delay: var(--crop-delay, -5s);
+}
+
+.admission-art__window--first {
+  --window-width: 19%;
+  --window-height: 29%;
+  --drift-x: 235%;
+  --drift-y: 20%;
+  --opening-shift: 65vw 10vh;
+  --opening-width: 19%;
+  --opening-height: 30%;
+  --crossing-shift: 25vw -3vh;
+  --crossing-width: 22%;
+  --crossing-height: 37%;
+  top: -14%;
+  left: 21%;
+}
+
+.admission-art__window--first > .decorative-video {
+  --crop-scale: 1.7;
+  --crop-delay: -11s;
+  --flower-position: 9% 35%;
+  filter: grayscale(1) contrast(1.15) brightness(0.82);
+}
+
+.admission-art__window--story {
+  --window-width: 11.5%;
+  --window-height: 20.5%;
+  --drift-x: 245%;
+  --drift-y: -55%;
+  --drift-scale: 0.8;
+  --opening-shift: -40vw -18vh;
+  --opening-width: 26%;
+  --opening-height: 35%;
+  --crossing-shift: -10vw 5vh;
+  --crossing-width: 18%;
+  --crossing-height: 31%;
+  top: 28%;
+  left: 31%;
+}
+
+.admission-art__window--story > .decorative-video {
+  --crop-scale: 2.1;
+  --crop-delay: -18s;
+  --flower-position: 76% 50%;
+  filter: grayscale(1) contrast(1.2) brightness(0.85);
+}
+
+.admission-art__window--chapter {
+  --window-width: 25.5%;
+  --window-height: 44.5%;
+  --drift-x: 3%;
+  --drift-y: 14%;
+  --opening-shift: -37vw -17vh;
+  --opening-width: 28%;
+  --opening-height: 26%;
+  --crossing-shift: -10vw -4vh;
+  --crossing-width: 24%;
+  --crossing-height: 34%;
+  left: 45%;
+  top: 34%;
+  border: 0;
+}
+
+.admission-art__window--chapter > img {
+  --crop-scale: 1.5;
+  --crop-delay: -7s;
+  object-position: 65% 87%;
+  filter: grayscale(1) contrast(1.3) brightness(0.76);
+}
+
+.admission-art__window--possibility {
+  --window-width: 17.5%;
+  --window-height: 31%;
+  --drift-x: -275%;
+  --drift-y: -5%;
+  --drift-scale: 1.15;
+  --opening-shift: -30vw 10vh;
+  --opening-width: 22%;
+  --opening-height: 45%;
+  --crossing-shift: 3vw -7vh;
+  --crossing-width: 26%;
+  --crossing-height: 42%;
+  top: 15%;
+  left: 72%;
+}
+
+.admission-art__window--possibility > img {
+  --crop-scale: 1.9;
+  --crop-delay: -3s;
+  object-position: 91% 17%;
+}
+
+.admission-art__window--college {
+  --window-width: 18%;
+  --window-height: 51%;
+  --drift-x: -90%;
+  --drift-y: -50%;
+  --drift-scale: 0.7;
+  --opening-shift: 36vw -14vh;
+  --opening-width: 21%;
+  --opening-height: 31%;
+  --crossing-shift: 14vw -6vh;
+  --crossing-width: 19%;
+  --crossing-height: 27%;
+  left: 6%;
+  top: 42%;
+  border: 0;
+}
+
+.admission-art__window--college > .decorative-video {
+  --crop-scale: 1.65;
+  --crop-delay: -13s;
+  --flower-position: 12% 88%;
+}
+
+.admission-art__window--fragment-top {
+  --window-width: 9.5%;
+  --window-height: 38%;
+  --opening-width: 12%;
+  --opening-height: 32%;
+  --crossing-width: 10%;
+  --crossing-height: 35%;
+  --opening-shift: -30vw 13vh;
+  --crossing-shift: -10vw 3vh;
+  left: 54%;
+  top: -19%;
+  border: 0;
+}
+
+.admission-art__window--fragment-right {
+  --window-width: 15%;
+  --window-height: 48%;
+  --opening-width: 20%;
+  --opening-height: 40%;
+  --crossing-width: 17%;
+  --crossing-height: 43%;
+  --opening-shift: -17vw -20vh;
+  --crossing-shift: -5vw -3vh;
+  left: 97%;
+  top: 0;
+  border: 0;
+}
+
+/* Keep the collage in the same 16:9 coordinates as the botanical film,
+   including while the fullscreen intro contracts to the hero banner. */
+@media (min-width: 701px) {
+  .admission-art--hero {
+    container-type: size;
+  }
+  .admission-art__windows {
+    inset: auto;
+    top: 50%;
+    left: 50%;
+    width: max(100cqw, 177.778cqh);
+    height: max(56.25cqw, 100cqh);
+    transform: translate(-50%, -50%);
+  }
+}
+
+.admission-art__window-label {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 3px 5px 2px;
+  background: #fff;
+  color: #171717;
+  font-family: var(--mono);
+  font-size: clamp(6px, 0.6vw, 9px);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.015em;
+  white-space: nowrap;
+}
+
+.admission-art__coordinate {
+  position: absolute;
+  left: 16px;
+  bottom: 14px;
+  padding: 3px 5px;
+  background: rgb(255 255 255 / 80%);
+  color: #222;
+  font-family: 'Space Mono', 'Courier New', monospace;
+  font-size: 8px;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+}
+
+.admission-art__motion-toggle {
+  position: absolute;
+  z-index: 2;
+  right: 14px;
+  bottom: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 7px 10px;
+  border: 1px solid rgb(255 255 255 / 85%);
+  border-radius: 0;
+  background: rgb(255 255 255 / 86%);
+  color: #171717;
+  font-family: 'Space Mono', 'Courier New', monospace;
+  font-size: 9px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 180ms ease;
+}
+
+.admission-art__motion-toggle:hover {
+  background: #fff;
+}
+
+.admission-art__motion-toggle:focus-visible {
+  outline: 2px solid #171717;
+  outline-offset: 3px;
+}
+
+.admission-art__chapter-turn {
+  transform-origin: 400px 450px;
+  animation: admission-chapter-turn 90s linear infinite;
+}
+
+.admission-art__chapter-breathe {
+  transform-origin: 400px 450px;
+  animation: admission-chapter-breathe 18s ease-in-out infinite alternate;
+}
+
+.admission-art__print-grain {
+  opacity: 0.11;
+  pointer-events: none;
+  background-image: url('/art/grain.svg');
+}
+
+.admission-art__registration {
+  position: absolute;
+  color: rgb(255 255 255 / 80%);
+  font-family: 'Courier New', monospace;
+  font-size: 25px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.admission-art__registration--top {
+  top: 15px;
+  left: 17px;
+}
+
+.admission-art__registration--bottom {
+  right: 17px;
+  bottom: 57px;
+}
+
+.admission-art[data-motion='paused'] *,
+.admission-art[data-motion='paused'] *::before,
+.admission-art[data-motion='paused'] *::after,
+.admission-art[data-visible='false'] *,
+.admission-art[data-visible='false'] *::before,
+.admission-art[data-visible='false'] *::after {
+  animation-play-state: paused !important;
+}
+
+@keyframes admission-field-drift {
+  from {
+    transform: scale(1.06) translate(-0.7%, 0.5%) rotate(-0.6deg);
+  }
+  to {
+    transform: scale(1.13) translate(0.9%, -0.6%) rotate(0.8deg);
+  }
+}
+
+@keyframes admission-field-opening {
+  0% {
+    transform: scale(1.35) translate(-7%, -1%);
+  }
+  46% {
+    transform: scale(1.19) translate(3%, 0.8%);
+  }
+  100% {
+    transform: scale(1) translate(0, 0);
+  }
+}
+
+@keyframes admission-window-opening {
+  0% {
+    translate: var(--opening-shift);
+    width: var(--opening-width);
+    height: var(--opening-height);
+  }
+  35% {
+    translate: var(--crossing-shift);
+    width: var(--crossing-width);
+    height: var(--crossing-height);
+  }
+  75% {
+    translate: 0 0;
+    width: var(--window-width);
+    height: var(--window-height);
+  }
+  100% {
+    translate: 0 0;
+    width: var(--window-width);
+    height: var(--window-height);
+  }
+}
+
+@keyframes admission-crop-drift {
+  from {
+    transform: scale(var(--crop-scale, 1.5)) translate(-1.1%, 0.8%);
+  }
+  to {
+    transform: scale(calc(var(--crop-scale, 1.5) + 0.08)) translate(1.3%, -0.9%);
+  }
+}
+
+@keyframes admission-window-drift {
+  0%,
+  15%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  40%,
+  50% {
+    transform: translate(var(--drift-x, 15%), var(--drift-y, 12%)) scale(var(--drift-scale, 1));
+  }
+  75% {
+    transform: translate(calc(var(--drift-x, 15%) * 0.1), calc(var(--drift-y, 12%) * 0.1)) scale(1);
+  }
+}
+
+@keyframes admission-chapter-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes admission-chapter-breathe {
+  from {
+    transform: rotate(-5deg) scale(0.97);
+  }
+  to {
+    transform: rotate(6deg) scale(1.08);
+  }
+}
+
+@media (max-width: 700px) {
+  .admission-art__window--first {
+    --window-width: 35%;
+    --window-height: 55%;
+    --opening-shift: 52vw 13vh;
+    --opening-width: 40%;
+    --opening-height: 42%;
+    --crossing-width: 45%;
+    --crossing-height: 38%;
+    left: -9%;
+    top: -11%;
+  }
+  .admission-art__window--story {
+    --window-width: 28%;
+    --window-height: 51%;
+    --opening-width: 50%;
+    --opening-height: 35%;
+    --crossing-width: 42%;
+    --crossing-height: 32%;
+    left: 39%;
+    top: 16%;
+  }
+  .admission-art__window--chapter {
+    --window-width: 37%;
+    --window-height: 39%;
+    --opening-width: 53%;
+    --opening-height: 29%;
+    --crossing-width: 46%;
+    --crossing-height: 26%;
+    right: -8%;
+    bottom: -4%;
+    left: auto;
+    top: auto;
+  }
+  .admission-art__window--possibility {
+    --window-width: 24%;
+    --window-height: 57%;
+    --opening-width: 45%;
+    --opening-height: 44%;
+    --crossing-width: 33%;
+    --crossing-height: 38%;
+    right: -9%;
+    top: -14%;
+    left: auto;
+  }
+  .admission-art__window--college {
+    --window-width: 31%;
+    --window-height: 42%;
+    --opening-width: 48%;
+    --opening-height: 30%;
+    --crossing-width: 38%;
+    --crossing-height: 29%;
+    left: -4%;
+    bottom: -13%;
+    top: auto;
+  }
+  .admission-art__window--fragment-top,
+  .admission-art__window--fragment-right {
+    display: none;
+  }
+  .admission-art__window-label {
+    font-size: 6px;
+  }
+  .admission-art__coordinate {
+    left: 10px;
+    bottom: 11px;
+    font-size: 6px;
+  }
+  .admission-art__motion-toggle {
+    right: 10px;
+    bottom: 10px;
+    min-height: 30px;
+    font-size: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admission-art *,
+  .admission-art *::before,
+  .admission-art *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .admission-art__motion-toggle {
+    display: none;
+  }
+}

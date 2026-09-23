@@ -9,14 +9,15 @@ describe('App routing', () => {
     expect(screen.getByText('Impossible becomes')).toBeInTheDocument();
   });
 
-  it('renders How it works at /how', () => {
+  it('renders How admissions works at /how', () => {
     renderWithRouter(<App />, { route: '/how' });
-    expect(screen.getByRole('heading', { level: 1, name: 'How it works' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'How admissions works' })).toBeInTheDocument();
   });
 
   it('renders the Join form at /join', () => {
     renderWithRouter(<App />, { route: '/join' });
-    expect(screen.getByText('hello@admissionpossible.org')).toBeInTheDocument();
+    expect(screen.getByLabelText(/^first name/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Join' })).toBeInTheDocument();
   });
 
   it('renders the NotFound page for unknown routes', () => {

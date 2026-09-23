@@ -23,7 +23,10 @@ const walkToLastStep = async (user: ReturnType<typeof userEvent.setup>) => {
 };
 
 describe('intake flow', () => {
-  beforeEach(() => sessionStorage.clear());
+  beforeEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+  });
   afterEach(() => vi.restoreAllMocks());
 
   it('walks the 7-step router through to a computed plan', async () => {
@@ -71,5 +74,44 @@ describe('intake flow', () => {
     renderWithRouter(<App />, { route: '/router' });
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(await screen.findByText('Impossible becomes')).toBeInTheDocument();
+  });
+
+  // #32: pull-to-refresh and gesture-back are reflexes on mobile, and they used
+  // to discard every answer given on steps 2-7.
+  it('restores mid-quiz answers after a remount', async () => {
+    const user = userEvent.setup();
+    const { unmount } = renderWithRouter(<App />, { route: '/router' });
+
+    await user.click(screen.getByText('11th grade'));
+    await user.click(screen.getByRole('button', { name: /^next/i }));
+    expect(screen.getByText('2 / 7')).toBeInTheDocument();
+
+    // Simulate a refresh: the component remounts with no React state.
+    unmount();
+    renderWithRouter(<App />, { route: '/router' });
+
+    expect(await screen.findByText('2 / 7')).toBeInTheDocument();
+  });
+
+  it('drops the draft when the intake is abandoned from step 1', async () => {
+    const user = userEvent.setup();
+    const { unmount } = renderWithRouter(<App />, { route: '/router' });
+
+    await user.click(screen.getByText('11th grade'));
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    unmount();
+
+    renderWithRouter(<App />, { route: '/router' });
+    expect(await screen.findByText('1 / 7')).toBeInTheDocument();
+  });
+
+  it('clears the draft once the plan is saved', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<App />, { route: '/router' });
+    await walkToLastStep(user);
+    await user.click(screen.getByRole('button', { name: /see my plan/i }));
+
+    expect(await screen.findByRole('heading', { name: 'Your plan' })).toBeInTheDocument();
+    expect(sessionStorage.getItem('ap.intake.draft')).toBeNull();
   });
 });

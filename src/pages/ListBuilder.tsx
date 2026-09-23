@@ -1,5 +1,12 @@
+import { useRef, useState } from 'react';
+import { Link } from 'react-router';
 import { Circle } from '../components/Circle';
 import { Crumbs } from '../components/Crumbs';
+import { navCrumb } from '../data/nav';
+import { useHydrated } from '../hooks/useHydrated';
+import { loadIntake } from '../data/storage';
+import type { School } from '../types';
+import { EditorialHero } from '../components/EditorialHero';
 
 const FACTORS: [string, string][] = [
   ['Academic', 'Programs, rigor, admit range vs your profile'],
@@ -9,22 +16,82 @@ const FACTORS: [string, string][] = [
   ['Cultural', 'Belonging, HBCU/HSI options'],
 ];
 
+/** The student's three columns as plain text, for copying somewhere useful. */
+function listToText(reach: School[], target: School[], likely: School[]): string {
+  const col = (title: string, list: School[]) =>
+    [`${title}:`, ...(list.length ? list.map((s) => `  - ${s.name} (${s.tag})`) : ['  (none)'])].join('\n');
+  return ['My college list', '', col('Reach', reach), col('Target', target), col('Likely', likely)].join('\n');
+}
+
+function YourList({ reach, target, likely }: { reach: School[]; target: School[]; likely: School[] }) {
+  const [copied, setCopied] = useState(false);
+  const timer = useRef<number | undefined>(undefined);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(listToText(reach, target, likely));
+      setCopied(true);
+      window.clearTimeout(timer.current);
+      timer.current = window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // Clipboard unavailable; the list is on screen and selectable.
+      setCopied(false);
+    }
+  };
+
+  const col = (title: string, list: School[]) => (
+    <div>
+      <div className="ov-school__head">{title}</div>
+      {list.map((s) => (
+        <div className="ov-school" key={s.name}>
+          <div className="ov-school__name">{s.name}</div>
+          <div className="ov-school__tag">{s.tag}</div>
+        </div>
+      ))}
+    </div>
+  );
+
+  return (
+    <div className="listbuilder__yours">
+      <div className="label">Your starter list</div>
+      <div className="ov-plan__cols">
+        {col('Reach', reach)}
+        {col('Target', target)}
+        {col('Likely', likely)}
+      </div>
+      <div className="ov-plan__export">
+        <button className="ov-plan__switch" onClick={copy}>
+          {copied ? 'Copied' : 'Copy my list'}
+        </button>
+        <Link className="ov-plan__switch" to="/plan">
+          Back to my plan
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export default function ListBuilder() {
+  // The page promised a tool and rendered a brochure — it imported no storage
+  // at all, so it could never show the list it offered to refine.
+  // Storage is unavailable during the prerender, so the first render must
+  // match it and the plan-aware bits appear after hydration (#45).
+  const hydrated = useHydrated();
+  const intake = hydrated ? loadIntake() : null;
+  const plan = intake?.plan;
+
   return (
     <main className="interior">
-      <div className="rule" />
-      <Crumbs crumbs={[{ label: 'How it works', to: '/how' }, { label: 'College list builder' }]} />
-      <div className="rule" />
+      <EditorialHero
+        kicker="Build your list / Fit and finances"
+        title="A list built on fit and finances, not luck."
+        tone="sky"
+        note="Reach. Target. Likely."
+        description="Balance is the whole game. We help you spread your list so an acceptance is likely and an affordable acceptance is likely too."
+      />
+      <Crumbs crumbs={[navCrumb('how'), { label: 'College list builder' }]} />
 
-      <div className="page-intro">
-        <h1 className="subhead" data-reveal="">
-          A list built on fit and finances, not luck.
-        </h1>
-        <p className="page-intro__lede" data-reveal="">
-          Balance is the whole game. We help you spread your list so an acceptance is likely and an affordable
-          acceptance is likely too.
-        </p>
-      </div>
+      {plan && <YourList reach={plan.reach} target={plan.target} likely={plan.likely} />}
 
       <div className="triband">
         <div className="triband__col">
@@ -67,7 +134,9 @@ export default function ListBuilder() {
       </p>
 
       <div className="section-cta">
-        <Circle to="/router">Build my list</Circle>
+        {/* Plan-aware: sending a student who already answered seven questions
+            back to question 1 wiped the plan they came here to refine. */}
+        {plan ? <Circle to="/router">Change my answers</Circle> : <Circle to="/router">Build my list</Circle>}
       </div>
     </main>
   );

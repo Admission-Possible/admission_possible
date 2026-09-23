@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="440" viewBox="0 0 600 440" role="img" aria-label="Portrait placeholder">
+  <rect width="600" height="440" fill="#DCD6CE"/>
+  <polygon points="0,0 270,0 110,440 0,440" fill="#E6E0D8"/>
+  <polygon points="400,0 600,0 600,440 230,440" fill="#D0CABF"/>
+  <g>
+    <ellipse cx="300" cy="360" rx="135" ry="120" fill="#7F9BB3"/>
+    <circle cx="300" cy="180" r="78" fill="#8FB2CB"/>
+  </g>
+  <text x="300" y="212" font-family="Inter, system-ui, sans-serif" font-size="100" font-weight="700" fill="#FBFAF1" text-anchor="middle">R</text>
+</svg>
